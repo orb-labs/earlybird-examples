@@ -1,0 +1,48 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.17;
+
+import "forge-std/Script.sol";
+import "forge-std/console.sol";
+import "../../../src/RukhVersion/SendingOracle.sol";
+
+contract SendingOracleDeployment is Script {
+    function run() external {
+        // get mnemonics and key indexes for app, oracle, relayer from env vars
+        string memory mnemonics = vm.envString("MNEMONICS");
+        uint256 keyIndex = vm.envUint("KEY_INDEX");
+        string memory chainName = vm.envString("CHAIN_NAME");
+
+        // expected address
+        address expectedRukhVersionPingPongSendingOracleAddress = vm.envAddress(
+            "EXPECTED_RUKH_VERSION_PINGPONG_SENDING_ORACLE_ADDRESS"
+        );
+
+        uint256 deployerPrivateKey = vm.deriveKey(mnemonics, uint32(keyIndex));
+        uint256 size = 0;
+
+        assembly {
+            size := extcodesize(expectedRukhVersionPingPongSendingOracleAddress)
+        }
+
+        if (size == 0) {
+            vm.startBroadcast(deployerPrivateKey);
+            SendingOracle sendingOracle = new SendingOracle();
+            sendingOracle.updateNativeTokenFee(true, 0);
+            vm.stopBroadcast();
+
+            string memory storagePath = string.concat(
+                "script/deploymentScripts/RukhVersion/addresses/",
+                vm.envString("ADDRESS_FOLDER"),
+                "/",
+                chainName,
+                "/sending_oracle.txt"
+            );
+
+            string memory appAddress = vm.toString(address(sendingOracle));
+            vm.writeFile(storagePath, appAddress);
+            console.log("Rukh Version PingPong SendingOracle deployed on %s", chainName);
+        } else {
+            console.log("Rukh Version PingPong SendingOracle already deployed on %s", chainName);
+        }
+    }
+}
