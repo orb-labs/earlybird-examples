@@ -1,7 +1,6 @@
 cache/
 out/
 broadcast/
-script/environmentVariables/publicTestnet/*
 script/deploymentScripts/endpoint/endpointV1/addresses/local_testnet/*
 !script/deploymentScripts/endpoint/endpointV1/addresses/local_testnet/.gitkeep
 script/deploymentScripts/mockThunderbirdApp/addresses/local_testnet/*
