@@ -1,40 +1,42 @@
 ############################################################# SETTING ENVIRONMENT VARIABLES ################################################################
 
-# Uncomment for local_testnet
-# export ENVIRONMENT="Local_Testnet"
+# Uncomment for local chains
+export ENVIRONMENT=${ENVIRONMENT:-local}
 
 # Uncomment for public testnet
-export ENVIRONMENT="Public_Testnet"
+# export ENVIRONMENT="testnet"
 
 # Uncomment for mainnet
-# export ENVIRONMENT="Production"
+# export ENVIRONMENT="mainnet"
 
-############################################################# SETTING SEARCH DIRECTORY ####################################################################
-if [ "$ENVIRONMENT" == "Production" ]
+chains_directory="environmentVariables/$ENVIRONMENT"
+
+export MNEMONICS="test test test test test test test test test test test junk"
+export SENDING_KEY_INDEX=5
+
+if [ "$ENVIRONMENT" != "local" ]
 then
-    search_directory=environmentVariables/production
-    export ADDRESS_FOLDER=mainnet
+    export MNEMONICS=$(op read "op://Private/Deployment/Mnemonic_phrase/"$ENVIRONMENT"")
+    export SENDING_KEY_INDEX=0
     export SENDING_MNEMONICS=$(op read "op://Security/MockRukhApp/Sending_mnemonic_phrase")
-    export SENDING_KEY_INDEX=0
-
-elif [ "$ENVIRONMENT" == "Public_Testnet" ]
-then
-    search_directory=environmentVariables/publicTestnet
-    export ADDRESS_FOLDER=public_testnet
-    export SENDING_MNEMONICS="<ADD YOUR MNEMONIC HERE>"
-    export SENDING_KEY_INDEX=0
-
-elif [ "$ENVIRONMENT" == "Local_Testnet" ]
-then
-    search_directory=environmentVariables/localTestnet
-    export ADDRESS_FOLDER=local_testnet
-    export SENDING_MNEMONICS=$MNEMONICS
-    export SENDING_KEY_INDEX=5
 fi
+
+############################################## HELPER FUNCTIONS ############################################################
+
+address_from_filepath() {
+    existing_address_path=$1
+    if [ -f $existing_address_path ]
+    then
+        address=$(<$existing_address_path)
+    else
+        address="0x0000000000000000000000000000000000000000"
+    fi
+    echo $address
+}
 
 ############################################## SENDING MESSAGE TO MOCK APP ############################################################
 i=0
-for entry in "$search_directory"/*
+for entry in "$chains_directory"/*
 do
     . "$entry"
     chains[$i]=$CHAIN_NAME
@@ -60,8 +62,8 @@ while true; do
     echo "Enter message you will like to send:"
     read NEWMESSAGE
 
-    destinationChainConfigsPath="$search_directory/""$destinationChain"".sh" 
-    destination_mock_rukh_app_address_path="deploymentScripts/mockRukhApp/addresses/"$ADDRESS_FOLDER"/""$destinationChain"".txt"
+    destinationChainConfigsPath="$chains_directory/"$destinationChain".sh" 
+    destination_mock_rukh_app_address_path="../addresses/"$ENVIRONMENT"/"$destinationChain"/rukh/app.txt"
     . "$destinationChainConfigsPath"
 
     if [ -f "$destination_mock_rukh_app_address_path" ]
@@ -72,15 +74,11 @@ while true; do
         export RECEIVER_CHAIN_ID=$CHAIN_ID
     fi
 
-    sourceChainConfigsPath="$search_directory/""$sourceChain"".sh" 
-    source_mock_rukh_app_address_path="deploymentScripts/mockRukhApp/addresses/"$ADDRESS_FOLDER"/""$sourceChain"".txt"
+    sourceChainConfigsPath="$search_directory/"$sourceChain".sh" 
+    source_mock_rukh_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/rukh/app.txt"
     . "$sourceChainConfigsPath"
 
-    if [ -f "$source_mock_rukh_app_address_path" ]
-    then
-        source_mock_rukh_app_address=$(<$source_mock_rukh_app_address_path)
-        export MOCK_RUKH_APP_ADDRESS=$source_mock_rukh_app_address
-    fi
+    export MOCK_RUKH_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt"`
 
     echo $MESSAGE_STRING
     echo $RECEIVER_ADDRESS
@@ -88,6 +86,6 @@ while true; do
     echo $MOCK_RUKH_APP_ADDRESS
     echo $RPC_URL
 
-    forge script deploymentScripts/mockRukhApp/mockRukhApp.s.sol:MockRukhAppSendMessage --rpc-url $RPC_URL --broadcast
+    forge script deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppSendMessage --rpc-url $RPC_URL --broadcast
     echo "\n"
 done

@@ -1,41 +1,42 @@
 ############################################################# SETTING ENVIRONMENT VARIABLES ################################################################
 
-# Uncomment for local_testnet
-# export ENVIRONMENT="Local_Testnet"
+# Uncomment for local chains
+export ENVIRONMENT=${ENVIRONMENT:-local}
 
 # Uncomment for public testnet
-export ENVIRONMENT="Public_Testnet"
+# export ENVIRONMENT="testnet"
 
 # Uncomment for mainnet
-# export ENVIRONMENT="Production"
+# export ENVIRONMENT="mainnet"
 
-############################################################# SETTING SEARCH DIRECTORY ####################################################################
-if [ "$ENVIRONMENT" == "Production" ]
+chains_directory="environmentVariables/$ENVIRONMENT"
+
+export MNEMONICS="test test test test test test test test test test test junk"
+
+if [ "$ENVIRONMENT" != "local" ]
 then
-    search_directory=environmentVariables/production
-    export ADDRESS_FOLDER=mainnet
-elif [ "$ENVIRONMENT" == "Public_Testnet" ]
-then
-    search_directory=environmentVariables/publicTestnet
-    export ADDRESS_FOLDER=public_testnet
-elif [ "$ENVIRONMENT" == "Local_Testnet" ]
-then
-    search_directory=environmentVariables/localTestnet
-    export ADDRESS_FOLDER=local_testnet
+    export MNEMONICS=$(op read "op://Private/Deployment/Mnemonic_phrase/"$ENVIRONMENT"")
+    export KEY_INDEX=0
 fi
 
-############################################## GETTING ALL MESSAGES SENT TO MOCK APP ############################################################
-for entry in "$search_directory"/*
+############################################## Helper Functions ############################################################
+
+address_from_filepath() {
+    existing_address_path=$1
+    if [ -f $existing_address_path ]
+    then
+        address=$(<$existing_address_path)
+    else
+        address="0x0000000000000000000000000000000000000000"
+    fi
+    echo $address
+}
+
+############################################## GETTING ALL MESSAGES SENT TO MOCK APP #######################################
+
+for entry in "$chains_directory"/*
 do
     . "$entry"
-    expected_mock_rukh_app_address_path="deploymentScripts/mockRukhApp/addresses/"$ADDRESS_FOLDER"/"$CHAIN_NAME".txt"
-    echo $expected_mock_rukh_app_address_path
-
-    if [ -f "$expected_mock_rukh_app_address_path" ]
-    then
-        expected_mock_rukh_app_address=$(<$expected_mock_rukh_app_address_path)
-        export MOCK_RUKH_APP_ADDRESS=$expected_mock_rukh_app_address
-    fi
-
-    forge script deploymentScripts/mockRukhApp/mockRukhApp.s.sol:MockRukhAppGetAllMessages --rpc-url $RPC_URL --broadcast
+    export MOCK_RUKH_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt"`
+    forge script deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppGetAllMessages --rpc-url $RPC_URL --broadcast
 done

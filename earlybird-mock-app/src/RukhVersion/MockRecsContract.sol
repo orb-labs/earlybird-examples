@@ -1,5 +1,5 @@
-// test/TestHelperContracts/RukhTestHelperContract/MockRecsContract.sol
-// SPDX-License-Identifier: UNLICENSED
+// src/RukhVersion/MockRecsContract.sol
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
 

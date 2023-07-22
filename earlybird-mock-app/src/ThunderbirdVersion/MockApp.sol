@@ -1,5 +1,5 @@
-// src/MockApp.sol
-// SPDX-License-Identifier: UNLICENSED
+// src/ThunderbirdVersion/MockApp.sol
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.17;
 pragma experimental ABIEncoderV2;
 
@@ -10,12 +10,20 @@ import "earlybird/src/Endpoint/IEndpoint/IEndpointGetFunctions.sol";
 import "earlybird/src/Endpoint/IEndpoint/IEndpoint.sol";
 
 contract MockApp is IReceiver {
+    // name of the library that the application is using
+    string public libraryName = "Thunderbird V1";
+    
+    // Endpoint address
     address public endpoint;
-    string[] public allSentMessages;
-    string[] public allReceivedMessages;
+
+    // The address of the library's receive module
+    address public libraryReceiveModule;
 
     // The default token for paying fees
     address public defaultFeeToken;
+
+    string[] public allSentMessages;
+    string[] public allReceivedMessages;
 
     constructor(address _endpoint, address _defaultFeeToken) {
         endpoint = _endpoint;
@@ -88,7 +96,13 @@ contract MockApp is IReceiver {
         );
     }
 
-    function receiveMsg(uint256, bytes memory, uint256, bytes memory _payload, bytes memory) external onlyEndpoint {
+    function receiveMsg(
+        uint256,
+        bytes memory,
+        uint256,
+        bytes memory _payload,
+        bytes memory
+    ) external onlyEndpoint {
         string memory message = abi.decode(_payload, (string));
         allReceivedMessages.push(message);
     }

@@ -1,5 +1,5 @@
-// src/MockApp.sol
-// SPDX-License-Identifier: UNLICENSED
+// src/RukhVersion/MockApp.sol
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.17;
 pragma experimental ABIEncoderV2;
 
@@ -58,7 +58,7 @@ contract MockApp is IReceiver, Ownable {
             _sendModuleConfigs,
             _receiveModuleConfigs
         );
-        (, libraryReceiveModule, ) = IEndpointGetFunctions(endpoint).getLibraryInfo(libraryName);
+        (,, libraryReceiveModule, ) = IEndpointGetFunctions(endpoint).getLibraryInfo(libraryName);
         libraryName = _libraryName;
     }
 
@@ -68,7 +68,7 @@ contract MockApp is IReceiver, Ownable {
 
     function updateReceiveModuleConfigs(bytes memory _receiveModuleConfigs) external {
         IEndpointFunctionsForApps(endpoint).updateReceiveModuleConfigs(_receiveModuleConfigs);
-        (, libraryReceiveModule, ) = IEndpointGetFunctions(endpoint).getLibraryInfo(libraryName);
+        (,, libraryReceiveModule, ) = IEndpointGetFunctions(endpoint).getLibraryInfo(libraryName);
     }
 
     function sendMessage(
