@@ -1,5 +1,5 @@
 // src/ThunderbirdVersion/PingPong.sol
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
 
