@@ -1,12 +1,12 @@
-// src/RukhVersion/SendingOracle.sol
+// src/FeeCollector.sol
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
 
-import "../../lib/earlybird-evm-interfaces/src/FeeCollector/IFeeCollector.sol";
+import "earlybird/src/FeeCollector/IFeeCollector.sol";
 import "openzeppelin-contracts/token/ERC20/ERC20.sol";
 
-contract SendingOracle is IFeeCollector {
+contract FeeCollector is IFeeCollector {
 
     struct NonNativeTokenFee {
         bool tokenAccepted;
@@ -20,10 +20,9 @@ contract SendingOracle is IFeeCollector {
 
     receive() external payable {}
 
-    function updateNonNativeTokenAcceptedForFees(
-        address[] calldata _newAcceptedTokens,
-        uint256[] calldata _feeAmounts
-    ) public {
+    function updateNonNativeTokenAcceptedForFees(address[] calldata _newAcceptedTokens, uint256[] calldata _feeAmounts)
+        public
+    {
         // Remove all the acceptedTokens
         for (uint256 i = 0; i < acceptedTokensArray.length; i++) {
             nonNativeTokensToFeeObjects[acceptedTokensArray[i]] = NonNativeTokenFee(false, 0);
@@ -55,8 +54,7 @@ contract SendingOracle is IFeeCollector {
             estimatedFee = nativeTokenFeeAmount;
         } else {
             // Pay fee in token specified in _additionalParams
-            (address feeToken, , ) = abi.decode(_additionalParams, (address, bool, uint256));
-
+            (address feeToken,) = abi.decode(_additionalParams, (address, bool));
             if (feeToken == address(0)) {
                 isTokenAccepted = acceptsNativeToken;
                 estimatedFee = nativeTokenFeeAmount;

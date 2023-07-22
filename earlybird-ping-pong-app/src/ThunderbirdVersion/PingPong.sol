@@ -1,5 +1,5 @@
 // src/ThunderbirdVersion/PingPong.sol
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
 
@@ -88,7 +88,7 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
         );
 
         IEndpointFunctionsForApps(endpoint).setLibraryAndConfigs(libraryName, sendModuleConfigs, receiveModuleConfigs);
-        (, libraryReceiveModule, ) = IEndpointGetFunctions(endpoint).getLibraryInfo(libraryName);
+        (,, libraryReceiveModule, ) = IEndpointGetFunctions(endpoint).getLibraryInfo(libraryName);
     }
 
     // Modifier used for the receive function to endure that the only address
@@ -124,7 +124,7 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
 
     function updateReceiveModuleConfigs(
         address _receivingOracle,
-        address _receivingDefaultRelayer,
+        address payable _receivingDefaultRelayer,
         address _recsContract,
         bool _emitMsgProofs,
         bool _directMsgsEnabled,
@@ -157,14 +157,12 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
         ERC20(_tokenAddress).approve(endpoint, _amount);
     }
 
-    function ping(uint256 _dstChainId, address _dstAddress, uint256 pings) public whenNotPaused {
-        // encode the payload with the number of pings
+    function getFees(uint256 _dstChainId, address _dstAddress, uint256 pings) public returns (uint256) {
         bytes memory payload = abi.encode(pings);
-        bool isOrderedMsg = false;
+        bool isOrderedMsg = true;
         bytes memory additionalParams = abi.encode(defaultFeeToken, isOrderedMsg, 500000);
         bytes memory _dst = abi.encode(_dstAddress);
-
-        // Check how much it costs to send messages with the default token
+        
         (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getSendingFeeEstimate(
             address(this),
             _dstChainId,
@@ -186,6 +184,14 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
         } else {
             totalNativeTokenFee = _handleSendingAndProtocolFees(feeEstimated, protocolFeeAmount, protocolFeeToken);
         }
+        return totalNativeTokenFee * pings;
+    }
+
+    function sendPing(uint256 _dstChainId, address   _dstAddress, uint256 pings, uint256 totalNativeTokenFee) private {
+        bytes memory payload = abi.encode(pings);
+        bool isOrderedMsg = true;
+        bytes memory additionalParams = abi.encode(defaultFeeToken, isOrderedMsg, 500000);
+        bytes memory _dst = abi.encode(_dstAddress);
 
         IEndpointFunctionsForApps(endpoint).sendMessage{value: totalNativeTokenFee}(
             _dstChainId,
@@ -196,6 +202,14 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
 
         emit Ping(pings);
     }
+
+
+    function ping(uint256 _dstChainId, address _dstAddress, uint256 pings) public whenNotPaused payable {
+        uint256 totalNativeTokenFee = this.getFees(_dstChainId, _dstAddress, pings);
+        require(totalNativeTokenFee <= msg.value, "Too many pings, too little coin, friend");
+        sendPing(_dstChainId, _dstAddress, pings, totalNativeTokenFee);
+    }
+
 
     function receiveMsg(
         uint256 _senderChainId,
@@ -217,8 +231,15 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
             "PingPong: Msg Delivered with wrong rec values"
         );
 
+        // Extract sending address and chain
+        address sendBackAddress = abi.decode(_sender, (address));
+
+        // increase the number of pings
+        uint256 pings = abi.decode(_payload, (uint256));
         // Call the ping function again.
-        ping(_senderChainId, abi.decode(_sender, (address)), abi.decode(_payload, (uint256)));
+        if (pings > 0)  { 
+            ping(_senderChainId, sendBackAddress, pings--); 
+        }
     }
 
     function getAllRecs(
@@ -226,7 +247,7 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
         bytes memory,
         uint256,
         bytes memory _payload
-    ) public view returns (bytes32 revealedMsgSecret, address recommendedRelayer) {
+    ) public view returns (bytes32 revealedMsgSecret, address payable recommendedRelayer) {
         // revealedSecret is the hash of the payload
         revealedMsgSecret = keccak256(_payload);
 
@@ -241,7 +262,7 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
         bytes memory,
         uint256,
         bytes memory _payload
-    ) public view returns (address recRelayer) {
+    ) public view returns (address payable recRelayer) {
         // RecRelayer is the default relayer for every odd ping and the backup relayer for even pings
         uint256 pingCount = abi.decode(_payload, (uint256));
         if (pingCount % 2 == 1) recRelayer = receiveDefaultRelayer;

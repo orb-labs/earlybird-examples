@@ -1,13 +1,13 @@
 // src/ThunderbirdVersion/SendingOracle.sol
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
 
-import "earlybird/src/Libraries/Thunderbird/ThunderbirdSendModule/IOracleForThunderbirdSendModule.sol";
+import "../../lib/earlybird-evm-interfaces/src/FeeCollector/IFeeCollector.sol";
 import "openzeppelin-contracts/token/ERC20/ERC20.sol";
 
-contract SendingOracle is IOracleForThunderbirdSendModule {
-    
+contract SendingOracle is IFeeCollector {
+
     struct NonNativeTokenFee {
         bool tokenAccepted;
         uint256 tokenFeeAmount;
