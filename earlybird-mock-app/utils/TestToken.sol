@@ -1,5 +1,5 @@
-// test/TestHelperContracts/TestToken.sol
-// SPDX-License-Identifier: UNLICENSED
+// utils/TestToken.sol
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 
 import "../lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
