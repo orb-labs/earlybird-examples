@@ -1,5 +1,5 @@
 // src/RukhVersion/DisputerContract.sol
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
 import "earlybird/src/Libraries/Rukh/RukhReceiveModule/IRukhReceiveModule.sol";
