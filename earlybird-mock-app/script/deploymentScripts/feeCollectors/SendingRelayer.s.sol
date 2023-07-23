@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import "../../../src/SendingRelayer.sol";
+import "../../../src/FeeCollector.sol";
 
 contract SendingRelayerDeployment is Script {
     function run() external {
@@ -20,7 +20,7 @@ contract SendingRelayerDeployment is Script {
 
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
-            SendingRelayer sendingRelayer = new SendingRelayer();
+            FeeCollector sendingRelayer = new FeeCollector();
             sendingRelayer.updateNativeTokenFee(true, 0);
             vm.stopBroadcast();
 
