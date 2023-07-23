@@ -1,0 +1,32 @@
+# Earlybird PingPong App
+
+## Setup
+
+Update the following files with your mnemonic phrase where it says `<ADD YOUR MNEMONIC HERE>`
+
+1. `/script/sendPingOnRukhPingPoingApp.sh`
+2. `/script/sendPingOnThunderbirdPingPoingApp.sh`
+
+---
+
+## **How to interact with the PingPong App**
+
+### **Sending a message**
+
+You can send pings using the 2 libraries currently supported by the PingPong App.
+
+1. Using the **Rukh Library** run the following command and follow the prompts
+
+   `make send-rukh-ping`
+
+2. Using the **Thunderbird Library** run the following command and follow the prompts
+
+   `make send-thunderbird-ping`
+
+---
+
+## Don't Have Testnet tokens to send messages?
+
+There are open source faucets you can find online. [Visit Alchemy](https://www.alchemy.com/best/crypto-faucets) to easily find a faucet.
+
+If you are still having trouble finding tokens for using the PingPong App, ping us in the [discord group](https://discord.com/invite/7jETqRMBRc).
