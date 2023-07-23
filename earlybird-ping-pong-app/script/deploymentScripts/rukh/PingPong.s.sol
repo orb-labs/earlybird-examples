@@ -54,12 +54,12 @@ contract PingPongRukhDeployment is Script {
     }
 }
 
-contract MockRukhPingPongAppSendPing is Script {
+contract RukhPingPongAppSendPing is Script {
     function run() external {
         string memory sendingMnemonics = vm.envString("SENDING_MNEMONICS");
         uint256 sendingKeyIndex = vm.envUint("SENDING_KEY_INDEX");
 
-        address payable mockPingPongAppAddress = payable(vm.envAddress("MOCK_RUKH_PING_PONG_APP_ADDRESS"));
+        address payable pingPongAppAddress = payable(vm.envAddress("RUKH_PING_PONG_APP_ADDRESS"));
         uint256 receiverChainId = vm.envUint("RECEIVER_CHAIN_ID");
         address receiverAddress = vm.envAddress("RECEIVER_ADDRESS");
         uint256 pings = vm.envUint("PINGS");
@@ -67,7 +67,7 @@ contract MockRukhPingPongAppSendPing is Script {
         uint256 deployerPrivateKey = vm.deriveKey(sendingMnemonics, uint32(sendingKeyIndex));
 
         vm.startBroadcast(deployerPrivateKey);
-        PingPong(mockPingPongAppAddress).ping(receiverChainId, receiverAddress, pings);
+        PingPong(pingPongAppAddress).ping(receiverChainId, receiverAddress, pings);
         vm.stopBroadcast();
     }
 }

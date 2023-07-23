@@ -1,4 +1,4 @@
-// src/MockSendingOracle.sol
+// src/SendingRelayer.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../lib/earlybird-evm-interfaces/src/FeeCollector/IFeeCollector.sol";
 import "../utils/TestToken.sol";
 
-contract MockSendingOracle is IFeeCollector {
+contract SendingRelayer is IFeeCollector {
     struct NonNativeTokenFee {
         bool tokenAccepted;
         uint256 tokenFeeAmount;

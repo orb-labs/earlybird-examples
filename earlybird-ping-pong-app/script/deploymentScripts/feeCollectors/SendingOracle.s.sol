@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import "../../../src/SendingOracle.sol";
+import "../../../src/FeeCollector.sol";
 
 contract SendingOracleDeployment is Script {
     function run() external {
@@ -20,7 +20,7 @@ contract SendingOracleDeployment is Script {
 
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
-            SendingOracle sendingOracle = new SendingOracle();
+            FeeCollector sendingOracle = new FeeCollector();
             sendingOracle.updateNativeTokenFee(true, 0);
             vm.stopBroadcast();
 

@@ -14,8 +14,8 @@ contract MockThunderbirdAppDeployment is Script {
 
         address expectedMockAppAddress = vm.envAddress("EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS");
 
-        address sendingOracle = vm.envAddress("MOCK_SENDING_ORACLE_ADDRESS");
-        address sendingRelayer = vm.envAddress("MOCK_SENDING_RELAYER_ADDRESS");
+        address sendingOracle = vm.envAddress("SENDING_ORACLE_ADDRESS");
+        address sendingRelayer = vm.envAddress("SENDING_RELAYER_ADDRESS");
 
         bytes memory sendModuleConfigs = abi.encode(false, sendingOracle, sendingRelayer);
         bytes memory receiveModuleConfigs = abi.encode(
@@ -27,7 +27,7 @@ contract MockThunderbirdAppDeployment is Script {
                 vm.envString("RELAYER_MNEMONICS"),
                 uint32(vm.envUint("RELAYER_KEY_INDEX"))
             )), //_receiveDefaultRelayer
-            vm.envAddress("MOCK_THUNDERBIRD_RECS_CONTRACT_ADDRESS"), //recsContract
+            vm.envAddress("THUNDERBIRD_RECS_CONTRACT_ADDRESS"), //recsContract
             true, // emitMsgProofs
             false, // directMsgsEnabled
             false // msgDeliveryPaused

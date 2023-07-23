@@ -1,9 +1,9 @@
-// src/RukhVersion/MockRecsContract.sol
+// src/RukhVersion/RecsContract.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
 
-contract MockRecsContract {
+contract RecsContract {
     // Address of default receive relayer 1
     address public receiveDefaultRelayer;
 

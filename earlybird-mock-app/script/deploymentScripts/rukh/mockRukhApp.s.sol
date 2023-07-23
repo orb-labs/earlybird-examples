@@ -15,8 +15,8 @@ contract MockRukhAppDeployment is Script {
 
         bytes memory sendModuleConfigs = abi.encode(
             false, 
-            vm.envAddress("MOCK_SENDING_ORACLE_ADDRESS"),
-            vm.envAddress("MOCK_SENDING_RELAYER_ADDRESS")
+            vm.envAddress("SENDING_ORACLE_ADDRESS"),
+            vm.envAddress("SENDING_RELAYER_ADDRESS")
         );
         bool directMsgsEnabled = true;
 
@@ -33,12 +33,12 @@ contract MockRukhAppDeployment is Script {
                 vm.envString("RELAYER_MNEMONICS"),
                 uint32(vm.envUint("RELAYER_KEY_INDEX"))
             )), //_receiveDefaultRelayer,
-            vm.envAddress("MOCK_RUKH_DISPUTER_CONTRACT_ADDRESS"), //_disputersContract,
+            vm.envAddress("RUKH_DISPUTER_CONTRACT_ADDRESS"), //_disputersContract,
             vm.deriveKey(
                 vm.envString("DISPUTE_RESOLVER_MNEMONICS"),
                 uint32(vm.envUint("DISPUTE_RESOLVER_KEY_INDEX"))
             ), //_disputeResolver,
-            vm.envAddress("MOCK_RUKH_RECS_CONTRACT_ADDRESS"), //recsContract,
+            vm.envAddress("RUKH_RECS_CONTRACT_ADDRESS"), //recsContract,
             true, // emitMsgProofs,
             directMsgsEnabled, // directMsgsEnabled,
             false // msgDeliveryPaused
