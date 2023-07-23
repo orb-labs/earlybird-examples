@@ -37,6 +37,6 @@ address_from_filepath() {
 for entry in "$chains_directory"/*
 do
     . "$entry"
-    export THUNDERBIRD_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/app.txt"`
+    export MOCK_THUNDERBIRD_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/app.txt"`
     forge script deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppGetAllMessages --rpc-url $RPC_URL --broadcast
 done

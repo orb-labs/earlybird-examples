@@ -11,7 +11,7 @@ contract MockRukhAppDeployment is Script {
 
         string memory chainName = vm.envString("CHAIN_NAME");
         
-        address expectedMockAppAddress = vm.envAddress("EXPECTED_RUKH_APP_ADDRESS");
+        address expectedMockAppAddress = vm.envAddress("EXPECTED_MOCK_RUKH_APP_ADDRESS");
 
         bytes memory sendModuleConfigs = abi.encode(
             false, 
