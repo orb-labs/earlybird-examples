@@ -48,35 +48,35 @@ do
     . "$entry"
 
     ########################################## GET EXISTING ADDRESSES ######################################################
-    export EXPECTED_MOCK_SENDING_ORACLE_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_oracle.txt"`
-    export EXPECTED_MOCK_SENDING_RELAYER_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_relayer.txt"`
-    export EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/app.txt"`
-    export EXPECTED_MOCK_THUNDERBIRD_RECS_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/recs_contract.txt"`
-    export EXPECTED_MOCK_RUKH_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt"`
-    export EXPECTED_MOCK_RUKH_RECS_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/recs_contract.txt"`
-    export EXPECTED_MOCK_RUKH_DISPUTER_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/disputer_contract.txt"`
+    export EXPECTED_SENDING_ORACLE_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_oracle.txt"`
+    export EXPECTED_SENDING_RELAYER_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_relayer.txt"`
+    export EXPECTED_THUNDERBIRD_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/app.txt"`
+    export EXPECTED_THUNDERBIRD_RECS_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/recs_contract.txt"`
+    export EXPECTED_RUKH_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt"`
+    export EXPECTED_RUKH_RECS_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/recs_contract.txt"`
+    export EXPECTED_RUKH_DISPUTER_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/disputer_contract.txt"`
 
     ########################################## DEPLOY FEE COLLECTORS #######################################################
     
-    forge script deploymentScripts/feeCollectors/MockSendingOracle.s.sol:MockSendingOracleDeployment --rpc-url $RPC_URL --broadcast
-    export MOCK_SENDING_ORACLE_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_oracle.txt"`
+    forge script deploymentScripts/feeCollectors/SendingOracle.s.sol:SendingOracleDeployment --rpc-url $RPC_URL --broadcast
+    export SENDING_ORACLE_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_oracle.txt"`
     
-    forge script deploymentScripts/feeCollectors/MockSendingRelayer.s.sol:MockSendingRelayerDeployment --rpc-url $RPC_URL --broadcast
-    export MOCK_SENDING_RELAYER_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_relayer.txt"`
+    forge script deploymentScripts/feeCollectors/SendingRelayer.s.sol:SendingRelayerDeployment --rpc-url $RPC_URL --broadcast
+    export SENDING_RELAYER_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_relayer.txt"`
 
     ########################################## DEPLOY THUNDERBIRD VERSION ##################################################
-    forge script deploymentScripts/thunderbird/MockThunderbirdRecsContract.s.sol:MockThunderbirdRecsContractDeployment --rpc-url $RPC_URL --broadcast
-    export MOCK_THUNDERBIRD_RECS_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/recs_contract.txt"`
+    forge script deploymentScripts/thunderbird/ThunderbirdRecsContract.s.sol:ThunderbirdRecsContractDeployment --rpc-url $RPC_URL --broadcast
+    export THUNDERBIRD_RECS_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/recs_contract.txt"`
     
-    forge script deploymentScripts/thunderbird/MockThunderbirdApp.s.sol:MockThunderbirdAppDeployment --rpc-url $RPC_URL --broadcast
+    forge script deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppDeployment --rpc-url $RPC_URL --broadcast
 
     
     ########################################## DEPLOY RUKH VERSION #########################################################
-    forge script deploymentScripts/rukh/MockRukhRecsContract.s.sol:MockRukhRecsContractDeployment --rpc-url $RPC_URL --broadcast
-    export MOCK_RUKH_RECS_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/recs_contract.txt"`
+    forge script deploymentScripts/rukh/RukhRecsContract.s.sol:RukhRecsContractDeployment --rpc-url $RPC_URL --broadcast
+    export RUKH_RECS_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/recs_contract.txt"`
     
-    forge script deploymentScripts/rukh/MockRukhDisputerContract.s.sol:MockRukhDisputerContractDeployment --rpc-url $RPC_URL --broadcast
-    export MOCK_RUKH_DISPUTER_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/disputer_contract.txt"`
+    forge script deploymentScripts/rukh/RukhDisputerContract.s.sol:RukhDisputerContractDeployment --rpc-url $RPC_URL --broadcast
+    export RUKH_DISPUTER_CONTRACT_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/disputer_contract.txt"`
 
     forge script deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppDeployment --rpc-url $RPC_URL --broadcast
 done

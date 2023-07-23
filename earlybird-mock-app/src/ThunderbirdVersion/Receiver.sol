@@ -1,4 +1,4 @@
-// src/ThunderbirdVersion/MockReceiver.sol
+// src/ThunderbirdVersion/Receiver.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
@@ -7,7 +7,7 @@ import "../../lib/earlybird-evm-interfaces/src/IReceiver/IReceiver.sol";
 import "../../lib/earlybird-evm-interfaces/src/Endpoint/IEndpoint/IEndpointFunctionsForApps.sol";
 import "../../lib/earlybird-evm-interfaces/src/Libraries/Thunderbird/ThunderbirdReceiveModule/IThunderbirdReceiveModule.sol";
 
-contract MockReceiver is IReceiver {
+contract Receiver is IReceiver {
     address public endpoint;
     address public receiveLibrary;
 
@@ -74,7 +74,7 @@ contract MockReceiver is IReceiver {
             );
             IThunderbirdReceiveModule(receiveLibrary).submitMessages(msgsByApps);
         } else if (testingType == _TESTING_DELIVERY_FAILURE) {
-            require(false, "MockReceiver: Not receiving messages.");
+            require(false, "Receiver: Not receiving messages.");
         } else if (testingType == _TESTING_CONTENT) {
             emit BroadcastedMessage(_senderChainId, _sender, _nonce, _payload, _additionalInfo);
         } else if (testingType == _TESTING_MSG_DELIVERY_CONTRACT) {

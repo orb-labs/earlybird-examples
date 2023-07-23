@@ -33,7 +33,7 @@ address_from_filepath() {
     echo $address
 }
 
-############################################## SENDING MESSAGE TO MOCK APP ############################################################
+############################################## SENDING MESSAGE TO APP ############################################################
 i=0
 for entry in "$search_directory"/*
 do
@@ -62,29 +62,29 @@ while true; do
     read PINGS
 
     destinationChainConfigsPath="$search_directory/"$destinationChain".sh" 
-    destination_mock_thunderbird_ping_pong_app_address_path="../addresses/"$ENVIRONMENT"/"$destinationChain"/thunderbird/app.txt"
+    destination_thunderbird_ping_pong_app_address_path="../addresses/"$ENVIRONMENT"/"$destinationChain"/thunderbird/app.txt"
     . "$destinationChainConfigsPath"
 
-    if [ -f "$destination_mock_thunderbird_ping_pong_app_address_path" ]
+    if [ -f "$destination_thunderbird_ping_pong_app_address_path" ]
     then
-        destination_mock_thunderbird_ping_pong_app_address=$(<$destination_mock_thunderbird_ping_pong_app_address_path)
-        export RECEIVER_ADDRESS=$destination_mock_rukh_ping_pong_app_address
+        destination_thunderbird_ping_pong_app_address=$(<$destination_thunderbird_ping_pong_app_address_path)
+        export RECEIVER_ADDRESS=$destination_rukh_ping_pong_app_address
         export PINGS=$PINGS
         export RECEIVER_CHAIN_ID=$CHAIN_ID
     fi
 
     sourceChainConfigsPath="$search_directory/"$sourceChain".sh" 
-    source_mock_thunderbird_ping_pong_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
+    source_thunderbird_ping_pong_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
     . "$sourceChainConfigsPath"
 
-    export MOCK_THUNDERBIRD_PING_PONG_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/app.txt"`
+    export THUNDERBIRD_PING_PONG_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/app.txt"`
 
     echo $PINGS
     echo $RECEIVER_ADDRESS
     echo $RECEIVER_CHAIN_ID
-    echo $MOCK_THUNDERBIRD_PING_PONG_APP_ADDRESS
+    echo $THUNDERBIRD_PING_PONG_APP_ADDRESS
     echo $RPC_URL
 
-    forge script deploymentScripts/thunderbird/PingPong.s.sol:MockThunderbirdPingPongAppSendPing --rpc-url $RPC_URL --broadcast
+    forge script deploymentScripts/thunderbird/PingPong.s.sol:ThunderbirdPingPongAppSendPing --rpc-url $RPC_URL --broadcast
     echo "\n"
 done
