@@ -27,6 +27,8 @@ address_from_filepath() {
 
 ############################################## GET EXISTING ADDRESSES ############################################################
 
+export EXPECTED_SENDING_ORACLE_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_oracle.txt"`
+export EXPECTED_SENDING_RELAYER_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_relayer.txt"`
 export EXPECTED_RUKH_VERSION_PINGPONG_DISPUTER_CONTRACT_ADDRESS=`address_from_filepath "addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/disputer_contract.txt"`
 export EXPECTED_RUKH_VERSION_PINGPONG_APP_ADDRESS=`address_from_filepath "addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt"`
 export EXPECTED_THUNDERBIRD_VERSION_PINGPONG_APP_ADDRESS=`address_from_filepath "addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt"`
@@ -36,6 +38,14 @@ for entry in "$chains_directory"/*
 do
     # run scripts in environmentVariables/ to set env vars for the chain
     . "$entry"
+
+    ########################################## DEPLOY FEE COLLECTORS #######################################################
+    
+    forge script deploymentScripts/feeCollectors/MockSendingOracle.s.sol:SendingOracleDeployment --rpc-url $RPC_URL --broadcast
+    export SENDING_ORACLE_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_oracle.txt"`
+    
+    forge script deploymentScripts/feeCollectors/MockSendingRelayer.s.sol:SendingRelayerDeployment --rpc-url $RPC_URL --broadcast
+    export SENDING_RELAYER_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/sending_relayer.txt"`
 
     # # deploy rukh disputer contract
     export EXPECTED_RUKH_VERSION_PINGPONG_DISPUTER_CONTRACT_ADDRESS=`address_from_filepath "addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/disputer_contract.txt"`
