@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../lib/earlybird-evm-interfaces/src/FeeCollector/IFeeCollector.sol";
 import "../utils/TestToken.sol";
 
-contract SendingOracle is IFeeCollector {
+contract FeeCollector is IFeeCollector {
     struct NonNativeTokenFee {
         bool tokenAccepted;
         uint256 tokenFeeAmount;

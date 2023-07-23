@@ -54,7 +54,8 @@ contract FeeCollector is IFeeCollector {
             estimatedFee = nativeTokenFeeAmount;
         } else {
             // Pay fee in token specified in _additionalParams
-            (address feeToken,) = abi.decode(_additionalParams, (address, bool));
+            (address feeToken, , ) = abi.decode(_additionalParams, (address, bool, uint256));
+            
             if (feeToken == address(0)) {
                 isTokenAccepted = acceptsNativeToken;
                 estimatedFee = nativeTokenFeeAmount;
