@@ -9,7 +9,7 @@
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
 [submodule "earlybird-ping-pong-app/lib/earlybird-evm-interfaces"]
 	path = earlybird-ping-pong-app/lib/earlybird-evm-interfaces
-	url = git@github.com:orb-labs/earlybird-evm-interfaces.git
+	url = https://github.com/orb-labs/earlybird-evm-interfaces.git
 [submodule "earlybird-mock-app/lib/forge-std"]
 	path = earlybird-mock-app/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
@@ -18,4 +18,4 @@
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
 [submodule "earlybird-mock-app/lib/earlybird-evm-interfaces"]
 	path = earlybird-mock-app/lib/earlybird-evm-interfaces
-	url = git@github.com:orb-labs/earlybird-evm-interfaces.git
+	url = https://github.com/orb-labs/earlybird-evm-interfaces.git
