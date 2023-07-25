@@ -253,8 +253,8 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
 
         // RecommendedRelayer is the default relayer for every odd ping and the backup relayer for even pings
         uint256 pingCount = abi.decode(_payload, (uint256));
-        if (pingCount % 2 == 1) recommendedRelayer = receiveDefaultRelayer;
-        else recommendedRelayer = receiveBackupRelayer;
+        if (pingCount % 2 == 1) recommendedRelayer = payable(receiveDefaultRelayer);
+        else recommendedRelayer = payable(receiveBackupRelayer);
     }
 
     function getRecRelayer(
@@ -265,8 +265,8 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
     ) public view returns (address payable recRelayer) {
         // RecRelayer is the default relayer for every odd ping and the backup relayer for even pings
         uint256 pingCount = abi.decode(_payload, (uint256));
-        if (pingCount % 2 == 1) recRelayer = receiveDefaultRelayer;
-        else recRelayer = receiveBackupRelayer;
+        if (pingCount % 2 == 1) recRelayer = payable(receiveDefaultRelayer);
+        else recRelayer = payable(receiveBackupRelayer);
     }
 
     // allow this contract to receive ether
