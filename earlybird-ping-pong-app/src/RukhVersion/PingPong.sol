@@ -312,7 +312,7 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
         uint256 pingCount = abi.decode(_payload, (uint256));
         if (pingCount % 2 == 1) {
             // RecommendedRelayer is the default relayer for every odd ping
-            recommendedRelayer = receiveDefaultRelayer;
+            recommendedRelayer = payable(receiveDefaultRelayer);
             // RecommendedDisputeTime is minDisputeTime for every odd ping
             recommendedDisputeTime = minDisputeTime;
             // RecommendedDisputeResolutionExtension is minDisputeResolutionExtension for every odd ping
