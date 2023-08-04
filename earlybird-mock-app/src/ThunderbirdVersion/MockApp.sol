@@ -16,6 +16,9 @@ contract MockApp is IReceiver {
     // Endpoint address
     address public endpoint;
 
+    // Endpoint instance id, computed by the endpoint using its address and chainid
+    bytes32 public endpointInstanceId;
+
     // The address of the library's receive module
     address public libraryReceiveModule;
 
@@ -28,8 +31,10 @@ contract MockApp is IReceiver {
     constructor(address _endpoint, address _defaultFeeToken) {
         endpoint = _endpoint;
         defaultFeeToken = _defaultFeeToken;
+        endpointInstanceId = IEndpointGetFunctions(endpoint).getInstanceId();
     }
 
+    // Modifier to ensure only the endpoint can call a function
     modifier onlyEndpoint() {
         require(msg.sender == endpoint);
         _;
@@ -37,26 +42,25 @@ contract MockApp is IReceiver {
 
     function setLibraryAndConfigs(
         string memory _libraryName,
-        bytes memory _sendModuleConfigs,
-        bytes memory _receiveModuleConfigs
+        bytes memory _appConfigForSending,
+        bytes memory _appConfigForReceiving
     ) external {
         IEndpointFunctionsForApps(endpoint).setLibraryAndConfigs(
             _libraryName,
-            _sendModuleConfigs,
-            _receiveModuleConfigs
+            _appConfigForSending,
+            _appConfigForReceiving
         );
     }
 
-    function updateSendModuleConfigs(bytes memory _sendModuleConfigs) external {
-        IEndpointFunctionsForApps(endpoint).updateSendModuleConfigs(_sendModuleConfigs);
+    function updateAppConfigForSending(bytes memory _appConfigForSending) external {
+        IEndpointFunctionsForApps(endpoint).updateAppConfigForSending(_appConfigForSending);
     }
 
-    function updateReceiveModuleConfigs(bytes memory _receiveModuleConfigs) external {
-        IEndpointFunctionsForApps(endpoint).updateReceiveModuleConfigs(_receiveModuleConfigs);
+    function updateAppConfigForReceiving(bytes memory _appConfigForReceiving) external {
+        IEndpointFunctionsForApps(endpoint).updateAppConfigForReceiving(_appConfigForReceiving);
     }
 
     function sendMessage(
-        uint256 _receiverChainId,
         bytes memory _receiver,
         string memory _message,
         bytes memory _additionalParams
@@ -68,7 +72,7 @@ contract MockApp is IReceiver {
         // Check how much it costs to send messages with the default token
         (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getSendingFeeEstimate(
             address(this),
-            _receiverChainId,
+            endpointInstanceId,
             _receiver,
             payload,
             _additionalParams
@@ -89,7 +93,7 @@ contract MockApp is IReceiver {
         }
 
         IEndpointFunctionsForApps(endpoint).sendMessage{value: totalNativeTokenFee}(
-            _receiverChainId,
+            endpointInstanceId,
             _receiver,
             payload,
             _additionalParams

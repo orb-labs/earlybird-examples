@@ -16,6 +16,9 @@ contract MockApp is IReceiver, Ownable {
 
     // Endpoint address
     address public endpoint;
+    
+    // Endpoint instance id, computed by the endpoint using its address and chainid
+    bytes32 public endpointInstanceId;
 
     // The address of the library's receive module
     address public libraryReceiveModule;
@@ -35,10 +38,10 @@ contract MockApp is IReceiver, Ownable {
         endpoint = _endpoint;
         defaultFeeToken = _defaultFeeToken;
         directMsgsEnabled = _directMsgsEnabled;
+        endpointInstanceId = IEndpointGetFunctions(endpoint).getInstanceId();
     }
 
-    // Modifier used for the receive function to endure that the only address
-    // that can call the function is the endpoint
+    // Modifier to ensure only the endpoint (if direct messages is disabled) or library receive module (if enabled) can call a function
     modifier onlyEndpointOrLibraryReceiveModule() {
         if (!directMsgsEnabled) {
             require(msg.sender == endpoint);
@@ -50,29 +53,27 @@ contract MockApp is IReceiver, Ownable {
 
     function setLibraryAndConfigs(
         string memory _libraryName,
-        bytes memory _sendModuleConfigs,
-        bytes memory _receiveModuleConfigs
+        bytes memory _appConfigForSending,
+        bytes memory _appConfigForReceiving
     ) external {
         IEndpointFunctionsForApps(endpoint).setLibraryAndConfigs(
             _libraryName,
-            _sendModuleConfigs,
-            _receiveModuleConfigs
+            _appConfigForSending,
+            _appConfigForReceiving
         );
         (,, libraryReceiveModule, ) = IEndpointGetFunctions(endpoint).getLibraryInfo(libraryName);
         libraryName = _libraryName;
     }
 
-    function updateSendModuleConfigs(bytes memory _sendModuleConfigs) external {
-        IEndpointFunctionsForApps(endpoint).updateSendModuleConfigs(_sendModuleConfigs);
+    function updateAppConfigForSending(bytes memory _appConfigForSending) external {
+        IEndpointFunctionsForApps(endpoint).updateAppConfigForSending(_appConfigForSending);
     }
 
-    function updateReceiveModuleConfigs(bytes memory _receiveModuleConfigs) external {
-        IEndpointFunctionsForApps(endpoint).updateReceiveModuleConfigs(_receiveModuleConfigs);
-        (,, libraryReceiveModule, ) = IEndpointGetFunctions(endpoint).getLibraryInfo(libraryName);
+    function updateAppConfigForReceiving(bytes memory _appConfigForReceiving) external {
+        IEndpointFunctionsForApps(endpoint).updateAppConfigForReceiving(_appConfigForReceiving);
     }
-
+ 
     function sendMessage(
-        uint256 _receiverChainId,
         bytes memory _receiver,
         string memory _message,
         bytes memory _additionalParams
@@ -83,7 +84,7 @@ contract MockApp is IReceiver, Ownable {
         // Check how much it costs to send messages with the default token
         (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getSendingFeeEstimate(
             address(this),
-            _receiverChainId,
+            endpointInstanceId,
             _receiver,
             payload,
             _additionalParams
@@ -104,7 +105,7 @@ contract MockApp is IReceiver, Ownable {
         }
 
         IEndpointFunctionsForApps(endpoint).sendMessage{value: totalNativeTokenFee}(
-            _receiverChainId,
+            endpointInstanceId,
             _receiver,
             payload,
             _additionalParams
