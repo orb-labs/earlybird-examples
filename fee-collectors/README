@@ -1,27 +1,16 @@
-# Earlybird PingPong App
+# Earlybird Fee Collectors
 
-## Setup
+## **Setup**
 
-Update the following files with your mnemonic phrase where it says `<ADD YOUR MNEMONIC HERE>`
+Update `/script/setup.sh` with your mnemonic phrase where it says `ADD YOUR MNEMONIC HERE`
+Run a local hardhat or select an environment other than testnet in `/script/setup.sh`
+If deploying non-locally, be sure to update the RPC_URL vars in the `script/environmentVariables/$ENVIRONMENT` -- the deploy script will iterate over each chain file in the environment-specific directory, attempting to deploy to each chain 
 
-1. `/script/sendPingOnRukhPingPoingApp.sh`
-2. `/script/sendPingOnThunderbirdPingPoingApp.sh`
 
 ---
 
-## **How to interact with the PingPong App**
-
-### **Sending a message**
-
-You can send pings using the 2 libraries currently supported by the PingPong App.
-
-1. Using the **Rukh Library** run the following command and follow the prompts
-
-   `make send-rukh-ping`
-
-2. Using the **Thunderbird Library** run the following command and follow the prompts
-
-   `make send-thunderbird-ping`
+### **Deployment**
+Run `script/deploy.sh`
 
 ---
 
@@ -29,4 +18,4 @@ You can send pings using the 2 libraries currently supported by the PingPong App
 
 There are open source faucets you can find online. [Visit Alchemy](https://www.alchemy.com/best/crypto-faucets) to easily find a faucet.
 
-If you are still having trouble finding tokens for using the PingPong App, ping us in the [discord group](https://discord.com/invite/7jETqRMBRc).
+If you have any trouble, ping us in the [discord group](https://discord.com/invite/7jETqRMBRc).

@@ -14,12 +14,7 @@ chains_directory="environmentVariables/$ENVIRONMENT"
 export KEY_INDEX=3
 
 export MNEMONICS="test test test test test test test test test test test junk"
-
-if [ "$ENVIRONMENT" != "local" ]
-then
-    export MNEMONICS=$(op read "op://Private/Deployment/Mnemonic_phrase/"$ENVIRONMENT"")
-    export KEY_INDEX=0
-fi
+#### ADD YOUR MNEMONIC HERE
 
 ############################################## Helper Functions ############################################################
 
