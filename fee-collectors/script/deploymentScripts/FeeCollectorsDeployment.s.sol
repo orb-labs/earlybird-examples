@@ -6,7 +6,7 @@ import "forge-std/console.sol";
 import "../../../src/FeeCollector.sol";
 
 
-contract SendingOracleDeployment is Script {
+contract FeeCollectorsDeployment is Script {
     function deployFeeCollector(uint256 deployerPrivateKey, string memory chainName, string memory componentName, address expectedFeeCollectorAddress) private {
         uint256 size = 0;
 
