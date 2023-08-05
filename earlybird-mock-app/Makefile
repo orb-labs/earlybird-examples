@@ -1,9 +1,3 @@
-setup:
-	yarn
-
-run-local-chains:
-	docker compose up -d
-
 deploy-smart-contracts:
 	forge build && forge install && ./deployment.sh
 

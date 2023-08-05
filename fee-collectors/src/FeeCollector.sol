@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
 
 import "../lib/earlybird-evm-interfaces/src/FeeCollector/IFeeCollector.sol";
-import "../utils/TestToken.sol";
 
 contract FeeCollector is IFeeCollector {
     struct NonNativeTokenFee {
@@ -25,25 +24,32 @@ contract FeeCollector is IFeeCollector {
     ) public {
         // Remove all the acceptedTokens
         for (uint256 i = 0; i < acceptedTokensArray.length; i++) {
-            nonNativeTokensToFeeObjects[acceptedTokensArray[i]] = NonNativeTokenFee(false, 0);
+            nonNativeTokensToFeeObjects[
+                acceptedTokensArray[i]
+            ] = NonNativeTokenFee(false, 0);
         }
 
         // Insert all the newAcceptedTokens
         for (uint256 i = 0; i < _newAcceptedTokens.length; i++) {
-            nonNativeTokensToFeeObjects[_newAcceptedTokens[i]] = NonNativeTokenFee(true, _feeAmounts[i]);
+            nonNativeTokensToFeeObjects[
+                _newAcceptedTokens[i]
+            ] = NonNativeTokenFee(true, _feeAmounts[i]);
         }
 
         acceptedTokensArray = _newAcceptedTokens;
     }
 
-    function updateNativeTokenFee(bool _acceptNativeTokenForFees, uint256 _feeAmount) public {
+    function updateNativeTokenFee(
+        bool _acceptNativeTokenForFees,
+        uint256 _feeAmount
+    ) public {
         acceptsNativeToken = _acceptNativeTokenForFees;
         nativeTokenFeeAmount = _feeAmount;
     }
 
     function getEstimatedFee(
         address,
-        uint256,
+        bytes32,
         bytes calldata,
         bytes calldata,
         bytes calldata _additionalParams
@@ -54,46 +60,51 @@ contract FeeCollector is IFeeCollector {
             estimatedFee = nativeTokenFeeAmount;
         } else {
             // Pay fee in token specified in _additionalParams
-            (address feeToken, , ) = abi.decode(_additionalParams, (address, bool, uint256));
+            (address feeToken, , ) = abi.decode(
+                _additionalParams,
+                (address, bool, uint256)
+            );
 
             if (feeToken == address(0)) {
                 isTokenAccepted = acceptsNativeToken;
                 estimatedFee = nativeTokenFeeAmount;
             } else {
-                isTokenAccepted = nonNativeTokensToFeeObjects[feeToken].tokenAccepted;
-                estimatedFee = nonNativeTokensToFeeObjects[feeToken].tokenFeeAmount;
+                isTokenAccepted = nonNativeTokensToFeeObjects[feeToken]
+                    .tokenAccepted;
+                estimatedFee = nonNativeTokensToFeeObjects[feeToken]
+                    .tokenFeeAmount;
             }
         }
     }
 
     function getAcceptedTokens(
         address,
-        uint256,
+        bytes32,
         bytes calldata,
         bytes calldata
     ) external view returns (address[] memory acceptedTokens) {
         // Figure out the count of tokens that are accepted.
-        uint256 numberOfAcceeptedTokens = acceptedTokensArray.length;
+        uint256 numberOfAcceptedTokens = acceptedTokensArray.length;
         if (acceptsNativeToken == true) {
-            numberOfAcceeptedTokens++;
+            numberOfAcceptedTokens++;
         }
 
         // Create an array for them and migrate non-native tokens.
-        acceptedTokens = new address[](numberOfAcceeptedTokens);
+        acceptedTokens = new address[](numberOfAcceptedTokens);
         for (uint256 i = 0; i < acceptedTokensArray.length; i++) {
             acceptedTokens[i] = acceptedTokensArray[i];
         }
 
         // Migrate the native token if applicable.
         if (acceptsNativeToken == true) {
-            acceptedTokens[numberOfAcceeptedTokens - 1] = address(0);
+            acceptedTokens[numberOfAcceptedTokens - 1] = address(0);
         }
     }
 
     function areTokensAccepted(
         address[] memory _tokens,
         address,
-        uint256,
+        bytes32,
         bytes calldata,
         bytes calldata
     ) external view returns (bool[] memory areAcceptedTokens) {
@@ -102,7 +113,8 @@ contract FeeCollector is IFeeCollector {
             if (_tokens[i] == address(0)) {
                 areAcceptedTokens[i] = acceptsNativeToken;
             } else {
-                areAcceptedTokens[i] = nonNativeTokensToFeeObjects[_tokens[i]].tokenAccepted;
+                areAcceptedTokens[i] = nonNativeTokensToFeeObjects[_tokens[i]]
+                    .tokenAccepted;
             }
         }
     }

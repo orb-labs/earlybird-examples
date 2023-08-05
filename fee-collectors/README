@@ -1,0 +1,21 @@
+# Earlybird Fee Collectors
+
+## **Setup**
+
+Update `/script/setup.sh` with your mnemonic phrase where it says `ADD YOUR MNEMONIC HERE`
+Run a local hardhat or select an environment other than testnet in `/script/setup.sh`
+If deploying non-locally, be sure to update the RPC_URL vars in the `script/environmentVariables/$ENVIRONMENT` -- the deploy script will iterate over each chain file in the environment-specific directory, attempting to deploy to each chain 
+
+
+---
+
+### **Deployment**
+Run `script/deploy.sh`
+
+---
+
+## Don't Have Testnet tokens to send messages?
+
+There are open source faucets you can find online. [Visit Alchemy](https://www.alchemy.com/best/crypto-faucets) to easily find a faucet.
+
+If you have any trouble, ping us in the [discord group](https://discord.com/invite/7jETqRMBRc).
