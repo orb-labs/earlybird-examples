@@ -16,9 +16,6 @@ contract MockApp is IReceiver {
     // Endpoint address
     address public endpoint;
 
-    // Endpoint instance id, computed by the endpoint using its address and chainid
-    bytes32 public endpointInstanceId;
-
     // The address of the library's receive module
     address public libraryReceiveModule;
 
@@ -31,7 +28,6 @@ contract MockApp is IReceiver {
     constructor(address _endpoint, address _defaultFeeToken) {
         endpoint = _endpoint;
         defaultFeeToken = _defaultFeeToken;
-        endpointInstanceId = IEndpointGetFunctions(endpoint).getInstanceId();
     }
 
     // Modifier to ensure only the endpoint can call a function
@@ -61,6 +57,7 @@ contract MockApp is IReceiver {
     }
 
     function sendMessage(
+        bytes memory _receiverInstanceId,
         bytes memory _receiver,
         string memory _message,
         bytes memory _additionalParams
@@ -72,7 +69,7 @@ contract MockApp is IReceiver {
         // Check how much it costs to send messages with the default token
         (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getSendingFeeEstimate(
             address(this),
-            endpointInstanceId,
+            _receiverInstanceId,
             _receiver,
             payload,
             _additionalParams
@@ -93,7 +90,7 @@ contract MockApp is IReceiver {
         }
 
         IEndpointFunctionsForApps(endpoint).sendMessage{value: totalNativeTokenFee}(
-            endpointInstanceId,
+            _receiverInstanceId,
             _receiver,
             payload,
             _additionalParams
