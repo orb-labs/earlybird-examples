@@ -19,3 +19,6 @@
 [submodule "earlybird-mock-app/lib/earlybird-evm-interfaces"]
 	path = earlybird-mock-app/lib/earlybird-evm-interfaces
 	url = https://github.com/orb-labs/earlybird-evm-interfaces.git
+[submodule "fee-collectors/lib/earlybird-evm-interfaces"]
+	path = fee-collectors/lib/earlybird-evm-interfaces
+	url = https://github.com/orb-labs/earlybird-evm-interfaces
