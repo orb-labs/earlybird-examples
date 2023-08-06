@@ -22,3 +22,6 @@
 [submodule "fee-collectors/lib/earlybird-evm-interfaces"]
 	path = fee-collectors/lib/earlybird-evm-interfaces
 	url = https://github.com/orb-labs/earlybird-evm-interfaces
+[submodule "fee-collectors/lib/forge-std"]
+	path = fee-collectors/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
