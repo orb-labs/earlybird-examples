@@ -70,7 +70,7 @@ contract MockApp is IReceiver, Ownable {
     }
  
     function sendMessage(
-        bytes memory _receiverInstanceId,
+        bytes32 _receiverInstanceId,
         bytes memory _receiver,
         string memory _message,
         bytes memory _additionalParams
@@ -110,7 +110,7 @@ contract MockApp is IReceiver, Ownable {
     }
 
     function receiveMsg(
-        uint256,
+        bytes32,
         bytes memory,
         uint256,
         bytes memory _payload,

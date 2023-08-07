@@ -6,27 +6,35 @@ import "forge-std/console.sol";
 import "../../../src/ThunderbirdVersion/MockApp.sol";
 
 contract MockThunderbirdAppDeployment is Script {
+    function checkEnvVarsForAddressesOrKeys(string memory componentName) private returns (address componentAddress) {
+        
+        componentAddress = vm.envOr(string.concat(componentName, "_ADDRESS"), address(0)) != address(0) ?
+            vm.envAddress(string.concat(componentName, "_ADDRESS")) : 
+            vm.addr(vm.deriveKey(
+                vm.envString(string.concat(componentName, "_MNEMONICS")),
+                uint32(vm.envUint(string.concat(componentName, "_KEY_INDEX")))
+            ));
+    }
     function run() external {
         uint256 deployerPrivateKey = vm.deriveKey(vm.envString("MNEMONICS"), uint32(vm.envUint("KEY_INDEX")));
 
         string memory chainName = vm.envString("CHAIN_NAME");
-        address earlybirdEndpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
-
+        
         address expectedMockAppAddress = vm.envAddress("EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS");
 
-        address sendingOracle = vm.envAddress("SENDING_ORACLE_ADDRESS");
-        address sendingRelayer = vm.envAddress("SENDING_RELAYER_ADDRESS");
+        bytes memory appConfigForSending = abi.encode(
+            false, 
+            vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS"),
+            vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS")
+        );
 
-        bytes memory sendModuleConfigs = abi.encode(false, sendingOracle, sendingRelayer);
-        bytes memory receiveModuleConfigs = abi.encode(
-            vm.addr(vm.deriveKey(
-                vm.envString("ORACLE_MNEMONICS"),
-                uint32(vm.envUint("ORACLE_KEY_INDEX"))
-            )), //_receivingOracle
-             vm.addr(vm.deriveKey(
-                vm.envString("RELAYER_MNEMONICS"),
-                uint32(vm.envUint("RELAYER_KEY_INDEX"))
-            )), //_receiveDefaultRelayer
+        address oracleAddress = checkEnvVarsForAddressesOrKeys("ORACLE");
+
+        address relayerAddress = checkEnvVarsForAddressesOrKeys("RELAYER");
+        
+        bytes memory appConfigForReceiving = abi.encode(
+            oracleAddress, //oracle,
+            relayerAddress, //_defaultRelayer,
             vm.envAddress("THUNDERBIRD_RECS_CONTRACT_ADDRESS"), //recsContract
             true, // emitMsgProofs
             false, // directMsgsEnabled
@@ -40,8 +48,8 @@ contract MockThunderbirdAppDeployment is Script {
 
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
-            MockApp app = new MockApp(earlybirdEndpointAddress, address(0));
-            app.setLibraryAndConfigs("Thunderbird V1", sendModuleConfigs, receiveModuleConfigs);
+            MockApp app = new MockApp(vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"), address(0));
+            app.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
             vm.stopBroadcast();
 
             string memory storagePath = string.concat(
@@ -58,7 +66,7 @@ contract MockThunderbirdAppDeployment is Script {
         } else {
             vm.startBroadcast(deployerPrivateKey);
             MockApp app = MockApp(expectedMockAppAddress);
-            app.setLibraryAndConfigs("Thunderbird V1", sendModuleConfigs, receiveModuleConfigs);
+            app.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
             vm.stopBroadcast();
 
             console.log("MockAppAddress already deployed on %s", chainName);
@@ -69,20 +77,15 @@ contract MockThunderbirdAppDeployment is Script {
 
 contract MockThunderbirdAppSendMessage is Script {
     function run() external {
-        address sendingAppAddress = vm.envAddress("MOCK_THUNDERBIRD_APP_ADDRESS");
-        uint256 receiverChainId = vm.envUint("RECEIVER_CHAIN_ID");
-        address receiverAddress = vm.envAddress("RECEIVER_ADDRESS");
-        string memory messageString = vm.envString("MESSAGE_STRING");
-        
         uint256 deployerPrivateKey = vm.deriveKey(vm.envString("SENDING_MNEMONICS"), uint32(vm.envUint("SENDING_KEY_INDEX")));
 
         bytes memory additionalParams = abi.encode(address(0), true, 5000000);
 
         vm.startBroadcast(deployerPrivateKey);
-        MockApp(sendingAppAddress).sendMessage(
-            receiverChainId,
-            abi.encode(receiverAddress),
-            messageString,
+        MockApp(vm.envAddress("MOCK_THUNDERBIRD_APP_ADDRESS")).sendMessage(
+            bytes32(abi.encodePacked(vm.envString("RECEIVER_EARLYBIRD_INSTANCE_ID"))),
+            abi.encode(vm.envAddress("RECEIVER_ADDRESS")),
+            vm.envString("MESSAGE_STRING"),
             additionalParams
         );
         vm.stopBroadcast();

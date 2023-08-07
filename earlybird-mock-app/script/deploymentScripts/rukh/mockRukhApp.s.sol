@@ -6,10 +6,10 @@ import "forge-std/console.sol";
 import "../../../src/RukhVersion/MockApp.sol";
 
 contract MockRukhAppDeployment is Script {
-    function checkEnvVarsForAddressesOrKeys(string memory componentName) returns (address componentAddress) {
+    function checkEnvVarsForAddressesOrKeys(string memory componentName) private returns (address componentAddress) {
         
-        string memory componentAddress = vm.envString(string.concat(componentName, "_ADDRESS")) ?
-            vm.envString(string.concat(componentName, "_ADDRESS")) : 
+        componentAddress = vm.envOr(string.concat(componentName, "_ADDRESS"), address(0)) != address(0) ?
+            vm.envAddress(string.concat(componentName, "_ADDRESS")) : 
             vm.addr(vm.deriveKey(
                 vm.envString(string.concat(componentName, "_MNEMONICS")),
                 uint32(vm.envUint(string.concat(componentName, "_KEY_INDEX")))
@@ -29,11 +29,11 @@ contract MockRukhAppDeployment is Script {
         );
         bool directMsgsEnabled = true;
 
-        string memory oracleAddress = checkEnvVarsForAddressesOrKeys("ORACLE");
+        address oracleAddress = checkEnvVarsForAddressesOrKeys("ORACLE");
 
-        string memory relayerAddress = checkEnvVarsForAddressesOrKeys("RELAYER");
+        address relayerAddress = checkEnvVarsForAddressesOrKeys("RELAYER");
         
-        string memory disputeResolverAddress =  checkEnvVarsForAddressesOrKeys("DISPUTE_RESOLVER");
+        address disputeResolverAddress =  checkEnvVarsForAddressesOrKeys("DISPUTE_RESOLVER");
 
         bytes memory appConfigForReceiving = abi.encode(
             10, //minDisputeTime,
@@ -58,7 +58,7 @@ contract MockRukhAppDeployment is Script {
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
             MockApp app = new MockApp(vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"), address(0), directMsgsEnabled);
-            // app.setLibraryAndConfigs("Rukh V1", sendModuleConfigs, receiveModuleConfigs);
+            app.setLibraryAndConfigs("Rukh V1", appConfigForSending, appConfigForReceiving);
             vm.stopBroadcast();
 
             string memory storagePath = string.concat(
@@ -92,7 +92,7 @@ contract MockRukhAppSendMessage is Script {
 
         vm.startBroadcast(deployerPrivateKey);
         MockApp(vm.envAddress("MOCK_RUKH_APP_ADDRESS")).sendMessage(
-            vm.envUint("RECEIVER_EARLYBIRD_INSTANCE_ID"),
+            bytes32(abi.encodePacked(vm.envString("RECEIVER_EARLYBIRD_INSTANCE_ID"))),
             abi.encode(vm.envAddress("RECEIVER_ADDRESS")),
             vm.envString("MESSAGE_STRING"),
             additionalParams
