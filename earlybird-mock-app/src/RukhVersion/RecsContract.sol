@@ -1,7 +1,6 @@
 // src/RukhVersion/RecsContract.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
-pragma experimental ABIEncoderV2;
 
 contract RecsContract {
     // Address of default receive relayer 1

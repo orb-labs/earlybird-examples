@@ -1,7 +1,6 @@
 // src/SendingOracle.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
-pragma experimental ABIEncoderV2;
 
 import "../lib/earlybird-evm-interfaces/src/FeeCollector/IFeeCollector.sol";
 

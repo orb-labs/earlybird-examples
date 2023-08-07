@@ -1,7 +1,6 @@
 // src/ThunderbirdVersion/PingPong.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
-pragma experimental ABIEncoderV2;
 
 // Note: Contracts needs to be funded with token being used for message payment.abi
 
