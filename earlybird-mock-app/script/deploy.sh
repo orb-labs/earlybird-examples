@@ -6,7 +6,7 @@ export MNEMONICS=${MNEMONICS:-"test test test test test test test test test test
 
 chains_directory="environmentVariables/$ENVIRONMENT"
 
-export KEY_INDEX=3
+export KEY_INDEX=0
 
 
 export ORACLE_MNEMONICS=$MNEMONICS
