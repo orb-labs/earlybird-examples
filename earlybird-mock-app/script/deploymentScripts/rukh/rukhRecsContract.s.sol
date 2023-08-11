@@ -6,22 +6,11 @@ import "forge-std/console.sol";
 import "../../../src/RukhVersion/RecsContract.sol";
 
 contract RukhRecsContractDeployment is Script {
-    function checkEnvVarsForAddressesOrKeys(string memory componentName) private returns (address componentAddress) {
-        
-        componentAddress = vm.envOr(string.concat(componentName, "_ADDRESS"), address(0)) != address(0) ?
-            vm.envAddress(string.concat(componentName, "_ADDRESS")) : 
-            vm.addr(vm.deriveKey(
-                vm.envString(string.concat(componentName, "_MNEMONICS")),
-                uint32(vm.envUint(string.concat(componentName, "_KEY_INDEX")))
-            ));
-    }
     function run() external {
         uint256 deployerPrivateKey = vm.deriveKey(vm.envString("MNEMONICS"), uint32(vm.envUint("KEY_INDEX")));
 
         string memory chainName = vm.envString("CHAIN_NAME");
         address expectedRukhRecsContract = vm.envAddress("EXPECTED_RUKH_RECS_CONTRACT_ADDRESS");
-        
-        address relayer = checkEnvVarsForAddressesOrKeys("RELAYER");
         
         uint256 size = 0;
         assembly {
@@ -30,7 +19,7 @@ contract RukhRecsContractDeployment is Script {
 
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
-            RecsContract rukhRecsContract = new RecsContract(relayer);
+            RecsContract rukhRecsContract = new RecsContract(vm.envAddress("RELAYER_ADDRESS"));
             vm.stopBroadcast();
 
             string memory storagePath = string.concat(

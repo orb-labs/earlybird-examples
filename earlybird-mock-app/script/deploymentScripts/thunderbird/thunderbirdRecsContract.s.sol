@@ -13,8 +13,6 @@ contract ThunderbirdRecsContractDeployment is Script {
         
         address expectedThunderbirdRecsContract = vm.envAddress("EXPECTED_THUNDERBIRD_RECS_CONTRACT_ADDRESS");
         
-        address relayer = vm.envAddress("RELAYER_ADDRESS");
-
         uint256 size = 0;
         assembly {
             size := extcodesize(expectedThunderbirdRecsContract)
@@ -22,7 +20,7 @@ contract ThunderbirdRecsContractDeployment is Script {
 
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
-            RecsContract thunderbirdRecsContract = new RecsContract(relayer);
+            RecsContract thunderbirdRecsContract = new RecsContract(vm.envAddress("RELAYER_ADDRESS"));
             vm.stopBroadcast();
 
             string memory storagePath = string.concat(

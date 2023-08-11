@@ -6,15 +6,6 @@ import "forge-std/console.sol";
 import "../../../src/RukhVersion/MockApp.sol";
 
 contract MockRukhAppDeployment is Script {
-    function checkEnvVarsForAddressesOrKeys(string memory componentName) private returns (address componentAddress) {
-        
-        componentAddress = vm.envOr(string.concat(componentName, "_ADDRESS"), address(0)) != address(0) ?
-            vm.envAddress(string.concat(componentName, "_ADDRESS")) : 
-            vm.addr(vm.deriveKey(
-                vm.envString(string.concat(componentName, "_MNEMONICS")),
-                uint32(vm.envUint(string.concat(componentName, "_KEY_INDEX")))
-            ));
-    }
     function run() external {
         uint256 deployerPrivateKey = vm.deriveKey(vm.envString("MNEMONICS"), uint32(vm.envUint("KEY_INDEX")));
 
@@ -29,21 +20,18 @@ contract MockRukhAppDeployment is Script {
         );
         bool directMsgsEnabled = true;
 
-        address oracleAddress = checkEnvVarsForAddressesOrKeys("ORACLE");
-
-        address relayerAddress = checkEnvVarsForAddressesOrKeys("RELAYER");
-        
-        address disputeResolverAddress =  checkEnvVarsForAddressesOrKeys("DISPUTE_RESOLVER");
-
         bytes memory appConfigForReceiving = abi.encode(
             10, //minDisputeTime,
             10, // minDisputeResolutionExtension,
             100, //disputeEpochLength,
             1, //maxValidDisputesPerEpoch,
-            oracleAddress, //oracle,
-            relayerAddress, //_defaultRelayer,
+            vm.envAddress("ORACLE_ADDRESS"), //oracle,
+            vm.envAddress("RELAYER_ADDRESS"), //_defaultRelayer,
             vm.envAddress("RUKH_DISPUTER_CONTRACT_ADDRESS"), //_disputersContract,
-            disputeResolverAddress, //_disputeResolver,
+            vm.addr(vm.deriveKey(
+                vm.envString("DISPUTE_RESOLVER_MNEMONICS"),
+                uint32(vm.envUint("DISPUTE_RESOLVER_KEY_INDEX"))
+            )), //_disputeResolver,
             vm.envAddress("RUKH_RECS_CONTRACT_ADDRESS"), //recsContract,
             true, // emitMsgProofs,
             directMsgsEnabled, // directMsgsEnabled,
