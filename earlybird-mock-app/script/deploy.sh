@@ -1,7 +1,7 @@
 ############################################### SETTING ENVIRONMENT VARIABLES ##############################################
 
 # Uncomment for local chains
-export ENVIRONMENT=${ENVIRONMENT:-testnet}
+export ENVIRONMENT=${ENVIRONMENT:-local}
 export MNEMONICS=${MNEMONICS:-"test test test test test test test test test test test junk"}
 
 chains_directory="environmentVariables/$ENVIRONMENT"

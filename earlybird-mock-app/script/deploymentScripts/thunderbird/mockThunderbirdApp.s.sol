@@ -4,21 +4,23 @@ pragma solidity 0.8.17;
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import "../../../src/ThunderbirdVersion/MockApp.sol";
+import "../../../lib/earlybird-evm-interfaces/src/Endpoint/IEndpoint/IEndpoint.sol";
 
 contract MockThunderbirdAppDeployment is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.deriveKey(vm.envString("MNEMONICS"), uint32(vm.envUint("KEY_INDEX")));
 
         string memory chainName = vm.envString("CHAIN_NAME");
-        
         address expectedMockAppAddress = vm.envAddress("EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS");
-
+        
+        IEndpoint endpoint = IEndpoint(vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"));
+        
         bytes memory appConfigForSending = abi.encode(
             false, 
             vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS"),
             vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS")
         );
-
+        
         bytes memory appConfigForReceiving = abi.encode(
             vm.envAddress("ORACLE_ADDRESS"), //oracle,
             vm.envAddress("RELAYER_ADDRESS"), //_defaultRelayer,
@@ -32,11 +34,12 @@ contract MockThunderbirdAppDeployment is Script {
         assembly {
             size := extcodesize(expectedMockAppAddress)
         }
-
+            
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
             MockApp app = new MockApp(vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"), address(0));
-            app.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
+            
+            endpoint.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
             vm.stopBroadcast();
 
             string memory storagePath = string.concat(
@@ -53,7 +56,7 @@ contract MockThunderbirdAppDeployment is Script {
         } else {
             vm.startBroadcast(deployerPrivateKey);
             MockApp app = MockApp(expectedMockAppAddress);
-            app.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
+            endpoint.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
             vm.stopBroadcast();
 
             console.log("MockAppAddress already deployed on %s", chainName);
