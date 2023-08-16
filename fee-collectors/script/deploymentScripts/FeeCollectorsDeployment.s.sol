@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import "../../../src/FeeCollector.sol";
+import "../../src/FeeCollector.sol";
 
 
 contract FeeCollectorsDeployment is Script {

@@ -13,31 +13,25 @@ contract MockRukhAppDeployment is Script {
         
         address expectedMockAppAddress = vm.envAddress("EXPECTED_MOCK_RUKH_APP_ADDRESS");
 
-        bytes memory sendModuleConfigs = abi.encode(
+        bytes memory appConfigForSending = abi.encode(
             false, 
-            vm.envAddress("SENDING_ORACLE_ADDRESS"),
-            vm.envAddress("SENDING_RELAYER_ADDRESS")
+            vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS"),
+            vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS")
         );
         bool directMsgsEnabled = true;
 
-        bytes memory receiveModuleConfigs = abi.encode(
+        bytes memory appConfigForReceiving = abi.encode(
             10, //minDisputeTime,
             10, // minDisputeResolutionExtension,
             100, //disputeEpochLength,
             1, //maxValidDisputesPerEpoch,
-            vm.addr(vm.deriveKey(
-                vm.envString("ORACLE_MNEMONICS"),
-                uint32(vm.envUint("ORACLE_KEY_INDEX"))
-            )), //_receivingOracle,
-            vm.addr(vm.deriveKey(
-                vm.envString("RELAYER_MNEMONICS"),
-                uint32(vm.envUint("RELAYER_KEY_INDEX"))
-            )), //_receiveDefaultRelayer,
+            vm.envAddress("ORACLE_ADDRESS"), //oracle,
+            vm.envAddress("RELAYER_ADDRESS"), //_defaultRelayer,
             vm.envAddress("RUKH_DISPUTER_CONTRACT_ADDRESS"), //_disputersContract,
-            vm.deriveKey(
+            vm.addr(vm.deriveKey(
                 vm.envString("DISPUTE_RESOLVER_MNEMONICS"),
                 uint32(vm.envUint("DISPUTE_RESOLVER_KEY_INDEX"))
-            ), //_disputeResolver,
+            )), //_disputeResolver,
             vm.envAddress("RUKH_RECS_CONTRACT_ADDRESS"), //recsContract,
             true, // emitMsgProofs,
             directMsgsEnabled, // directMsgsEnabled,
@@ -52,7 +46,7 @@ contract MockRukhAppDeployment is Script {
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
             MockApp app = new MockApp(vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"), address(0), directMsgsEnabled);
-            // app.setLibraryAndConfigs("Rukh V1", sendModuleConfigs, receiveModuleConfigs);
+            app.setLibraryAndConfigs("Rukh V1", appConfigForSending, appConfigForReceiving);
             vm.stopBroadcast();
 
             string memory storagePath = string.concat(
@@ -69,7 +63,7 @@ contract MockRukhAppDeployment is Script {
         } else {
             vm.startBroadcast(deployerPrivateKey);
             MockApp app = MockApp(expectedMockAppAddress);
-            app.setLibraryAndConfigs("Rukh V1", sendModuleConfigs, receiveModuleConfigs);
+            app.setLibraryAndConfigs("Rukh V1", appConfigForSending, appConfigForReceiving);
             vm.stopBroadcast();
 
             console.log("MockRukhApp already deployed on %s", chainName);
@@ -86,7 +80,7 @@ contract MockRukhAppSendMessage is Script {
 
         vm.startBroadcast(deployerPrivateKey);
         MockApp(vm.envAddress("MOCK_RUKH_APP_ADDRESS")).sendMessage(
-            vm.envUint("RECEIVER_CHAIN_ID"),
+            bytes32(abi.encodePacked(vm.envString("RECEIVER_EARLYBIRD_INSTANCE_ID"))),
             abi.encode(vm.envAddress("RECEIVER_ADDRESS")),
             vm.envString("MESSAGE_STRING"),
             additionalParams

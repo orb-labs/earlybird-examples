@@ -1,5 +1,0 @@
-export CHAIN_NAME="local_chain_1"
-export CHAIN_ID="1000000000002"
-export RPC_URL="http://localhost:8547"
-
-export EARLYBIRD_ENDPOINT_ADDRESS="0x5FbDB2315678afecb367f032d93F642f64180aa3"

@@ -11,7 +11,7 @@ do
     export EXPECTED_RELAYER_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/relayerFeeCollector.txt"`
     
     ########################################## DEPLOY ######################################################################
-    forge script deploymentScripts/feeCollectors/SendingOracle.s.sol:SendingOracleDeployment --rpc-url $RPC_URL --broadcast
+    forge script deploymentScripts/FeeCollectorsDeployment.s.sol:FeeCollectorsDeployment --rpc-url $RPC_URL --broadcast
     export ORACLE_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/oracleFeeCollector.txt"`
     export RELAYER_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/relayerFeeCollector.txt"`
     

@@ -10,10 +10,7 @@ contract RukhRecsContractDeployment is Script {
         uint256 deployerPrivateKey = vm.deriveKey(vm.envString("MNEMONICS"), uint32(vm.envUint("KEY_INDEX")));
 
         string memory chainName = vm.envString("CHAIN_NAME");
-        
         address expectedRukhRecsContract = vm.envAddress("EXPECTED_RUKH_RECS_CONTRACT_ADDRESS");
-        
-        address sendingRelayer = vm.envAddress("SENDING_RELAYER_ADDRESS");
         
         uint256 size = 0;
         assembly {
@@ -22,7 +19,7 @@ contract RukhRecsContractDeployment is Script {
 
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
-            RecsContract rukhRecsContract = new RecsContract(sendingRelayer);
+            RecsContract rukhRecsContract = new RecsContract(vm.envAddress("RELAYER_ADDRESS"));
             vm.stopBroadcast();
 
             string memory storagePath = string.concat(
