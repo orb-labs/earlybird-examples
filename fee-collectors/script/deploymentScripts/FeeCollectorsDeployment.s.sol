@@ -32,7 +32,7 @@ contract FeeCollectorsDeployment is Script {
 
             string memory feeCollectorAddress = vm.toString(address(feeCollector));
             vm.writeFile(storagePath, feeCollectorAddress);
-            console.log("%s deployed on %s", componentName, chainName);
+            console.log("%s deployed on %s at %s", componentName, chainName, feeCollectorAddress);
         } else {
             console.log("%s already found on %s at %s", componentName, chainName, expectedFeeCollectorAddress);
         }

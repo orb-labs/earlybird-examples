@@ -16,4 +16,6 @@ docs/
 
 node_modules
 
+# files for local chain deployment
 **/environmentVariables/local/
+**/addresses/local/
