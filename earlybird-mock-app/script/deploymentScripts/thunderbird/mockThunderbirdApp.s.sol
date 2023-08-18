@@ -39,7 +39,7 @@ contract MockThunderbirdAppDeployment is Script {
             vm.startBroadcast(deployerPrivateKey);
             MockApp app = new MockApp(vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"), address(0));
             
-            endpoint.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
+            app.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
             vm.stopBroadcast();
 
             string memory storagePath = string.concat(
@@ -56,7 +56,7 @@ contract MockThunderbirdAppDeployment is Script {
         } else {
             vm.startBroadcast(deployerPrivateKey);
             MockApp app = MockApp(expectedMockAppAddress);
-            endpoint.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
+            app.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
             vm.stopBroadcast();
 
             console.log("MockAppAddress already deployed on %s", chainName);

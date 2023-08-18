@@ -11,7 +11,7 @@ export ENVIRONMENT=${ENVIRONMENT:-local}
 
 chains_directory="environmentVariables/$ENVIRONMENT"
 
-export MNEMONICS="test test test test test test test test test test test junk"
+export SENDING_MNEMONICS="test test test test test test test test test test test junk"
 export SENDING_KEY_INDEX=5
 
 if [ "$ENVIRONMENT" != "local" ]
@@ -61,7 +61,7 @@ while true; do
     echo "Enter message you will like to send:"
     read NEWMESSAGE
 
-    destinationChainConfigsPath="$search_directory/"$destinationChain".sh" 
+    destinationChainConfigsPath="$chains_directory/"$destinationChain".sh" 
     destination_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$destinationChain"/thunderbird/app.txt"
     . "$destinationChainConfigsPath"
 
@@ -71,9 +71,10 @@ while true; do
         export RECEIVER_ADDRESS=$destination_mock_thunderbird_app_address
         export MESSAGE_STRING=$NEWMESSAGE
         export RECEIVER_CHAIN_ID=$CHAIN_ID
+        export RECEIVER_EARLYBIRD_INSTANCE_ID=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$destinationChain"/rukh/instanceId.txt"`
     fi
 
-    sourceChainConfigsPath="$search_directory/""$sourceChain"".sh" 
+    sourceChainConfigsPath="$chains_directory/""$sourceChain"".sh" 
     source_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
     . "$sourceChainConfigsPath"
 
