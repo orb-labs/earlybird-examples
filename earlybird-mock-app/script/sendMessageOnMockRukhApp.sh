@@ -11,14 +11,13 @@ export ENVIRONMENT=${ENVIRONMENT:-local}
 
 chains_directory="environmentVariables/$ENVIRONMENT"
 
-export MNEMONICS="test test test test test test test test test test test junk"
+export SENDING_MNEMONICS="test test test test test test test test test test test junk"
 export SENDING_KEY_INDEX=5
 
 if [ "$ENVIRONMENT" != "local" ]
 then
     export MNEMONICS=$(op read "op://Private/Deployment/Mnemonic_phrase/"$ENVIRONMENT"")
     export SENDING_KEY_INDEX=0
-    export SENDING_MNEMONICS=$(op read "op://Security/MockRukhApp/Sending_mnemonic_phrase")
 fi
 
 ############################################## HELPER FUNCTIONS ############################################################
@@ -34,7 +33,7 @@ address_from_filepath() {
     echo $address
 }
 
-############################################## SENDING MESSAGE TO MOCK APP ############################################################
+############################################## SENDING MESSAGE TO APP ############################################################
 i=0
 for entry in "$chains_directory"/*
 do
@@ -72,10 +71,11 @@ while true; do
         export RECEIVER_ADDRESS=$destination_mock_rukh_app_address
         export MESSAGE_STRING=$NEWMESSAGE
         export RECEIVER_CHAIN_ID=$CHAIN_ID
+        export RECEIVER_EARLYBIRD_INSTANCE_ID=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$destinationChain"/rukh/instanceId.txt"`
     fi
 
-    sourceChainConfigsPath="$search_directory/"$sourceChain".sh" 
-    source_mock_rukh_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/rukh/app.txt"
+    sourceChainConfigsPath="$chains_directory/""$sourceChain"".sh" 
+    source_mock_rukh_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
     . "$sourceChainConfigsPath"
 
     export MOCK_RUKH_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt"`

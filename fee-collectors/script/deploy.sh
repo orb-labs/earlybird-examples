@@ -1,6 +1,6 @@
 . ./setup.sh
 
-export MNEMONICS=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`
+export MNEMONICS=${MNEMONICS:-"test test test test test test test test test test test junk"}
 export KEY_INDEX=0
 
 ############################################## Helper Functions ############################################################
