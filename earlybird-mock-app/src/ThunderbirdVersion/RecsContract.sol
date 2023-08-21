@@ -13,7 +13,7 @@ contract RecsContract {
     }
 
     function getAllRecs(
-        uint256,
+        bytes32,
         bytes memory,
         uint256,
         bytes memory
