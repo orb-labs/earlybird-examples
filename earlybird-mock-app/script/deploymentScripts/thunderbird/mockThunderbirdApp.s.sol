@@ -8,19 +8,26 @@ import "../../../lib/earlybird-evm-interfaces/src/Endpoint/IEndpoint/IEndpoint.s
 
 contract MockThunderbirdAppDeployment is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.deriveKey(vm.envString("MNEMONICS"), uint32(vm.envUint("KEY_INDEX")));
+        uint256 deployerPrivateKey = vm.deriveKey(
+            vm.envString("MNEMONICS"),
+            uint32(vm.envUint("KEY_INDEX"))
+        );
 
         string memory chainName = vm.envString("CHAIN_NAME");
-        address expectedMockAppAddress = vm.envAddress("EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS");
-        
-        IEndpoint endpoint = IEndpoint(vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"));
-        
+        address expectedMockAppAddress = vm.envAddress(
+            "EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS"
+        );
+
+        IEndpoint endpoint = IEndpoint(
+            vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS")
+        );
+
         bytes memory appConfigForSending = abi.encode(
-            false, 
+            false,
             vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS"),
             vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS")
         );
-        
+
         bytes memory appConfigForReceiving = abi.encode(
             vm.envAddress("ORACLE_ADDRESS"), //oracle,
             vm.envAddress("RELAYER_ADDRESS"), //_defaultRelayer,
@@ -34,12 +41,19 @@ contract MockThunderbirdAppDeployment is Script {
         assembly {
             size := extcodesize(expectedMockAppAddress)
         }
-            
+
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
-            MockApp app = new MockApp(vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"), address(0));
-            
-            app.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
+            MockApp app = new MockApp(
+                vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"),
+                address(0)
+            );
+
+            app.setLibraryAndConfigs(
+                "Thunderbird V1",
+                appConfigForSending,
+                appConfigForReceiving
+            );
             vm.stopBroadcast();
 
             string memory storagePath = string.concat(
@@ -56,7 +70,11 @@ contract MockThunderbirdAppDeployment is Script {
         } else {
             vm.startBroadcast(deployerPrivateKey);
             MockApp app = MockApp(expectedMockAppAddress);
-            app.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
+            app.setLibraryAndConfigs(
+                "Thunderbird V1",
+                appConfigForSending,
+                appConfigForReceiving
+            );
             vm.stopBroadcast();
 
             console.log("MockAppAddress already deployed on %s", chainName);
@@ -67,13 +85,16 @@ contract MockThunderbirdAppDeployment is Script {
 
 contract MockThunderbirdAppSendMessage is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.deriveKey(vm.envString("SENDING_MNEMONICS"), uint32(vm.envUint("SENDING_KEY_INDEX")));
+        uint256 deployerPrivateKey = vm.deriveKey(
+            vm.envString("SENDING_MNEMONICS"),
+            uint32(vm.envUint("SENDING_KEY_INDEX"))
+        );
 
         bytes memory additionalParams = abi.encode(address(0), true, 5000000);
 
         vm.startBroadcast(deployerPrivateKey);
         MockApp(vm.envAddress("MOCK_THUNDERBIRD_APP_ADDRESS")).sendMessage(
-            bytes32(abi.encodePacked(vm.envString("RECEIVER_EARLYBIRD_INSTANCE_ID"))),
+            vm.envBytes32("RECEIVER_EARLYBIRD_INSTANCE_ID"),
             abi.encode(vm.envAddress("RECEIVER_ADDRESS")),
             vm.envString("MESSAGE_STRING"),
             additionalParams
@@ -86,8 +107,10 @@ contract MockThunderbirdAppGetAllMessages is Script {
     function run() external view {
         address mockAppAddress = vm.envAddress("MOCK_THUNDERBIRD_APP_ADDRESS");
         string memory chainName = vm.envString("CHAIN_NAME");
-        string[] memory receivedMessages = MockApp(mockAppAddress).getAllReceivedMessages();
-        string[] memory sentMessages = MockApp(mockAppAddress).getAllSentMessages();
+        string[] memory receivedMessages = MockApp(mockAppAddress)
+            .getAllReceivedMessages();
+        string[] memory sentMessages = MockApp(mockAppAddress)
+            .getAllSentMessages();
 
         console.log(chainName, "\n");
         console.log("Sent Messages:");

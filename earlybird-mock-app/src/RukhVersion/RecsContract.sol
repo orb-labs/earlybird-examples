@@ -32,7 +32,12 @@ contract RecsContract {
         revealedMsgSecret = keccak256(abi.encode(recommendedRelayer));
     }
 
-    function getRecRelayer(uint256, bytes memory, uint256, bytes memory) external view returns (address recRelayer) {
+    function getRecRelayer(
+        bytes32,
+        bytes memory,
+        uint256,
+        bytes memory
+    ) external view returns (address recRelayer) {
         recRelayer = defaultRelayer;
     }
 }
