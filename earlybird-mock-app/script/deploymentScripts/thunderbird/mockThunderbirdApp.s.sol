@@ -4,26 +4,43 @@ pragma solidity 0.8.17;
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import "../../../src/ThunderbirdVersion/MockApp.sol";
-import "../../../lib/earlybird-evm-interfaces/src/Endpoint/IEndpoint/IEndpoint.sol";
 
 contract MockThunderbirdAppDeployment is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.deriveKey(vm.envString("MNEMONICS"), uint32(vm.envUint("KEY_INDEX")));
 
         string memory chainName = vm.envString("CHAIN_NAME");
+        address earlybirdEndpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
+
         address expectedMockAppAddress = vm.envAddress("EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS");
-        
+
+<<<<<<< Updated upstream
+        address sendingOracle = vm.envAddress("SENDING_ORACLE_ADDRESS");
+        address sendingRelayer = vm.envAddress("SENDING_RELAYER_ADDRESS");
+
+        bytes memory sendModuleConfigs = abi.encode(false, sendingOracle, sendingRelayer);
+        bytes memory receiveModuleConfigs = abi.encode(
+            vm.addr(vm.deriveKey(
+                vm.envString("ORACLE_MNEMONICS"),
+                uint32(vm.envUint("ORACLE_KEY_INDEX"))
+            )), //_receivingOracle
+             vm.addr(vm.deriveKey(
+                vm.envString("RELAYER_MNEMONICS"),
+                uint32(vm.envUint("RELAYER_KEY_INDEX"))
+            )), //_receiveDefaultRelayer
+=======
         IEndpoint endpoint = IEndpoint(vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"));
-        
+
         bytes memory appConfigForSending = abi.encode(
-            false, 
+            false,
             vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS"),
             vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS")
         );
-        
+
         bytes memory appConfigForReceiving = abi.encode(
             vm.envAddress("ORACLE_ADDRESS"), //oracle,
             vm.envAddress("RELAYER_ADDRESS"), //_defaultRelayer,
+>>>>>>> Stashed changes
             vm.envAddress("THUNDERBIRD_RECS_CONTRACT_ADDRESS"), //recsContract
             true, // emitMsgProofs
             false, // directMsgsEnabled
@@ -34,12 +51,17 @@ contract MockThunderbirdAppDeployment is Script {
         assembly {
             size := extcodesize(expectedMockAppAddress)
         }
-            
+
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
+<<<<<<< Updated upstream
+            MockApp app = new MockApp(earlybirdEndpointAddress, address(0));
+            app.setLibraryAndConfigs("Thunderbird V1", sendModuleConfigs, receiveModuleConfigs);
+=======
             MockApp app = new MockApp(vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"), address(0));
-            
+
             app.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
+>>>>>>> Stashed changes
             vm.stopBroadcast();
 
             string memory storagePath = string.concat(
@@ -56,7 +78,7 @@ contract MockThunderbirdAppDeployment is Script {
         } else {
             vm.startBroadcast(deployerPrivateKey);
             MockApp app = MockApp(expectedMockAppAddress);
-            app.setLibraryAndConfigs("Thunderbird V1", appConfigForSending, appConfigForReceiving);
+            app.setLibraryAndConfigs("Thunderbird V1", sendModuleConfigs, receiveModuleConfigs);
             vm.stopBroadcast();
 
             console.log("MockAppAddress already deployed on %s", chainName);
@@ -67,15 +89,34 @@ contract MockThunderbirdAppDeployment is Script {
 
 contract MockThunderbirdAppSendMessage is Script {
     function run() external {
+<<<<<<< Updated upstream
+        address sendingAppAddress = vm.envAddress("MOCK_THUNDERBIRD_APP_ADDRESS");
+        uint256 receiverChainId = vm.envUint("RECEIVER_CHAIN_ID");
+        address receiverAddress = vm.envAddress("RECEIVER_ADDRESS");
+        string memory messageString = vm.envString("MESSAGE_STRING");
+        
         uint256 deployerPrivateKey = vm.deriveKey(vm.envString("SENDING_MNEMONICS"), uint32(vm.envUint("SENDING_KEY_INDEX")));
+=======
+        uint256 deployerPrivateKey = vm.deriveKey(
+            vm.envString("SENDING_MNEMONICS"),
+            uint32(vm.envUint("SENDING_KEY_INDEX"))
+        );
+>>>>>>> Stashed changes
 
         bytes memory additionalParams = abi.encode(address(0), true, 5000000);
 
         vm.startBroadcast(deployerPrivateKey);
+<<<<<<< Updated upstream
+        MockApp(sendingAppAddress).sendMessage(
+            receiverChainId,
+            abi.encode(receiverAddress),
+            messageString,
+=======
         MockApp(vm.envAddress("MOCK_THUNDERBIRD_APP_ADDRESS")).sendMessage(
-            bytes32(abi.encodePacked(vm.envString("RECEIVER_EARLYBIRD_INSTANCE_ID"))),
+            vm.envBytes32("RECEIVER_EARLYBIRD_INSTANCE_ID"),
             abi.encode(vm.envAddress("RECEIVER_ADDRESS")),
             vm.envString("MESSAGE_STRING"),
+>>>>>>> Stashed changes
             additionalParams
         );
         vm.stopBroadcast();

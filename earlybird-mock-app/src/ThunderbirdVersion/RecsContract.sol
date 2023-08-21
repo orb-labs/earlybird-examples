@@ -5,24 +5,24 @@ pragma experimental ABIEncoderV2;
 
 contract RecsContract {
     // Address of default receive relayer 1
-    address public defaultRelayer;
+    address public receiveDefaultRelayer;
 
     // Constructor hardcodes the relayer address.
-    constructor(address _defaultRelayer) {
-        defaultRelayer = _defaultRelayer;
+    constructor(address _receiveDefaultRelayer) {
+        receiveDefaultRelayer = _receiveDefaultRelayer;
     }
 
     function getAllRecs(
-        uint256,
+        bytes32,
         bytes memory,
         uint256,
         bytes memory
     ) external view returns (bytes32 revealedMsgSecret, address recommendedRelayer) {
-        recommendedRelayer = defaultRelayer;
+        recommendedRelayer = receiveDefaultRelayer;
         revealedMsgSecret = keccak256(abi.encode(recommendedRelayer));
     }
 
     function getRecRelayer(uint256, bytes memory, uint256, bytes memory) external view returns (address recRelayer) {
-        recRelayer = defaultRelayer;
+        recRelayer = receiveDefaultRelayer;
     }
 }
