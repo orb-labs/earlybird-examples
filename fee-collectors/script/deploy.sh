@@ -1,9 +1,13 @@
-. ./setup.sh
+############################################### SETTING ENVIRONMENT VARIABLES ##############################################
 
-export MNEMONICS=${MNEMONICS:-"test test test test test test test test test test test junk"}
-export KEY_INDEX=0
+### set env vars if unset
+: "${ENVIRONMENT:=testnet}" 
+: "${CHAINS_DIRECTORY:=environmentVariables/$ENVIRONMENT}"
+: "${KEY_INDEX:=0}"
+: "${MNEMONICS:=test test test test test test test test test test test junk}"
+export ENVIRONMENT KEY_INDEX MNEMONICS
 
-############################################## Helper Functions ############################################################
+############################################## HELPER FUNCTIONS ############################################################
 
 address_from_filepath() {
     existing_address_path=$1
@@ -17,8 +21,8 @@ address_from_filepath() {
 }
 
 ############################################################################################################################
-
-for entry in "$chains_directory"/*
+if [[ -z $CHAINS_DIRECTORY || -z $ENVIRONMENT || -z $KEY_INDEX || -z $MNEMONICS  ]]; then echo "env vars unset" && exit 1;fi
+for entry in "$CHAINS_DIRECTORY"/*
 do
     . "$entry"
 
