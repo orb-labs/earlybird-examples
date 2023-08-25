@@ -11,7 +11,7 @@
 : "${RELAYER_KEY_INDEX:=1}"
 : "${DISPUTE_RESOLVER_MNEMONICS:=$MNEMONICS}"
 : "${DISPUTE_RESOLVER_KEY_INDEX:=10}"
-: "${ADDRESS_FOLDER:=../addresses}"
+
 export ENVIRONMENT KEY_INDEX MNEMONICS ORACLE_MNEMONICS ORACLE_KEY_INDEX RELAYER_MNEMONICS RELAYER_KEY_INDEX DISPUTE_RESOLVER_MNEMONICS DISPUTE_RESOLVER_KEY_INDEX
 
 ############################################## Helper Functions ############################################################
@@ -44,8 +44,8 @@ do
     export ORACLE_FEE_COLLECTOR_ADDRESS=$(<../addresses/$ENVIRONMENT/$CHAIN_NAME/oracleFeeCollector.txt)
     export RELAYER_FEE_COLLECTOR_ADDRESS=$(<../addresses/$ENVIRONMENT/$CHAIN_NAME/relayerFeeCollector.txt)
 
-    if [[ -z $EARLYBIRD_ENDPOINT_ADDRESS || -z $ORACLE_ADDRESS || -z $RELAYER_ADDRESS || -z $ORACLE_FEE_COLLECTOR_ADDRESS || -z $RELAYER_FEE_COLLECTOR_ADDRES ]]; then
-        echo "env vars not set"
+    if [[ -z $EARLYBIRD_ENDPOINT_ADDRESS || -z $ORACLE_ADDRESS || -z $RELAYER_ADDRESS || -z $ORACLE_FEE_COLLECTOR_ADDRESS || -z $RELAYER_FEE_COLLECTOR_ADDRESS ]]; then
+        echo "env vars not set" && exit 1
     fi
 
 
