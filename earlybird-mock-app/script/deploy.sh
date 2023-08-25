@@ -44,10 +44,9 @@ do
     export ORACLE_FEE_COLLECTOR_ADDRESS=$(<../addresses/$ENVIRONMENT/$CHAIN_NAME/oracleFeeCollector.txt)
     export RELAYER_FEE_COLLECTOR_ADDRESS=$(<../addresses/$ENVIRONMENT/$CHAIN_NAME/relayerFeeCollector.txt)
 
-    if [[ -z $EARLYBIRD_ENDPOINT_ADDRESS || -z $ORACLE_ADDRESS || -z $RELAYER_ADDRESS || -z $ORACLE_FEE_COLLECTOR_ADDRESS || -z $RELAYER_FEE_COLLECTOR_ADDRESS ]]; then
-        echo "env vars not set" && exit 1
-    fi
-
+    if [[ -z $EARLYBIRD_ENDPOINT_ADDRESS ]]; then echo "endpoint not set" && exit 2; fi
+    if [[ -z $ORACLE_ADDRESS || -z $RELAYER_ADDRESS ]]; then echo "oracle and relayer not set" && exit 2; fi
+    if [[ -z $ORACLE_FEE_COLLECTOR_ADDRESS || -z $RELAYER_FEE_COLLECTOR_ADDRESS ]]; then "echo fee collectors not set" && exit 2; fi
 
     ########################################## DEPLOY THUNDERBIRD VERSION ##################################################
     forge script deploymentScripts/thunderbird/ThunderbirdRecsContract.s.sol:ThunderbirdRecsContractDeployment --rpc-url $RPC_URL --broadcast
