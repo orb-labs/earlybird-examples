@@ -16,6 +16,10 @@ do
     chain_dir="../addresses/$ENVIRONMENT/$CHAIN_NAME"
 
     cd $chain_dir
-    for f in `ls`; do echo "\n$f -- `cat $f`"; done
+    for f in `ls`; do 
+        if [[ $f == *"FeeCollector"* ]]; then
+            echo "\n$f -- `cat $f`"; 
+        fi
+    done
     cd $script_dir
 done
