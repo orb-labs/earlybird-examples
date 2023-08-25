@@ -15,13 +15,9 @@ do
     chain_dir="../addresses/$ENVIRONMENT/$CHAIN_NAME"
     cd $chain_dir
 
-    for e in `ls`; do
-        if [ -d $e ]; then 
-            echo "\n#### $e"
-            for f in `ls $e`; do echo "\n$f -- `cat $e/$f`"; done
-        else
-            echo "\n$e -- `cat $e`"
-        fi
+    for e in "rukh" "thunderbird"; do
+        echo "\n#### $e"
+        for f in `ls $e`; do echo "\n$f -- `cat $e/$f`"; done
     done
     cd $script_dir
 done
