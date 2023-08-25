@@ -14,7 +14,7 @@ do
     
     script_dir=`pwd`
     chain_dir="../addresses/$ENVIRONMENT/$CHAIN_NAME"
-`
+
     cd $chain_dir
     for f in `ls`; do echo "\n$f -- `cat $f`"; done
     cd $script_dir

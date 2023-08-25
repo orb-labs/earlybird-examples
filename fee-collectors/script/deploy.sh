@@ -26,6 +26,9 @@ for entry in "$CHAINS_DIRECTORY"/*
 do
     . "$entry"
 
+    address_dir="../addresses/"$ENVIRONMENT"/"$CHAIN_NAME""
+    if [[ ! -d $address_dir ]]; then mkdir $address_dir; fi
+
     ########################################## GET EXISTING ADDRESSES ######################################################
     export EXPECTED_ORACLE_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/oracleFeeCollector.txt"`
     export EXPECTED_RELAYER_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/relayerFeeCollector.txt"`
