@@ -16,7 +16,7 @@ export SENDING_KEY_INDEX=5
 
 if [ "$ENVIRONMENT" != "local" ]
 then
-    export MNEMONICS=$(op read "op://Private/Deployment/Mnemonic_phrase/"$ENVIRONMENT"")
+    export MNEMONICS=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`
     export SENDING_KEY_INDEX=0
 fi
 
@@ -71,14 +71,14 @@ while true; do
         export RECEIVER_ADDRESS=$destination_mock_rukh_app_address
         export MESSAGE_STRING=$NEWMESSAGE
         export RECEIVER_CHAIN_ID=$CHAIN_ID
-        export RECEIVER_EARLYBIRD_INSTANCE_ID=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$destinationChain"/instanceId.txt"`
+        export RECEIVER_EARLYBIRD_INSTANCE_ID=$(<"../addresses/"$ENVIRONMENT"/"$destinationChain"/instanceId.txt")
     fi
 
     sourceChainConfigsPath="$chains_directory/""$sourceChain"".sh" 
     source_mock_rukh_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
     . "$sourceChainConfigsPath"
 
-    export MOCK_RUKH_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt"`
+    export MOCK_RUKH_APP_ADDRESS=$(<"../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt")
 
     echo $MESSAGE_STRING
     echo $RECEIVER_ADDRESS
