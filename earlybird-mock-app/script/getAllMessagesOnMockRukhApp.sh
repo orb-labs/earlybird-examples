@@ -15,7 +15,7 @@ export MNEMONICS="test test test test test test test test test test test junk"
 
 if [ "$ENVIRONMENT" != "local" ]
 then
-    export MNEMONICS=$(op read "op://Private/Deployment/Mnemonic_phrase/"$ENVIRONMENT"")
+    export MNEMONICS=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`
     export KEY_INDEX=0
 fi
 
