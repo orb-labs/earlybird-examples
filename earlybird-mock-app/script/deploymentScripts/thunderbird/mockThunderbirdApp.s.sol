@@ -18,10 +18,6 @@ contract MockThunderbirdAppDeployment is Script {
             "EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS"
         );
 
-        IEndpoint endpoint = IEndpoint(
-            vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS")
-        );
-
         bytes memory appConfigForSending = abi.encode(
             false,
             vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS"),
@@ -43,9 +39,13 @@ contract MockThunderbirdAppDeployment is Script {
         }
 
         if (size == 0) {
+            address endpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
+            console.log("using endpoint address: ");
+            console.logAddress(endpointAddress);
             vm.startBroadcast(deployerPrivateKey);
+            
             MockApp app = new MockApp(
-                vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"),
+                endpointAddress,
                 address(0)
             );
 
@@ -90,7 +90,7 @@ contract MockThunderbirdAppSendMessage is Script {
             uint32(vm.envUint("SENDING_KEY_INDEX"))
         );
 
-        bytes memory additionalParams = abi.encode(address(0), true, 5000000);
+        bytes memory additionalParams = abi.encode(address(0), true, 300000);
 
         vm.startBroadcast(deployerPrivateKey);
         MockApp(vm.envAddress("MOCK_THUNDERBIRD_APP_ADDRESS")).sendMessage(

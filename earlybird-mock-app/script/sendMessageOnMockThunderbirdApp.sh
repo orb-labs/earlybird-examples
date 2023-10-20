@@ -58,7 +58,11 @@ while true; do
     read NEWMESSAGE
 
     destinationChainConfigsPath="$CHAINS_DIRECTORY/"$destinationChain".sh" 
+    sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
+
     destination_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$destinationChain"/thunderbird/app.txt"
+    source_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
+
     . ${destinationChainConfigsPath}
 
     if [ -f "$destination_mock_thunderbird_app_address_path" ]
@@ -68,6 +72,8 @@ while true; do
         export MESSAGE_STRING=$NEWMESSAGE
         export RECEIVER_CHAIN_ID=$CHAIN_ID
         export RECEIVER_EARLYBIRD_INSTANCE_ID=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$destinationChain"/instanceId.txt"`
+    else
+        echo "$ENVIRONMENT destination mock thunderbird app address not found at $destination_mock_thunderbird_app_address_path" && exit 10
     fi
 
     sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
@@ -75,12 +81,6 @@ while true; do
     . "$sourceChainConfigsPath"
 
     export MOCK_THUNDERBIRD_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/app.txt"`
-
-    echo $MESSAGE_STRING
-    echo $RECEIVER_ADDRESS
-    echo $RECEIVER_CHAIN_ID
-    echo $MOCK_THUNDERBIRD_APP_ADDRESS
-    echo $RPC_URL
 
     forge script --legacy deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppSendMessage --rpc-url $RPC_URL --broadcast
     echo "\n"

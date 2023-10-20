@@ -98,7 +98,7 @@ contract MockRukhAppSendMessage is Script {
             uint32(vm.envUint("SENDING_KEY_INDEX"))
         );
 
-        bytes memory additionalParams = abi.encode(address(0), true, 5000000);
+        bytes memory additionalParams = abi.encode(address(0), true, 300000);
 
         vm.startBroadcast(deployerPrivateKey);
         MockApp(vm.envAddress("MOCK_RUKH_APP_ADDRESS")).sendMessage(
