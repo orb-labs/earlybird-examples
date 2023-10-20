@@ -1,42 +1,20 @@
 ############################################################# SETTING ENVIRONMENT VARIABLES ################################################################
-
-# Uncomment for local chains
-export ENVIRONMENT=${ENVIRONMENT:-local}
-
-# Uncomment for public testnet
-# export ENVIRONMENT="testnet"
-
-# Uncomment for mainnet
-# export ENVIRONMENT="mainnet"
-
-chains_directory="environmentVariables/$ENVIRONMENT"
-
-export MNEMONICS="test test test test test test test test test test test junk"
-
 if [ "$ENVIRONMENT" != "local" ]
 then
     export MNEMONICS=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`
-    export KEY_INDEX=0
 fi
 
-############################################## Helper Functions ############################################################
+### set env vars if unset
+: "${ENVIRONMENT:=local}" 
+: "${CHAINS_DIRECTORY:=environmentVariables/$ENVIRONMENT}"
+: "${KEY_INDEX:=0}"
+: "${MNEMONICS:=test test test test test test test test test test test junk}"
 
-address_from_filepath() {
-    existing_address_path=$1
-    if [ -f $existing_address_path ]
-    then
-        address=$(<$existing_address_path)
-    else
-        address="0x0000000000000000000000000000000000000000"
-    fi
-    echo $address
-}
+export ENVIRONMENT KEY_INDEX 
 
-############################################## GETTING ALL MESSAGES SENT TO MOCK APP #######################################
-
-for entry in "$chains_directory"/*
+for entry in "$CHAINS_DIRECTORY"/*
 do
     . "$entry"
-    export MOCK_RUKH_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt"`
+    export MOCK_THUNDERBIRD_APP_ADDRESS=$(<"../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt")
     forge script deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppGetAllMessages --rpc-url $RPC_URL --broadcast
 done

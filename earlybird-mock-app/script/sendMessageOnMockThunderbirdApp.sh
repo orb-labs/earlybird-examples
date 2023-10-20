@@ -1,26 +1,22 @@
 ############################################################# SETTING ENVIRONMENT VARIABLES ################################################################
-
-# Uncomment for local chains
-export ENVIRONMENT=${ENVIRONMENT:-local}
-
-# Uncomment for public testnet
-# export ENVIRONMENT="testnet"
-
-# Uncomment for mainnet
-# export ENVIRONMENT="mainnet"
-
-chains_directory="environmentVariables/$ENVIRONMENT"
-
-export SENDING_MNEMONICS="test test test test test test test test test test test junk"
-export SENDING_KEY_INDEX=5
-
 if [ "$ENVIRONMENT" != "local" ]
 then
-    export MNEMONICS=$(op read "op://Private/Deployment/Mnemonic_phrase/"$ENVIRONMENT"")
     export SENDING_KEY_INDEX=0
+    export MNEMONICS=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`
 fi
 
-############################################## HELPER FUNCTIONS ############################################################
+### set env vars if unset
+: "${ENVIRONMENT:=local}" 
+: "${CHAINS_DIRECTORY:=environmentVariables/$ENVIRONMENT}"
+: "${KEY_INDEX:=0}"
+: "${MNEMONICS:=test test test test test test test test test test test junk}"
+: "${SENDING_MNEMONICS:=$MNEMONICS}"
+: "${SENDING_KEY_INDEX:=5}"
+
+
+export ENVIRONMENT KEY_INDEX MNEMONICS SENDING_MNEMONICS SENDING_KEY_INDEX
+
+############################################## Helper Functions ############################################################
 
 address_from_filepath() {
     existing_address_path=$1
@@ -35,7 +31,7 @@ address_from_filepath() {
 
 ############################################## SENDING MESSAGE TO APP ############################################################
 i=0
-for entry in "$chains_directory"/*
+for entry in "$CHAINS_DIRECTORY"/*
 do
     . "$entry"
     chains[$i]=$CHAIN_NAME
@@ -61,9 +57,13 @@ while true; do
     echo "Enter message you will like to send:"
     read NEWMESSAGE
 
-    destinationChainConfigsPath="$chains_directory/"$destinationChain".sh" 
+    destinationChainConfigsPath="$CHAINS_DIRECTORY/"$destinationChain".sh" 
+    sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
+
     destination_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$destinationChain"/thunderbird/app.txt"
-    . "$destinationChainConfigsPath"
+    source_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
+
+    . ${destinationChainConfigsPath}
 
     if [ -f "$destination_mock_thunderbird_app_address_path" ]
     then
@@ -72,20 +72,16 @@ while true; do
         export MESSAGE_STRING=$NEWMESSAGE
         export RECEIVER_CHAIN_ID=$CHAIN_ID
         export RECEIVER_EARLYBIRD_INSTANCE_ID=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$destinationChain"/instanceId.txt"`
+    else
+        echo "$ENVIRONMENT destination mock thunderbird app address not found at $destination_mock_thunderbird_app_address_path" && exit 10
     fi
 
-    sourceChainConfigsPath="$chains_directory/""$sourceChain"".sh" 
+    sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
     source_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
     . "$sourceChainConfigsPath"
 
     export MOCK_THUNDERBIRD_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/app.txt"`
 
-    echo $MESSAGE_STRING
-    echo $RECEIVER_ADDRESS
-    echo $RECEIVER_CHAIN_ID
-    echo $MOCK_THUNDERBIRD_APP_ADDRESS
-    echo $RPC_URL
-
-    forge script deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppSendMessage --rpc-url $RPC_URL --broadcast
+    forge script --legacy deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppSendMessage --rpc-url $RPC_URL --broadcast
     echo "\n"
 done
