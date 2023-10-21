@@ -1,7 +1,6 @@
 ############################################################# SETTING ENVIRONMENT VARIABLES ################################################################
 if [ "$ENVIRONMENT" != "local" ]
 then
-    export SENDING_KEY_INDEX=0
     export MNEMONICS=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`
 fi
 

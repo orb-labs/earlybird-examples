@@ -77,7 +77,7 @@ contract MockThunderbirdAppDeployment is Script {
             );
             vm.stopBroadcast();
 
-            console.log("MockAppAddress already deployed on %s", chainName);
+            console.log("MockThunderbirdApp already deployed on %s at %s", chainName, expectedMockAppAddress);
             console.log("Resetting configs");
         }
     }
@@ -100,6 +100,7 @@ contract MockThunderbirdAppSendMessage is Script {
             additionalParams
         );
         vm.stopBroadcast();
+        console.log("sent message on Thunderbird via Thunderbird mock app");
     }
 }
 

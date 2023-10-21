@@ -58,11 +58,7 @@ while true; do
     read NEWMESSAGE
 
     destinationChainConfigsPath="$CHAINS_DIRECTORY/"$destinationChain".sh" 
-    sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
-
     destination_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$destinationChain"/thunderbird/app.txt"
-    source_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
-
     . ${destinationChainConfigsPath}
 
     if [ -f "$destination_mock_thunderbird_app_address_path" ]
@@ -75,6 +71,9 @@ while true; do
     else
         echo "$ENVIRONMENT destination mock thunderbird app address not found at $destination_mock_thunderbird_app_address_path" && exit 10
     fi
+
+    sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
+    source_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
 
     sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
     source_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
