@@ -1,7 +1,7 @@
 ############################################### SETTING ENVIRONMENT VARIABLES ##############################################
 
-# Uncomment for local chains
-export ENVIRONMENT=${ENVIRONMENT:-testnet}
+### set env vars if unset
+: "${ENVIRONMENT:=local}" 
 
 chains_directory="environmentVariables/$ENVIRONMENT"
 
@@ -9,15 +9,15 @@ chains_directory="environmentVariables/$ENVIRONMENT"
 for entry in "$chains_directory"/*
 do
     . "$entry"
-    echo "\n\n\n\n############ $CHAIN_NAME ###########"
+    echo "\n\n########### mock_app $CHAIN_NAME ###########"
     
     script_dir=`pwd`
-    chain_dir="../addresses/$ENVIRONMENT/$CHAIN_NAME"
-    cd $chain_dir
+    chain_addresses_dir="../addresses/$ENVIRONMENT/$CHAIN_NAME"
+    cd $chain_addresses_dir
 
     for e in "rukh" "thunderbird"; do
-        echo "\n#### $e"
-        for f in `ls $e`; do echo "\n$f -- `cat $e/$f`"; done
+        echo "#### $e\n"
+        for f in `ls $e`; do echo "$f -- `cat $e/$f` \n"; done
     done
     cd $script_dir
 done

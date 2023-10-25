@@ -2,6 +2,3 @@ export CHAIN_NAME="local_chain_1"
 export CHAIN_ID="1000000000002"
 
 export RPC_URL="http://0.0.0.0:8547"
-
-export ORACLE_ADDRESS="0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-export RELAYER_ADDRESS="0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
