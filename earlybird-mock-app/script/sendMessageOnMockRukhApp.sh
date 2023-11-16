@@ -67,7 +67,7 @@ while true; do
         export RECEIVER_ADDRESS=$destination_mock_rukh_app_address
         export MESSAGE_STRING=$NEWMESSAGE
         export RECEIVER_CHAIN_ID=$CHAIN_ID
-        export RECEIVER_EARLYBIRD_INSTANCE_ID=$(<"../addresses/"$ENVIRONMENT"/"$destinationChain"/earlybrird-evm/instanceId.txt")
+        export RECEIVER_EARLYBIRD_INSTANCE_ID=$(<"../addresses/"$ENVIRONMENT"/"$destinationChain"/earlybird-evm/instanceId.txt")
     fi
 
     sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
