@@ -78,7 +78,7 @@ contract MockApp is IReceiver, Ownable {
         bytes memory payload = abi.encode(_message);
 
         // Check how much it costs to send messages with the default token
-        (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getSendingFeeEstimate(
+        (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getEstimatedFeeForSending(
             address(this),
             _receiverInstanceId,
             _receiver,
