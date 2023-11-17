@@ -68,6 +68,7 @@ while true; do
         export MESSAGE_STRING=$NEWMESSAGE
         export RECEIVER_CHAIN_ID=$CHAIN_ID
         export RECEIVER_EARLYBIRD_INSTANCE_ID=$(<../addresses/"$ENVIRONMENT"/"$destinationChain"/earlybird-evm/instanceId.txt)
+        export RECEIVER_RELAYER_FEE_COLLECTOR=$(<"../addresses/"$ENVIRONMENT"/"$destinationChain"/fee-collectors/relayerFeeCollector.txt")
     else
         echo "$ENVIRONMENT destination mock thunderbird app address not found at $destination_mock_thunderbird_app_address_path" && exit 10
     fi
