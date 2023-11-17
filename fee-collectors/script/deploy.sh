@@ -1,7 +1,7 @@
 ############################################### SETTING ENVIRONMENT VARIABLES ##############################################
 
 ### set env vars if unset
-: "${ENVIRONMENT:=testnet}" 
+: "${ENVIRONMENT:=local}"
 : "${CHAINS_DIRECTORY:=environmentVariables/$ENVIRONMENT}"
 : "${KEY_INDEX:=0}"
 : "${MNEMONICS:=test test test test test test test test test test test junk}"
