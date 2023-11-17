@@ -53,8 +53,6 @@ do
     export EARLYBIRD_ENDPOINT_ADDRESS=$(<../addresses/$ENVIRONMENT/$CHAIN_NAME/earlybird-evm/endpoint.txt)
     export ORACLE_FEE_COLLECTOR_ADDRESS=$(<../addresses/$ENVIRONMENT/$CHAIN_NAME/fee-collectors/oracleFeeCollector.txt)
     export RELAYER_FEE_COLLECTOR_ADDRESS=$(<../addresses/$ENVIRONMENT/$CHAIN_NAME/fee-collectors/relayerFeeCollector.txt)
-    
-    export EARLYBIRD_ENDPOINT_ADDRESS=$(<../addresses/$ENVIRONMENT/$CHAIN_NAME/earlybird-evm/endpoint.txt)
 
     if [[ -z $EARLYBIRD_ENDPOINT_ADDRESS ]]; then echo "endpoint not set" && exit 2; fi
     if [[ -z $ORACLE_ADDRESS || -z $RELAYER_ADDRESS ]]; then echo "oracle and relayer not set" && exit 2; fi

@@ -7,16 +7,11 @@ import "../../../src/RukhVersion/MockApp.sol";
 
 contract MockRukhAppDeployment is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.deriveKey(
-            vm.envString("MNEMONICS"),
-            uint32(vm.envUint("KEY_INDEX"))
-        );
+        uint256 deployerPrivateKey = vm.deriveKey(vm.envString("MNEMONICS"), uint32(vm.envUint("KEY_INDEX")));
 
         string memory chainName = vm.envString("CHAIN_NAME");
 
-        address expectedMockAppAddress = vm.envAddress(
-            "EXPECTED_MOCK_RUKH_APP_ADDRESS"
-        );
+        address expectedMockAppAddress = vm.envAddress("EXPECTED_MOCK_RUKH_APP_ADDRESS");
 
         bytes memory appConfigForSending = abi.encode(
             false,
@@ -52,16 +47,8 @@ contract MockRukhAppDeployment is Script {
 
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
-            MockApp app = new MockApp(
-                vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"),
-                address(0),
-                directMsgsEnabled
-            );
-            app.setLibraryAndConfigs(
-                "Rukh V1",
-                appConfigForSending,
-                appConfigForReceiving
-            );
+            MockApp app = new MockApp(vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS"), address(0), directMsgsEnabled);
+            app.setLibraryAndConfigs("Rukh V1", appConfigForSending, appConfigForReceiving);
             vm.stopBroadcast();
 
             string memory storagePath = string.concat(
@@ -78,11 +65,7 @@ contract MockRukhAppDeployment is Script {
         } else {
             vm.startBroadcast(deployerPrivateKey);
             MockApp app = MockApp(expectedMockAppAddress);
-            app.setLibraryAndConfigs(
-                "Rukh V1",
-                appConfigForSending,
-                appConfigForReceiving
-            );
+            app.setLibraryAndConfigs("Rukh V1", appConfigForSending, appConfigForReceiving);
             vm.stopBroadcast();
 
             console.log("MockRukhApp already deployed on %s", chainName);
@@ -98,9 +81,16 @@ contract MockRukhAppSendMessage is Script {
             uint32(vm.envUint("SENDING_KEY_INDEX"))
         );
 
-        bytes memory additionalParams = abi.encode(address(0), true, 300000);
+        // Add in expectedRelayerFeeCollector as the 4th argument
+        bytes memory additionalParams = abi.encode(
+            address(0),
+            true,
+            300000,
+            vm.envAddress("RECEIVER_RELAYER_FEE_COLLECTOR")
+        );
 
         vm.startBroadcast(deployerPrivateKey);
+
         MockApp(vm.envAddress("MOCK_RUKH_APP_ADDRESS")).sendMessage(
             vm.envBytes32("RECEIVER_EARLYBIRD_INSTANCE_ID"),
             abi.encode(vm.envAddress("RECEIVER_ADDRESS")),
@@ -115,10 +105,8 @@ contract MockRukhAppGetAllMessages is Script {
     function run() external view {
         address mockAppAddress = vm.envAddress("MOCK_RUKH_APP_ADDRESS");
         string memory chainName = vm.envString("CHAIN_NAME");
-        string[] memory receivedMessages = MockApp(mockAppAddress)
-            .getAllReceivedMessages();
-        string[] memory sentMessages = MockApp(mockAppAddress)
-            .getAllSentMessages();
+        string[] memory receivedMessages = MockApp(mockAppAddress).getAllReceivedMessages();
+        string[] memory sentMessages = MockApp(mockAppAddress).getAllSentMessages();
 
         console.log(chainName, "\n");
         console.log("Sent Messages:");

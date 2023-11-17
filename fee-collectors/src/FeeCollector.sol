@@ -23,25 +23,18 @@ contract FeeCollector is IFeeCollector {
     ) public {
         // Remove all the acceptedTokens
         for (uint256 i = 0; i < acceptedTokensArray.length; i++) {
-            nonNativeTokensToFeeObjects[
-                acceptedTokensArray[i]
-            ] = NonNativeTokenFee(false, 0);
+            nonNativeTokensToFeeObjects[acceptedTokensArray[i]] = NonNativeTokenFee(false, 0);
         }
 
         // Insert all the newAcceptedTokens
         for (uint256 i = 0; i < _newAcceptedTokens.length; i++) {
-            nonNativeTokensToFeeObjects[
-                _newAcceptedTokens[i]
-            ] = NonNativeTokenFee(true, _feeAmounts[i]);
+            nonNativeTokensToFeeObjects[_newAcceptedTokens[i]] = NonNativeTokenFee(true, _feeAmounts[i]);
         }
 
         acceptedTokensArray = _newAcceptedTokens;
     }
 
-    function updateNativeTokenFee(
-        bool _acceptNativeTokenForFees,
-        uint256 _feeAmount
-    ) public {
+    function updateNativeTokenFee(bool _acceptNativeTokenForFees, uint256 _feeAmount) public {
         acceptsNativeToken = _acceptNativeTokenForFees;
         nativeTokenFeeAmount = _feeAmount;
     }
@@ -70,19 +63,14 @@ contract FeeCollector is IFeeCollector {
             estimatedFee = nativeTokenFeeAmount;
         } else {
             // Pay fee in token specified in _additionalParams
-            (address feeToken, , ) = abi.decode(
-                _additionalParams,
-                (address, bool, uint256)
-            );
+            (address feeToken, , ) = abi.decode(_additionalParams, (address, bool, uint256));
 
             if (feeToken == address(0)) {
                 isTokenAccepted = acceptsNativeToken;
                 estimatedFee = nativeTokenFeeAmount;
             } else {
-                isTokenAccepted = nonNativeTokensToFeeObjects[feeToken]
-                    .tokenAccepted;
-                estimatedFee = nonNativeTokensToFeeObjects[feeToken]
-                    .tokenFeeAmount;
+                isTokenAccepted = nonNativeTokensToFeeObjects[feeToken].tokenAccepted;
+                estimatedFee = nonNativeTokensToFeeObjects[feeToken].tokenFeeAmount;
             }
         }
     }
@@ -123,17 +111,38 @@ contract FeeCollector is IFeeCollector {
             if (_tokens[i] == address(0)) {
                 areAcceptedTokens[i] = acceptsNativeToken;
             } else {
-                areAcceptedTokens[i] = nonNativeTokensToFeeObjects[_tokens[i]]
-                    .tokenAccepted;
+                areAcceptedTokens[i] = nonNativeTokensToFeeObjects[_tokens[i]].tokenAccepted;
             }
         }
     }
 
-    function getBookmarkedFee(address _receiverApp, address _feeToken, bytes32 _msgHash)
-        external
-        view
-        returns (bool isTokenAccepted, uint256 fee)
-    {}
+    function getEstimatedFeeForSendingMsg(
+        address _app,
+        bytes32 _receiverInstanceId,
+        bytes calldata _receiver,
+        bytes calldata _payload,
+        bytes calldata _additionalParams
+    ) external view returns (bool isTokenAccepted, uint256 estimatedFee) {
+        return (true, 0);
+    }
+
+    function getEstimatedFeeForDeliveredMessage(
+        address _receiverApp,
+        bytes32 _senderInstanceId,
+        bytes calldata _sender,
+        bytes calldata _payload,
+        bytes calldata _additionalParams
+    ) external view returns (bool isTokenAccepted, uint256 feeEstimate) {
+        return (true, 0);
+    }
+
+    function getBookmarkedFee(
+        address _receiverApp,
+        address _feeToken,
+        bytes32 _msgHash
+    ) external view returns (bool isTokenAccepted, uint256 fee) {
+        return (true, 0);
+    }
 
     function feePaidToSendMsg(
         address _app,
@@ -159,7 +168,9 @@ contract FeeCollector is IFeeCollector {
         uint256 _nonce,
         bytes calldata _payload,
         bytes calldata _additionalParams
-    ) external returns (bool feeBookmarked) {}
+    ) external returns (bool feeBookmarked) {
+        return true;
+    }
 
     function bookmarkedFeesPaid(address _receiverApp, address _feeToken, bytes32 _msgHash) external {}
 }

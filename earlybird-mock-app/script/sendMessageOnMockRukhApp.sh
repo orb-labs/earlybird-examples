@@ -68,6 +68,7 @@ while true; do
         export MESSAGE_STRING=$NEWMESSAGE
         export RECEIVER_CHAIN_ID=$CHAIN_ID
         export RECEIVER_EARLYBIRD_INSTANCE_ID=$(<"../addresses/"$ENVIRONMENT"/"$destinationChain"/earlybird-evm/instanceId.txt")
+        export RECEIVER_RELAYER_FEE_COLLECTOR=$(<"../addresses/"$ENVIRONMENT"/"$destinationChain"/fee-collectors/relayerFeeCollector.txt")
     fi
 
     sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
