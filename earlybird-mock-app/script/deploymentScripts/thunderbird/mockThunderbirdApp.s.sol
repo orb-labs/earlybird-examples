@@ -103,6 +103,7 @@ contract MockThunderbirdAppSendMessage is Script {
             vm.envBytes32("RECEIVER_EARLYBIRD_INSTANCE_ID"),
             abi.encode(vm.envAddress("RECEIVER_ADDRESS")),
             vm.envString("MESSAGE_STRING"),
+            // additionalParams
             abi.encode(
                 vm.envAddress("RECEIVER_ADDRESS"),
                 true,
