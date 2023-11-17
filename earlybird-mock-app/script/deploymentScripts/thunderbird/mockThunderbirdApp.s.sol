@@ -91,19 +91,24 @@ contract MockThunderbirdAppSendMessage is Script {
             uint32(vm.envUint("SENDING_KEY_INDEX"))
         );
         
-        ISharedSendModule.AdditionalParams memory additionalParams = ISharedSendModule.AdditionalParams(
-            vm.envAddress("RECEIVER_ADDRESS"),
-            true,
-            300000,
-            vm.envAddress("RECEIVER_RELAYER_FEE_COLLECTOR")
-        );
+        // ISharedSendModule.AdditionalParams memory additionalParams = ISharedSendModule.AdditionalParams(
+        //     vm.envAddress("RECEIVER_ADDRESS"),
+        //     true,
+        //     300000,
+        //     vm.envAddress("RECEIVER_RELAYER_FEE_COLLECTOR")
+        // );
 
         vm.startBroadcast(deployerPrivateKey);
         MockApp(vm.envAddress("MOCK_THUNDERBIRD_APP_ADDRESS")).sendMessage(
             vm.envBytes32("RECEIVER_EARLYBIRD_INSTANCE_ID"),
             abi.encode(vm.envAddress("RECEIVER_ADDRESS")),
             vm.envString("MESSAGE_STRING"),
-            abi.encode(additionalParams)
+            abi.encode(
+                vm.envAddress("RECEIVER_ADDRESS"),
+                true,
+                300000,
+                vm.envAddress("RECEIVER_RELAYER_FEE_COLLECTOR")
+            )
         );
         vm.stopBroadcast();
         console.log("sent message on Thunderbird via Thunderbird mock app");
