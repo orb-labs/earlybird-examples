@@ -1,11 +1,13 @@
 name: Slither Analysis
-on: [push]
+
+permissions:
+  contents: read
+  security-events: write
+
+on: [workflow_call]
 jobs:
   analyze:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
     steps:
       - uses: actions/checkout@v3
       - uses: crytic/slither-action@v0.3.0
