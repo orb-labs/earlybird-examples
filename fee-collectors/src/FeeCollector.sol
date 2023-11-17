@@ -46,7 +46,18 @@ contract FeeCollector is IFeeCollector {
         nativeTokenFeeAmount = _feeAmount;
     }
 
-    function getEstimatedFee(
+    function getEstimatedFeeForDeliveredMessage(
+        address _receiverApp,
+        bytes32 _senderInstanceId,
+        bytes calldata _sender,
+        bytes calldata _payload,
+        bytes calldata _additionalParams
+    ) external view returns (bool isTokenAccepted, uint256 feeEstimate) {
+        isTokenAccepted=true;
+        feeEstimate=0;
+    }
+
+    function getEstimatedFeeForSendingMsg(
         address,
         bytes32,
         bytes calldata,
@@ -117,4 +128,38 @@ contract FeeCollector is IFeeCollector {
             }
         }
     }
+
+    function getBookmarkedFee(address _receiverApp, address _feeToken, bytes32 _msgHash)
+        external
+        view
+        returns (bool isTokenAccepted, uint256 fee)
+    {}
+
+    function feePaidToSendMsg(
+        address _app,
+        bytes32 _receiverInstanceId,
+        bytes calldata _receiver,
+        bytes calldata _payload,
+        bytes calldata _additionalParams
+    ) external {}
+
+    function feePaidForDeliveredMsg(
+        address _receiverApp,
+        bytes32 _senderInstanceId,
+        bytes calldata _sender,
+        bytes calldata _payload,
+        bytes calldata _additionalParams
+    ) external {}
+
+    function bookmarkFeesForDeliveredMessage(
+        bytes32 _msgHash,
+        address _receiverApp,
+        bytes32 _senderInstanceId,
+        bytes calldata _sender,
+        uint256 _nonce,
+        bytes calldata _payload,
+        bytes calldata _additionalParams
+    ) external returns (bool feeBookmarked) {}
+
+    function bookmarkedFeesPaid(address _receiverApp, address _feeToken, bytes32 _msgHash) external {}
 }
