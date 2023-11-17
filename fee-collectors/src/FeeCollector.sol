@@ -39,7 +39,18 @@ contract FeeCollector is IFeeCollector {
         nativeTokenFeeAmount = _feeAmount;
     }
 
-    function getEstimatedFee(
+    function getEstimatedFeeForDeliveredMessage(
+        address _receiverApp,
+        bytes32 _senderInstanceId,
+        bytes calldata _sender,
+        bytes calldata _payload,
+        bytes calldata _additionalParams
+    ) external view returns (bool isTokenAccepted, uint256 feeEstimate) {
+        isTokenAccepted=true;
+        feeEstimate=0;
+    }
+
+    function getEstimatedFeeForSendingMsg(
         address,
         bytes32,
         bytes calldata,
