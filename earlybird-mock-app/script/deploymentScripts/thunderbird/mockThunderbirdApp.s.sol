@@ -93,7 +93,7 @@ contract MockThunderbirdAppSendMessage is Script {
         );
         
         ISharedSendModule.AdditionalParams memory additionalParams = ISharedSendModule.AdditionalParams(
-            vm.envAddress("RECEIVER_ADDRESS"),
+            address(0),
             true,
             300000,
             vm.envAddress("RECEIVER_RELAYER_FEE_COLLECTOR")
