@@ -5,6 +5,8 @@ import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import "../../../src/ThunderbirdVersion/MockApp.sol";
 import "../../../lib/earlybird-evm-interfaces/src/Endpoint/IEndpoint/IEndpoint.sol";
+import "../../../lib/earlybird-evm-interfaces/src/Libraries/Thunderbird/ThunderbirdReceiveModule/IThunderbirdReceiveModule.sol";
+import "../../../lib/earlybird-evm-interfaces/src/Libraries/SharedSendModule/ISharedSendModule.sol";
 
 contract MockThunderbirdAppDeployment is Script {
     function run() external {
@@ -18,13 +20,13 @@ contract MockThunderbirdAppDeployment is Script {
             "EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS"
         );
 
-        bytes memory appConfigForSending = abi.encode(
+        ISharedSendModule.AppConfig memory appConfigForSending = ISharedSendModule.AppConfig(
             false,
             vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS"),
             vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS")
         );
 
-        bytes memory appConfigForReceiving = abi.encode(
+        IThunderbirdReceiveModule.AppConfig memory appConfigForReceiving = IThunderbirdReceiveModule.AppConfig(
             vm.envAddress("ORACLE_ADDRESS"), //oracle,
             vm.envAddress("RELAYER_ADDRESS"), //_defaultRelayer,
             vm.envAddress("THUNDERBIRD_RECS_CONTRACT_ADDRESS"), //recsContract
@@ -51,8 +53,8 @@ contract MockThunderbirdAppDeployment is Script {
 
             app.setLibraryAndConfigs(
                 "Thunderbird V1",
-                appConfigForSending,
-                appConfigForReceiving
+                abi.encode(appConfigForSending),
+                abi.encode(appConfigForReceiving)
             );
             vm.stopBroadcast();
 
@@ -72,8 +74,8 @@ contract MockThunderbirdAppDeployment is Script {
             MockApp app = MockApp(expectedMockAppAddress);
             app.setLibraryAndConfigs(
                 "Thunderbird V1",
-                appConfigForSending,
-                appConfigForReceiving
+                abi.encode(appConfigForSending),
+                abi.encode(appConfigForReceiving)
             );
             vm.stopBroadcast();
 
@@ -89,15 +91,20 @@ contract MockThunderbirdAppSendMessage is Script {
             vm.envString("SENDING_MNEMONICS"),
             uint32(vm.envUint("SENDING_KEY_INDEX"))
         );
-
-        bytes memory additionalParams = abi.encode(address(0), true, 300000);
+        
+        ISharedSendModule.AdditionalParams memory additionalParams = ISharedSendModule.AdditionalParams(
+            address(0),
+            true,
+            300000,
+            vm.envAddress("RECEIVER_RELAYER_FEE_COLLECTOR")
+        );
 
         vm.startBroadcast(deployerPrivateKey);
         MockApp(vm.envAddress("MOCK_THUNDERBIRD_APP_ADDRESS")).sendMessage(
             vm.envBytes32("RECEIVER_EARLYBIRD_INSTANCE_ID"),
             abi.encode(vm.envAddress("RECEIVER_ADDRESS")),
             vm.envString("MESSAGE_STRING"),
-            additionalParams
+            abi.encode(additionalParams)
         );
         vm.stopBroadcast();
         console.log("sent message on Thunderbird via Thunderbird mock app");

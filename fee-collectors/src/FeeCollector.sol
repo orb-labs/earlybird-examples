@@ -39,40 +39,15 @@ contract FeeCollector is IFeeCollector {
         nativeTokenFeeAmount = _feeAmount;
     }
 
-    function getEstimatedFeeForDeliveredMessage(
-        address _receiverApp,
-        bytes32 _senderInstanceId,
-        bytes calldata _sender,
-        bytes calldata _payload,
-        bytes calldata _additionalParams
-    ) external view returns (bool isTokenAccepted, uint256 feeEstimate) {
-        isTokenAccepted=true;
-        feeEstimate=0;
-    }
 
     function getEstimatedFeeForSendingMsg(
         address,
         bytes32,
         bytes calldata,
         bytes calldata,
-        bytes calldata _additionalParams
+        bytes calldata
     ) external view returns (bool isTokenAccepted, uint256 estimatedFee) {
-        if (_additionalParams.length == 0) {
-            // Pay fee in native
-            isTokenAccepted = acceptsNativeToken;
-            estimatedFee = nativeTokenFeeAmount;
-        } else {
-            // Pay fee in token specified in _additionalParams
-            (address feeToken, , ) = abi.decode(_additionalParams, (address, bool, uint256));
-
-            if (feeToken == address(0)) {
-                isTokenAccepted = acceptsNativeToken;
-                estimatedFee = nativeTokenFeeAmount;
-            } else {
-                isTokenAccepted = nonNativeTokensToFeeObjects[feeToken].tokenAccepted;
-                estimatedFee = nonNativeTokensToFeeObjects[feeToken].tokenFeeAmount;
-            }
-        }
+        return (true, 0);
     }
 
     function getAcceptedTokens(
@@ -114,16 +89,6 @@ contract FeeCollector is IFeeCollector {
                 areAcceptedTokens[i] = nonNativeTokensToFeeObjects[_tokens[i]].tokenAccepted;
             }
         }
-    }
-
-    function getEstimatedFeeForSendingMsg(
-        address _app,
-        bytes32 _receiverInstanceId,
-        bytes calldata _receiver,
-        bytes calldata _payload,
-        bytes calldata _additionalParams
-    ) external view returns (bool isTokenAccepted, uint256 estimatedFee) {
-        return (true, 0);
     }
 
     function getEstimatedFeeForDeliveredMessage(
