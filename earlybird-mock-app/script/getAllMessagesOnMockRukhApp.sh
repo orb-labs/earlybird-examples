@@ -1,14 +1,8 @@
 ############################################################# SETTING ENVIRONMENT VARIABLES ################################################################
-if [ "$ENVIRONMENT" != "local" ]
-then
-    export MNEMONICS=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`
-fi
-
 ### set env vars if unset
 : "${ENVIRONMENT:=local}" 
 : "${CHAINS_DIRECTORY:=environmentVariables/$ENVIRONMENT}"
 : "${KEY_INDEX:=0}"
-: "${MNEMONICS:=test test test test test test test test test test test junk}"
 
 export ENVIRONMENT KEY_INDEX 
 
