@@ -56,7 +56,7 @@ do
 
     if [[ -z $EARLYBIRD_ENDPOINT_ADDRESS ]]; then echo "endpoint not set" && exit 2; fi
     if [[ -z $ORACLE_ADDRESS || -z $RELAYER_ADDRESS ]]; then echo "oracle and relayer not set" && exit 2; fi
-    if [[ -z $ORACLE_FEE_COLLECTOR_ADDRESS || -z $RELAYER_FEE_COLLECTOR_ADDRESS ]]; then "echo fee collectors not set" && exit 2; fi
+    if [[ -z $ORACLE_FEE_COLLECTOR_ADDRESS || -z $RELAYER_FEE_COLLECTOR_ADDRESS ]]; then echo "fee collectors not set" && exit 2; fi
 
     ########################################## DEPLOY THUNDERBIRD VERSION ##################################################
     forge script deploymentScripts/thunderbird/ThunderbirdRecsContract.s.sol:ThunderbirdRecsContractDeployment --rpc-url $RPC_URL --broadcast
