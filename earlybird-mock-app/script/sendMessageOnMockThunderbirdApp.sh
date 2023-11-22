@@ -3,10 +3,10 @@
 : "${ENVIRONMENT:=local}" 
 : "${CHAINS_DIRECTORY:=environmentVariables/$ENVIRONMENT}"
 : "${KEY_INDEX:=0}"
+: "${SENDING_KEY_INDEX:=0}"
 
 if [ "$ENVIRONMENT" != "local" ]
 then
-    : "${SENDING_KEY_INDEX:=0}"
     : "${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}"
 fi
 
