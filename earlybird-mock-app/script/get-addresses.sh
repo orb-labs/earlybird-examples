@@ -17,6 +17,7 @@ do
 
     for e in "rukh" "thunderbird"; do
         echo "#### $e\n"
+        if [[ ! -d $e ]]; then echo "$e dir not found at `pwd`" && exit 1; fi
         for f in `ls $e`; do echo "$f -- `cat $e/$f` \n"; done
     done
     cd $script_dir
