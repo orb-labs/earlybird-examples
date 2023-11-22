@@ -1,10 +1,23 @@
 ############################################### SETTING ENVIRONMENT VARIABLES ##############################################
 
+if [ "$ENVIRONMENT" == "mainnet" ]
+then
+    export MNEMONICS=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`
+
+elif [ "$ENVIRONMENT" == "testnet" ]
+then
+    export MNEMONICS=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`
+elif [ "$ENVIRONMENT" == "local" ]
+then
+    export MNEMONICS="test test test test test test test test test test test junk"
+else
+    echo "invalid environment" && exit 1
+fi
+
 ### set env vars if unset
 : "${ENVIRONMENT:=local}" 
 : "${CHAINS_DIRECTORY:=environmentVariables/$ENVIRONMENT}"
 : "${KEY_INDEX:=0}"
-: "${MNEMONICS:=test test test test test test test test test test test junk}"
 : "${ORACLE_MNEMONICS:=$MNEMONICS}"
 : "${ORACLE_KEY_INDEX:=0}"
 : "${RELAYER_MNEMONICS:=$MNEMONICS}"
@@ -53,17 +66,17 @@ do
     if [[ -z $ORACLE_FEE_COLLECTOR_ADDRESS || -z $RELAYER_FEE_COLLECTOR_ADDRESS ]]; then echo "fee collectors not set" && exit 2; fi
 
     ########################################## DEPLOY THUNDERBIRD VERSION ##################################################
-    forge script deploymentScripts/thunderbird/ThunderbirdRecsContract.s.sol:ThunderbirdRecsContractDeployment --rpc-url $RPC_URL --broadcast
+    forge script --legacy deploymentScripts/thunderbird/ThunderbirdRecsContract.s.sol:ThunderbirdRecsContractDeployment --rpc-url $RPC_URL --broadcast
     export THUNDERBIRD_RECS_CONTRACT_ADDRESS=$(<$existing_addresses_path/thunderbird/recs_contract.txt)
     
     forge script --legacy deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppDeployment --rpc-url $RPC_URL --broadcast
 
     
     ########################################## DEPLOY RUKH VERSION #########################################################
-    forge script deploymentScripts/rukh/RukhRecsContract.s.sol:RukhRecsContractDeployment --rpc-url $RPC_URL --broadcast
+    forge script --legacy deploymentScripts/rukh/RukhRecsContract.s.sol:RukhRecsContractDeployment --rpc-url $RPC_URL --broadcast
     export RUKH_RECS_CONTRACT_ADDRESS=$(<$existing_addresses_path/rukh/recs_contract.txt)
     
-    forge script deploymentScripts/rukh/RukhDisputerContract.s.sol:RukhDisputerContractDeployment --rpc-url $RPC_URL --broadcast
+    forge script --legacy deploymentScripts/rukh/RukhDisputerContract.s.sol:RukhDisputerContractDeployment --rpc-url $RPC_URL --broadcast
     export RUKH_DISPUTER_CONTRACT_ADDRESS=$(<$existing_addresses_path/rukh/disputer_contract.txt)
 
     forge script --legacy deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppDeployment --rpc-url $RPC_URL --broadcast
