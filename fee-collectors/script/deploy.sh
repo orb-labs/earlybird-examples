@@ -1,10 +1,10 @@
 ############################################### SETTING ENVIRONMENT VARIABLES ##############################################
 
 ### set env vars if unset
-: "${ENVIRONMENT:=local}"
-: "${CHAINS_DIRECTORY:=environmentVariables/$ENVIRONMENT}"
-: "${KEY_INDEX:=0}"
-: "${MNEMONICS:=test test test test test test test test test test test junk}"
+: ${ENVIRONMENT:="local"}
+: ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
+: ${KEY_INDEX:="0"}
+: ${MNEMONICS:="test test test test test test test test test test test junk"}
 export ENVIRONMENT KEY_INDEX MNEMONICS
 
 ############################################## HELPER FUNCTIONS ############################################################
@@ -26,17 +26,17 @@ for entry in "$CHAINS_DIRECTORY"/*
 do
     . "$entry"
 
-    address_dir="../addresses/"$ENVIRONMENT"/"$CHAIN_NAME""
+    address_dir="../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}""
     if [[ ! -d $address_dir ]]; then mkdir $address_dir; fi
 
     ########################################## GET EXISTING ADDRESSES ######################################################
-    export EXPECTED_ORACLE_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/oracleFeeCollector.txt"`
-    export EXPECTED_RELAYER_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/relayerFeeCollector.txt"`
+    export EXPECTED_ORACLE_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}"/oracleFeeCollector.txt"`
+    export EXPECTED_RELAYER_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}"/relayerFeeCollector.txt"`
     
     ########################################## DEPLOY ######################################################################
     forge script --legacy deploymentScripts/FeeCollectorsDeployment.s.sol:FeeCollectorsDeployment --rpc-url $RPC_URL --broadcast
-    export ORACLE_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/oracleFeeCollector.txt"`
-    export RELAYER_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/relayerFeeCollector.txt"`
+    export ORACLE_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}"/oracleFeeCollector.txt"`
+    export RELAYER_FEE_COLLECTOR_ADDRESS=`address_from_filepath "../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}"/relayerFeeCollector.txt"`
     
     echo "
     deployed fee collectors on $CHAIN_NAME

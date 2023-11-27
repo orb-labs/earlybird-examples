@@ -1,33 +1,34 @@
 ############################################################# SETTING ENVIRONMENT VARIABLES ################################################################
-### set env vars if unset
-: "${ENVIRONMENT:=local}" 
-: "${CHAINS_DIRECTORY:=environmentVariables/$ENVIRONMENT}"
-: "${KEY_INDEX:=0}"
-: "${SENDING_KEY_INDEX:=0}"
 
-if [ "$ENVIRONMENT" != "local" ]
-then
-    : "${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}"
-fi
+# set env vars if unset
+### default environment
+: ${ENVIRONMENT:="local"}
 
-: "${SENDING_KEY_INDEX:=5}"
-: "${MNEMONICS:=test test test test test test test test test test test junk}"
-: "${SENDING_MNEMONICS:=$MNEMONICS}"
+case $ENVIRONMENT in
+    mainnet)
+        : ${SENDING_KEY_INDEX:="0"}
+        : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
+        ;;
+    testnet)
+        : ${SENDING_KEY_INDEX:="0"}
+        : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
+        ;;
+    local)
+        : ${SENDING_KEY_INDEX:="5"}
+        : ${MNEMONICS:="test test test test test test test test test test test junk"}
+        ;;
+    *)
+        echo "invalid environment" && exit 1
+        ;;
+esac
+: ${KEY_INDEX:="0"}
+: ${SENDING_MNEMONICS:="$MNEMONICS"}
 
+# export env vars needed by the Solidity scripts
 export ENVIRONMENT KEY_INDEX MNEMONICS SENDING_MNEMONICS SENDING_KEY_INDEX
 
-############################################## Helper Functions ############################################################
-
-address_from_filepath() {
-    existing_address_path=$1
-    if [ -f $existing_address_path ]
-    then
-        address=$(<$existing_address_path)
-    else
-        address="0x0000000000000000000000000000000000000000"
-    fi
-    echo $address
-}
+### other env vars
+: ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
 
 ############################################## SENDING MESSAGE TO APP ############################################################
 i=0
@@ -58,7 +59,7 @@ while true; do
     read NEWMESSAGE
 
     destinationChainConfigsPath="$CHAINS_DIRECTORY/"$destinationChain".sh" 
-    destination_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$destinationChain"/thunderbird/app.txt"
+    destination_mock_thunderbird_app_address_path="../addresses/"${ENVIRONMENT}"/"$destinationChain"/thunderbird/app.txt"
     . ${destinationChainConfigsPath}
 
     if [ -f "$destination_mock_thunderbird_app_address_path" ]
@@ -68,19 +69,19 @@ while true; do
         export MESSAGE_STRING=$NEWMESSAGE
         export RECEIVER_CHAIN_ID=$CHAIN_ID
         export RECEIVER_EARLYBIRD_INSTANCE_ID=$(<../addresses/"$ENVIRONMENT"/"$destinationChain"/earlybird-evm/instanceId.txt)
-        export RECEIVER_RELAYER_FEE_COLLECTOR=$(<"../addresses/"$ENVIRONMENT"/"$destinationChain"/fee-collectors/relayerFeeCollector.txt")
+        export RECEIVER_RELAYER_FEE_COLLECTOR=$(<"../addresses/"${ENVIRONMENT}"/"$destinationChain"/fee-collectors/relayerFeeCollector.txt")
     else
         echo "$ENVIRONMENT destination mock thunderbird app address not found at $destination_mock_thunderbird_app_address_path" && exit 10
     fi
 
     sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
-    source_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
+    source_mock_thunderbird_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/app.txt"
 
     sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
-    source_mock_thunderbird_app_address_path="../addresses/"$ENVIRONMENT"/"$sourceChain"/app.txt"
+    source_mock_thunderbird_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/app.txt"
     . "$sourceChainConfigsPath"
 
-    export MOCK_THUNDERBIRD_APP_ADDRESS=`address_from_filepath "../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/thunderbird/app.txt"`
+    export MOCK_THUNDERBIRD_APP_ADDRESS=$(<"../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}"/thunderbird/app.txt")
 
     forge script --legacy deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppSendMessage --rpc-url $RPC_URL --broadcast
     echo "\n"
