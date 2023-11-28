@@ -36,12 +36,7 @@ contract MockRukhAppDeployment is Script {
             vm.envAddress("ORACLE_ADDRESS"), //oracle,
             vm.envAddress("RELAYER_ADDRESS"), //_defaultRelayer,
             vm.envAddress("RUKH_DISPUTER_CONTRACT_ADDRESS"), //_disputersContract,
-            vm.addr(
-                vm.deriveKey(
-                    vm.envString("DISPUTE_RESOLVER_MNEMONICS"),
-                    uint32(vm.envUint("DISPUTE_RESOLVER_KEY_INDEX"))
-                )
-            ), //_disputeResolver,
+            vm.envAddress("RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS"), //_disputeResolver,
             vm.envAddress("RUKH_RECS_CONTRACT_ADDRESS"), //recsContract,
             true, // emitMsgProofs,
             directMsgsEnabled, // directMsgsEnabled,
