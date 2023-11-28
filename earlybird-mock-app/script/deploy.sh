@@ -10,9 +10,13 @@ case $ENVIRONMENT in
         ;;
     testnet)
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
+        : ${RUKH_DISPUTER_CONTRACT_ADDRESS:="0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f"}
+        : ${RUKH_DISPUTE_RESOLVER_ADDRESS:="0x5B18a2DdF5E71013DA70D5737EDe125f6d809fE9"}
         ;;
     local)
         : ${MNEMONICS:="test test test test test test test test test test test junk"}
+        : ${RUKH_DISPUTER_CONTRACT_ADDRESS:="0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f"}
+        : ${RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS:="0x5B18a2DdF5E71013DA70D5737EDe125f6d809fE9"}
         ;;
     *)
         echo "invalid environment" && exit 1
@@ -26,11 +30,9 @@ esac
 : ${ORACLE_KEY_INDEX:="0"}
 : ${RELAYER_MNEMONICS:="$MNEMONICS"}
 : ${RELAYER_KEY_INDEX:="1"}
-: ${DISPUTE_RESOLVER_MNEMONICS:="$MNEMONICS"}
-: ${DISPUTE_RESOLVER_KEY_INDEX:="10"}
 
 # export env vars needed by the Solidity scripts
-export ENVIRONMENT KEY_INDEX MNEMONICS ORACLE_MNEMONICS ORACLE_KEY_INDEX RELAYER_MNEMONICS RELAYER_KEY_INDEX DISPUTE_RESOLVER_MNEMONICS DISPUTE_RESOLVER_KEY_INDEX
+export ENVIRONMENT KEY_INDEX MNEMONICS ORACLE_MNEMONICS ORACLE_KEY_INDEX RELAYER_MNEMONICS RELAYER_KEY_INDEX RUKH_DISPUTER_CONTRACT_ADDRESS RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS
 
 ############################################## Helper Functions ############################################################
 
@@ -61,8 +63,7 @@ do
     export EXPECTED_THUNDERBIRD_RECS_CONTRACT_ADDRESS=`address_from_filepath "$address_dir_path/thunderbird/recs_contract.txt"`
     export EXPECTED_MOCK_RUKH_APP_ADDRESS=`address_from_filepath "$address_dir_path/rukh/app.txt"`
     export EXPECTED_RUKH_RECS_CONTRACT_ADDRESS=`address_from_filepath "$address_dir_path/rukh/recs_contract.txt"`
-    export EXPECTED_RUKH_DISPUTER_CONTRACT_ADDRESS=`address_from_filepath "$address_dir_path/rukh/disputer_contract.txt"`
-
+    
     # get existing addresses of earlybird, fee collectors, and periphery contracts
     # previously deployed to this chain (must exist)
     export EARLYBIRD_ENDPOINT_ADDRESS=$(<${address_dir_path}/earlybird-evm/endpoint.txt)
@@ -89,9 +90,5 @@ do
     # assume the address has been written by the script and read from it
     export RUKH_RECS_CONTRACT_ADDRESS=$(<$address_dir_path/rukh/recs_contract.txt)
     
-    forge script --legacy deploymentScripts/rukh/RukhDisputerContract.s.sol:RukhDisputerContractDeployment --rpc-url $RPC_URL --broadcast
-    # assume the address has been written by the script and read from it
-    export RUKH_DISPUTER_CONTRACT_ADDRESS=$(<$address_dir_path/rukh/disputer_contract.txt)
-
     forge script --legacy deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppDeployment --rpc-url $RPC_URL --broadcast
 done
