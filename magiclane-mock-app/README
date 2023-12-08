@@ -1,39 +1,23 @@
-# Earlybird Mock App
+# Magiclane Mock App
 
 ## Setup
 
 Update the following files with your mnemonic phrase where it says `<ADD YOUR MNEMONIC HERE>`
 
-1. `/script/sendMessageOnMockRukhApp.sh`
-2. `/script/sendMessageOnMockThunderbirdApp.sh`
+1. `/script/sendMessageOnMockMagiclaneApp.sh`
+2. `/script/sendMessageOnMockMagiclaneApp.sh`
 
 ---
 
 ## **How to interact with the Mock App**
 
-### **Sending a message**
+### **Sending tokens with a message **
 
-You can send a message for the 2 libraries currently supported by the Mock App.
-
-1. Using the **Rukh Library** run the following command and follow the prompts
-
-   `make send-rukh-message`
-
-2. Using the **Thunderbird Library** run the following command and follow the prompts
-
-   `make send-thunderbird-message`
+`make send-tokens`
 
 ### **Viewing messages**
 
-You can view sent/received messages for the 2 libraries currently supported by the Mock App.
-
-1. Using the **Rukh Library** run the following command to get messages sent/received across all supported chains
-
-   `make get-rukh-message`
-
-2. Using the **Thunderbird Library** run the following command to get messages sent/received across all supported chains
-
-   `make get-thunderbird-message`
+`make get-message`
 
 ---
 
