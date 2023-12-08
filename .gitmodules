@@ -28,3 +28,6 @@
 [submodule "magiclane-mock-app/lib/magiclane-evm-interfaces"]
 	path = magiclane-mock-app/lib/magiclane-evm-interfaces
 	url = git@github.com:orb-labs/magiclane-evm-interfaces.git
+[submodule "magiclane-mock-app/lib/forge-std"]
+	path = magiclane-mock-app/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
