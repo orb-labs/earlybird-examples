@@ -40,20 +40,20 @@ contract MagiclaneMockApp is Ownable, IMagiclaneReceiver {
         IMagiclaneSpokeEndpointSendingFunctions.NFTObjectForSendFunctions[] calldata _nonFungibleTokens,
         IMagiclaneSpokeEndpointSendingFunctions.SFTObjectForSendFunctions[] calldata _semiFungibleTokens,
         bytes calldata _message,
-        PayoutAndRefund.Info calldata _info,
         Gas.Data calldata _gasOnHub,
-        Gas.Data calldata _gasOnDest
+        Gas.Data calldata _gasOnDest,
+        address _receiver,
+        bytes32 _destinationMagiclaneSpokeId,
+        address _destinationMockAppAddress
     ) public view returns (bool isTokenAccepted, uint256 estimatedFee) {
         require(
             _fungibleTokens.length > 0 || _nonFungibleTokens.length > 0 || _semiFungibleTokens.length > 0,
             "No tokens to send"
         );
 
-        require(instanceIdToAppAddress[_info.instanceId] != address(0), "instance not found");
-
-        bytes memory payload = abi.encode(_message, _info);
+        bytes memory payload = abi.encode(_message, _receiver);
         PayoutAndRefund.Info memory info = PayoutAndRefund.Info(
-            _info.instanceId, abi.encode(instanceIdToAppAddress[_info.instanceId]), _info.refundAddress
+            _destinationMagiclaneSpokeId, abi.encode(_destinationMockAppAddress), abi.encode(_receiver)
         );
 
         IMagiclaneSpokeEndpointSendingFunctions.SendTokensRequest memory sendTokensRequest =
