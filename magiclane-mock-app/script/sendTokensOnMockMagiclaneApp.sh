@@ -80,23 +80,23 @@ while true; do
     done
 
     destinationChainConfigsPath="$CHAINS_DIRECTORY/"$destinationChain".sh" 
-    destination_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$destinationChain"/MagiclaneMockApp.txt"
+    destination_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$destinationChain"/magiclaneMockApp.txt"
     . ${destinationChainConfigsPath}
 
     if [ -f "$destination_magiclane_mock_app_address_path" ]
     then
         destination_magiclane_mock_app_address=$(<$destination_magiclane_mock_app_address_path)
-        export RECEIVER_MOCK_MAGICLANE_APP_ADDRESS=$destination_magiclane_mock_app_address
-        export RECEIVER_SPOKE_INSTANCE_ID=$(<../addresses/"$ENVIRONMENT"/"$destinationChain"/magiclane-evm/spokeInstanceId.txt)
+        export RECEIVER_MAGICLANE_MOCK_APP_ADDRESS=$destination_magiclane_mock_app_address
+        export RECEIVER_MAGICLANE_SPOKE_ID=$(<../addresses/"$ENVIRONMENT"/"$destinationChain"/magiclane-evm/magiclaneSpokeId.txt)
     else
         echo "$ENVIRONMENT destination mock thunderbird app address not found at $destination_magiclane_mock_app_address_path" && exit 10
     fi
 
     sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
-    source_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/MagiclaneMockApp.txt"
+    source_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/magiclaneMockApp.txt"
 
     sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
-    source_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/MagiclaneMockApp.txt"
+    source_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/magiclaneMockApp.txt"
     . "$sourceChainConfigsPath"
 
     # TODO(felix): this needs to be updated
@@ -120,6 +120,6 @@ while true; do
         export TEST_SFT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestFTs/TestSFT-"$i".txt)
     done
 
-    forge script --legacy deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppSendMessage --rpc-url $RPC_URL --broadcast
+    forge script --legacy deploymentScripts/MagiclaneMockApp.s.sol:MagiclaneMockAppSendTokens --rpc-url $RPC_URL --broadcast
     echo "\n"
 done

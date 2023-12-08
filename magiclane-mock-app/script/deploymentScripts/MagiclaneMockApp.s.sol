@@ -30,7 +30,7 @@ contract MagiclaneMockAppDeployment is Script {
             vm.stopBroadcast();
 
             string memory storagePath =
-                string.concat("addresses/", vm.envString("ENVIRONMENT"), "/", chainName, "/", "MagiclaneMockApp.txt");
+                string.concat("addresses/", vm.envString("ENVIRONMENT"), "/", chainName, "/", "magiclaneMockApp.txt");
 
             string memory magiclaneMockAppAddress = vm.toString(address(magiclaneMockApp));
             vm.writeFile(storagePath, magiclaneMockAppAddress);
@@ -41,7 +41,7 @@ contract MagiclaneMockAppDeployment is Script {
     }
 }
 
-contract MagiclaneMockAppSendMessage is Script {
+contract MagiclaneMockAppSendTokens is Script {
     // to facilitate safe transfers of ERC20s
     using SafeERC20 for IERC20;
 
@@ -50,7 +50,7 @@ contract MagiclaneMockAppSendMessage is Script {
             vm.deriveKey(vm.envString("SENDING_MNEMONICS"), uint32(vm.envUint("SENDING_KEY_INDEX")));
         address senderAddress = vm.addr(sendingPrivateKey);
         address magiclaneEndpoint = vm.envAddress("MAGICLANE_SPOKE_ENDPOINT_ADDRESS");
-        address receiverMagiclaneMockAppAdddress = vm.envAddress("RECEIVER_MOCK_MAGICLANE_APP_ADDRESS");
+        address receiverMockAppAddress = vm.envAddress("RECEIVER_MAGICLANE_MOCK_APP_ADDRESS");
         uint256 numberOfFTs = vm.envUint("NUMBER_OF_FTS");
         uint256 numberOfNFTs = vm.envUint("NUMBER_OF_NFTS");
         uint256 numberOfSFTs = vm.envUint("NUMBER_OF_SFTS");
@@ -89,12 +89,12 @@ contract MagiclaneMockAppSendMessage is Script {
         }
 
         string memory message = vm.envString("MESSAGE_STRING");
-        bytes32 receiverSpokeInstanceId = vm.envBytes32("RECEIVER_SPOKE_INSTANCE_ID");
-        PayoutAndRefund.Info memory info =
-            PayoutAndRefund.Info(receiverSpokeInstanceId, abi.encode(senderAddress), abi.encode(senderAddress));
+        bytes32 receiverMagiclaneSpokeId = vm.envBytes32("RECEIVER_MAGICLANE_SPOKE_ID");
+        PayoutAndRefund.Info memory info = PayoutAndRefund.Info(
+            receiverMagiclaneSpokeId, abi.encode(receiverMockAppAddress), abi.encode(senderAddress)
+        );
 
-        bytes memory payload = abi.encode(message, info);
-        info.payoutAddress = abi.encode(receiverMagiclaneMockAppAdddress);
+        bytes memory payload = abi.encode(message, senderAddress);
         Gas.Data memory gasOnHub = Gas.Data(500_000, 0, 2_000);
         Gas.Data memory gasOnDest = Gas.Data(500_000, 0, 2_000);
 
@@ -114,13 +114,13 @@ contract MagiclaneMockAppSendMessage is Script {
         vm.startBroadcast(sendingPrivateKey);
         IMagiclaneSpokeEndpointSendingFunctions(magiclaneEndpoint).sendTokens(sendTokensRequest);
         vm.stopBroadcast();
-        console.log("sent message on Thunderbird via Thunderbird mock app");
+        console.log("sent message and tokens on Magiclane mock app");
     }
 }
 
 contract MagiclaneMockAppGetAllMessages is Script {
     function run() external view {
-        address mockAppAddress = vm.envAddress("MOCK_MAGICLANE_APP_ADDRESS");
+        address mockAppAddress = vm.envAddress("MAGICLANE_MOCK_APP_ADDRESS");
         string memory chainName = vm.envString("CHAIN_NAME");
         string[] memory receivedMessages = MagiclaneMockApp(mockAppAddress).getAllReceivedMessages();
         string[] memory sentMessages = MagiclaneMockApp(mockAppAddress).getAllSentMessages();

@@ -11,6 +11,6 @@ for entry in "$CHAINS_DIRECTORY"/*
 do
     . "$entry"
     address_dir="../addresses/${ENVIRONMENT}/${CHAIN_NAME}"
-    export MOCK_MAGICLANE_APP_ADDRESS=$(<"${address_dir}/MagiclaneMockApp.txt")
+    export MAGICLANE_MOCK_APP_ADDRESS=$(<"${address_dir}/magiclaneMockApp.txt")
     forge script deploymentScripts/MagiclaneMockApp.s.sol:MagiclaneMockAppGetAllMessages --rpc-url $RPC_URL --broadcast
 done

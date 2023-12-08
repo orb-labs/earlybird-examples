@@ -22,7 +22,7 @@ contract TestNFTDeployment is Script {
                 size := extcodesize(expectedTestNFTAddress)
             }
 
-            string memory testNFTName = string.concat("TestNFT-", Strings.toString(i));
+            string memory testNFTName = string.concat("testNFT-", Strings.toString(i));
 
             if (size == 0) {
                 vm.startBroadcast(deployerPrivateKey);

@@ -22,7 +22,7 @@ contract TestSFTDeployment is Script {
                 size := extcodesize(expectedTestSFTAddress)
             }
 
-            string memory testSFTName = string.concat("TestSFT-", Strings.toString(i));
+            string memory testSFTName = string.concat("testSFT-", Strings.toString(i));
             if (size == 0) {
                 vm.startBroadcast(deployerPrivateKey);
                 TestSFT testSFT = new TestSFT();

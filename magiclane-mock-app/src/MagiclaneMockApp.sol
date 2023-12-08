@@ -22,9 +22,6 @@ contract MagiclaneMockApp is Ownable, IMagiclaneReceiver {
     // Endpoint address of the magiclane protcol
     address public magiclaneEndpoint;
 
-    // map of instance ids to address of MagiclaneMockApp on that instance
-    mapping(bytes32 => address) public instanceIdToAppAddress;
-
     string[] public allSentMessages;
     string[] public allReceivedMessages;
 
@@ -36,14 +33,6 @@ contract MagiclaneMockApp is Ownable, IMagiclaneReceiver {
     modifier onlyMagiclaneEndpoint() {
         require(msg.sender == magiclaneEndpoint);
         _;
-    }
-
-    function setInstanceAddresses(bytes32[] memory _instanceIds, address[] memory _appAddress) external onlyOwner {
-        require(_instanceIds.length == _appAddress.length, "lengths do not match");
-
-        for (uint256 i = 0; i < _instanceIds.length; i++) {
-            instanceIdToAppAddress[_instanceIds[i]] = _appAddress[i];
-        }
     }
 
     function getFeeEstimateForSendTokensRequest(
@@ -90,23 +79,22 @@ contract MagiclaneMockApp is Ownable, IMagiclaneReceiver {
         IMagiclaneSpokeEndpointSendingFunctions.NFTObjectForSendFunctions[] calldata _nonFungibleTokens,
         IMagiclaneSpokeEndpointSendingFunctions.SFTObjectForSendFunctions[] calldata _semiFungibleTokens,
         bytes calldata _message,
-        PayoutAndRefund.Info calldata _info,
         Gas.Data calldata _gasOnHub,
-        Gas.Data calldata _gasOnDest
+        Gas.Data calldata _gasOnDest,
+        address _receiver,
+        bytes32 _destinationMagiclaneSpokeId,
+        address _destinationMockAppAddress
     ) external {
         require(
             _fungibleTokens.length > 0 || _nonFungibleTokens.length > 0 || _semiFungibleTokens.length > 0,
             "No tokens to send"
         );
 
-        require(instanceIdToAppAddress[_info.instanceId] != address(0), "instance not found");
-
-        bytes memory payload = abi.encode(_message, _info);
+        bytes memory payload = abi.encode(_message, _receiver);
         PayoutAndRefund.Info memory info = PayoutAndRefund.Info(
-            _info.instanceId, abi.encode(instanceIdToAppAddress[_info.instanceId]), _info.refundAddress
+            _destinationMagiclaneSpokeId, abi.encode(_destinationMockAppAddress), abi.encode(_receiver)
         );
 
-        // Check how much it costs to send messages with the default token
         IMagiclaneSpokeEndpointSendingFunctions.SendTokensRequest memory sendTokensRequest =
         IMagiclaneSpokeEndpointSendingFunctions.SendTokensRequest(
             false, // collectTokensThroughHook
@@ -120,10 +108,11 @@ contract MagiclaneMockApp is Ownable, IMagiclaneReceiver {
             _gasOnDest
         );
 
+        // Check if token is accepted by the protocol for fees
         (bool isTokenAccepted,) = IMagiclaneSpokeEndpointSendingFunctions(magiclaneEndpoint)
             .getFeeEstimateForSendTokensRequest(sendTokensRequest);
 
-        require(isTokenAccepted, "Default fee token is not accepted by oracle and relayer");
+        require(isTokenAccepted, "Fee token is not accepted by oracle and relayer");
 
         // approve fts to be sent
         for (uint256 i = 0; i < _fungibleTokens.length; i++) {
@@ -161,10 +150,8 @@ contract MagiclaneMockApp is Ownable, IMagiclaneReceiver {
         IMagiclaneReceiver.Tokens calldata _tokens,
         bytes calldata _payload
     ) external onlyMagiclaneEndpoint {
-        (bytes memory message, PayoutAndRefund.Info memory info) = abi.decode(_payload, (bytes, PayoutAndRefund.Info));
+        (bytes memory message, address payoutAddress) = abi.decode(_payload, (bytes, address));
         allReceivedMessages.push(string(message));
-
-        address payoutAddress = abi.decode(info.payoutAddress, (address));
 
         // trasnfer fts to the final destination
         for (uint256 i = 0; i < _tokens.fungibleTokens.length; i++) {
