@@ -1,0 +1,3 @@
+openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/
+earlybird/=lib/earlybird-evm-interfaces/
+magiclane/=lib/magiclane-evm-interfaces/
