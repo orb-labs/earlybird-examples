@@ -1,0 +1,28 @@
+# Magiclane Mock App
+
+## Setup
+
+Update the following files with your mnemonic phrase where it says `<ADD YOUR MNEMONIC HERE>`
+
+1. `/script/sendMessageOnMockMagiclaneApp.sh`
+2. `/script/sendMessageOnMockMagiclaneApp.sh`
+
+---
+
+## **How to interact with the Mock App**
+
+### **Sending tokens with a message **
+
+`make send-tokens`
+
+### **Viewing messages**
+
+`make get-message`
+
+---
+
+## Don't Have Testnet tokens to send messages?
+
+There are open source faucets you can find online. [Visit Alchemy](https://www.alchemy.com/best/crypto-faucets) to easily find a faucet.
+
+If you are still having trouble finding tokens for using the Mock App, ping us in the [discord group](https://discord.com/invite/7jETqRMBRc).
