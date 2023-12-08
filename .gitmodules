@@ -31,3 +31,6 @@
 [submodule "magiclane-mock-app/lib/forge-std"]
 	path = magiclane-mock-app/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "magiclane-mock-app/lib/openzeppelin-contracts"]
+	path = magiclane-mock-app/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
