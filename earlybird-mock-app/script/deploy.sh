@@ -11,7 +11,7 @@ case $ENVIRONMENT in
     testnet)
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         : ${RUKH_DISPUTER_CONTRACT_ADDRESS:="0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f"}
-        : ${RUKH_DISPUTE_RESOLVER_ADDRESS:="0x5B18a2DdF5E71013DA70D5737EDe125f6d809fE9"}
+        : ${RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS:="0x5B18a2DdF5E71013DA70D5737EDe125f6d809fE9"}
         ;;
     local)
         : ${MNEMONICS:="test test test test test test test test test test test junk"}

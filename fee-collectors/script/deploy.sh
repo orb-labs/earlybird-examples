@@ -1,7 +1,24 @@
 ############################################### SETTING ENVIRONMENT VARIABLES ##############################################
 
-### set env vars if unset
+# set env vars if unset
+### default environment
 : ${ENVIRONMENT:="local"}
+
+case $ENVIRONMENT in
+    mainnet)
+        : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
+        ;;
+    testnet)
+        : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
+        ;;
+    local)
+        : ${MNEMONICS:="test test test test test test test test test test test junk"}
+        ;;
+    *)
+        echo "invalid environment" && exit 1
+        ;;
+esac
+
 : ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
 : ${KEY_INDEX:="0"}
 : ${MNEMONICS:="test test test test test test test test test test test junk"}
