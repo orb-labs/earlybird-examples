@@ -1,7 +1,24 @@
 ############################################### SETTING ENVIRONMENT VARIABLES ##############################################
 
-### set env vars if unset
+# set env vars if unset
+### default environment
 : ${ENVIRONMENT:="local"}
+
+case $ENVIRONMENT in
+    mainnet)
+        : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
+        ;;
+    testnet)
+        : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
+        ;;
+    local)
+        : ${MNEMONICS:="test test test test test test test test test test test junk"}
+        ;;
+    *)
+        echo "invalid environment" && exit 1
+        ;;
+esac
+
 : ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
 : ${KEY_INDEX:="0"}
 : ${MNEMONICS:="test test test test test test test test test test test junk"}
@@ -78,7 +95,7 @@ do
     export EXPECTED_TEST_SFT_ADDRESSES_9=`address_from_filepath "$sft_address_dir_path/testSFT-9.txt"`
     
     ########################################## DEPLOY ######################################################################
-    export MAGICLANE_SPOKE_ENDPOINT_ADDRESS=$(<../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/magiclane-evm/spokeEndpoint.txt)
+    export MAGICLANE_SPOKE_ENDPOINT_ADDRESS=$(<../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/magiclane-evm/spokeEndpoint.txt) || exit 1
     
     forge script --legacy deploymentScripts/MagiclaneMockApp.s.sol:MagiclaneMockAppDeployment --rpc-url $RPC_URL --broadcast
     forge script --legacy deploymentScripts/TestFT.s.sol:TestFTDeployment --rpc-url $RPC_URL --broadcast
