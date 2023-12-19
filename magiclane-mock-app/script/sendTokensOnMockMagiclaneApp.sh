@@ -14,7 +14,7 @@ case $ENVIRONMENT in
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         ;;
     local)
-        : ${SENDING_KEY_INDEX:="5"}
+        : ${SENDING_KEY_INDEX:="0"}
         : ${MNEMONICS:="test test test test test test test test test test test junk"}
         ;;
     *)
@@ -67,15 +67,15 @@ while true; do
 
     echo "\n"
     echo "Enter the number of nonfungible tokens you will like to send:"
-     select NEW_NUMBER_OF_NFTS in {1..10}; do
-        [[ -n $NEW_NUMBER_OF_NFTS ]] || { echo "Invalid chain. Please try again." >&2; continue; }
+     select NEW_NUMBER_OF_NFTS in {0..10}; do
+        [[ $NEW_NUMBER_OF_NFTS -ge 0 && $NEW_NUMBER_OF_NFTS -le 9 ]] || { echo "Invalid chain. Please try again." >&2; continue; }
         break # valid choice was made; exit prompt.
     done
 
     echo "\n"
     echo "Enter the number of semifungible tokens you will like to send:"
-     select NEW_NUMBER_OF_SFTS in {1..10}; do
-        [[ -n $NEW_NUMBER_OF_SFTS ]] || { echo "Invalid chain. Please try again." >&2; continue; }
+     select NEW_NUMBER_OF_SFTS in {0..10}; do
+        [[ $NEW_NUMBER_OF_NFTS -ge 0 && $NEW_NUMBER_OF_NFTS -le 9 ]] || { echo "Invalid chain. Please try again." >&2; continue; }
         break # valid choice was made; exit prompt.
     done
 
@@ -87,7 +87,7 @@ while true; do
     then
         destination_magiclane_mock_app_address=$(<$destination_magiclane_mock_app_address_path)
         export RECEIVER_MAGICLANE_MOCK_APP_ADDRESS=$destination_magiclane_mock_app_address
-        export RECEIVER_MAGICLANE_SPOKE_ID=$(<../addresses/"$ENVIRONMENT"/"$destinationChain"/magiclane-evm/magiclaneSpokeId.txt)
+        export RECEIVER_MAGICLANE_SPOKE_ID=$(<../addresses/"$ENVIRONMENT"/"$destinationChain"/magiclane-evm/spokeId.txt)
     else
         echo "$ENVIRONMENT destination mock thunderbird app address not found at $destination_magiclane_mock_app_address_path" && exit 10
     fi
@@ -99,25 +99,25 @@ while true; do
     source_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/magiclaneMockApp.txt"
     . "$sourceChainConfigsPath"
 
-    # TODO(felix): this needs to be updated
     export MAGICLANE_SPOKE_ENDPOINT_ADDRESS=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/magiclane-evm/spokeEndpoint.txt)
     export MESSAGE_STRING=$NEWMESSAGE
     export NUMBER_OF_FTS=$NEW_NUMBER_OF_FTS
     export NUMBER_OF_NFTS=$NEW_NUMBER_OF_NFTS
     export NUMBER_OF_SFTS=$NEW_NUMBER_OF_SFTS
-    for i in {1..$NEW_NUMBER_OF_FTS}
+
+    for i in $(seq 0 $NEW_NUMBER_OF_FTS)
     do
         export TEST_FT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestFTs/TestFT-"$i".txt)
     done
 
-    for i in {1..$NEW_NUMBER_OF_NFTS}
+    for i in $(seq 0 $NEW_NUMBER_OF_NFTS)
     do
         export TEST_NFT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestNFTs/TestNFT-"$i".txt)
     done
 
-    for i in {1..$NEW_NUMBER_OF_SFTS}
+    for i in $(seq 0 $NEW_NUMBER_OF_SFTS)
     do
-        export TEST_SFT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestFTs/TestSFT-"$i".txt)
+        export TEST_SFT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestSFTs/TestSFT-"$i".txt)
     done
 
     forge script --legacy deploymentScripts/MagiclaneMockApp.s.sol:MagiclaneMockAppSendTokens --rpc-url $RPC_URL --broadcast
