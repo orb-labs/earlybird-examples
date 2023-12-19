@@ -5,10 +5,10 @@
 : ${ENVIRONMENT:="local"}
 
 case $ENVIRONMENT in
-    mainnet)
+    prod)
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         ;;
-    testnet)
+    dev)
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         ;;
     local)
@@ -19,9 +19,11 @@ case $ENVIRONMENT in
         ;;
 esac
 
+### other env vars
 : ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
 : ${KEY_INDEX:="0"}
-: ${MNEMONICS:="test test test test test test test test test test test junk"}
+
+# export env vars needed by the Solidity scripts
 export ENVIRONMENT KEY_INDEX MNEMONICS
 
 ############################################## HELPER FUNCTIONS ############################################################
