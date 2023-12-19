@@ -1,0 +1,14 @@
+name: pull_request
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  checkout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+  test:
+    uses: ./.github/workflows/slither.yaml
