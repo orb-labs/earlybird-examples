@@ -60,10 +60,12 @@ contract MagiclaneMockAppSendTokens is Script {
         for (uint256 i = 0; i < numberOfFTs; i++) {
             address tokenAddress = vm.envAddress(string.concat("TEST_FT_ADDRESSES_", Strings.toString(i)));
             IMagiclaneSpokeEndpointSendingFunctions.FTObjectForSendFunctions memory ftObject =
-            IMagiclaneSpokeEndpointSendingFunctions.FTObjectForSendFunctions(tokenAddress, true, 10_000 * i, 10_000 * i);
+            IMagiclaneSpokeEndpointSendingFunctions.FTObjectForSendFunctions(tokenAddress, true, 10_000 * (i + 1), 10_000 * (i + 1));
 
             fungibleTokens[i] = ftObject;
+            vm.startBroadcast(sendingPrivateKey);
             IERC20(fungibleTokens[i].tokenAddress).approve(magiclaneEndpoint, fungibleTokens[i].amount);
+            vm.stopBroadcast();
         }
 
         IMagiclaneSpokeEndpointSendingFunctions.NFTObjectForSendFunctions[] memory nonFungibleTokens =
@@ -74,7 +76,9 @@ contract MagiclaneMockAppSendTokens is Script {
                 IMagiclaneSpokeEndpointSendingFunctions.NFTObjectForSendFunctions(tokenAddress, true, false, i);
 
             nonFungibleTokens[i] = nftObject;
+            vm.startBroadcast(sendingPrivateKey);
             IERC721((nonFungibleTokens[i].tokenAddress)).approve(magiclaneEndpoint, nonFungibleTokens[i].id);
+            vm.stopBroadcast();
         }
 
         IMagiclaneSpokeEndpointSendingFunctions.SFTObjectForSendFunctions[] memory semiFungibleTokens =
@@ -85,7 +89,9 @@ contract MagiclaneMockAppSendTokens is Script {
             IMagiclaneSpokeEndpointSendingFunctions.SFTObjectForSendFunctions(tokenAddress, true, false, i, 10_000 * i);
 
             semiFungibleTokens[i] = sftObject;
+            vm.startBroadcast(sendingPrivateKey);
             IERC1155(semiFungibleTokens[i].tokenAddress).setApprovalForAll(magiclaneEndpoint, true);
+            vm.stopBroadcast();
         }
 
         string memory message = vm.envString("MESSAGE_STRING");
@@ -95,8 +101,8 @@ contract MagiclaneMockAppSendTokens is Script {
         );
 
         bytes memory payload = abi.encode(message, senderAddress);
-        Gas.Data memory gasOnHub = Gas.Data(500_000, 0, 2_000);
-        Gas.Data memory gasOnDest = Gas.Data(500_000, 0, 2_000);
+        Gas.Data memory gasOnHub = Gas.Data(3_000_000, 0, 4_000);
+        Gas.Data memory gasOnDest = Gas.Data(3_000_000, 0, 4_000);
 
         IMagiclaneSpokeEndpointSendingFunctions.SendTokensRequest memory sendTokensRequest =
         IMagiclaneSpokeEndpointSendingFunctions.SendTokensRequest(
