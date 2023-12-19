@@ -5,10 +5,10 @@
 : ${ENVIRONMENT:="local"}
 
 case $ENVIRONMENT in
-    mainnet)
+    prod)
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         ;;
-    testnet)
+    dev)
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         : ${RUKH_DISPUTER_CONTRACT_ADDRESS:="0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f"}
         : ${RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS:="0x5B18a2DdF5E71013DA70D5737EDe125f6d809fE9"}
@@ -78,17 +78,23 @@ do
     if [[ -z $ORACLE_FEE_COLLECTOR_ADDRESS || -z $RELAYER_FEE_COLLECTOR_ADDRESS ]]; then echo "fee collectors not set" && exit 2; fi
 
     ########################################## DEPLOY THUNDERBIRD VERSION ##################################################
+    
+    # deploy recs contract
     forge script --legacy --skip-simulation deploymentScripts/thunderbird/ThunderbirdRecsContract.s.sol:ThunderbirdRecsContractDeployment --rpc-url $RPC_URL --broadcast
-    # assume the address has been written by the script and read from it
+    ### assume the address has been written by the script and read from it
     export THUNDERBIRD_RECS_CONTRACT_ADDRESS=$(<$address_dir_path/thunderbird/recs_contract.txt)
     
+    # deploy mock app
     forge script --legacy --skip-simulation deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppDeployment --rpc-url $RPC_URL --broadcast
-
     
     ########################################## DEPLOY RUKH VERSION ######################################################### 
+    
+    # deploy recs contract
     forge script --legacy --skip-simulation deploymentScripts/rukh/RukhRecsContract.s.sol:RukhRecsContractDeployment --rpc-url $RPC_URL --broadcast
-    # assume the address has been written by the script and read from it
+    ### assume the address has been written by the script and read from it
     export RUKH_RECS_CONTRACT_ADDRESS=$(<$address_dir_path/rukh/recs_contract.txt)
     
+    # deploy mock app
     forge script --legacy --skip-simulation deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppDeployment --rpc-url $RPC_URL --broadcast
+
 done
