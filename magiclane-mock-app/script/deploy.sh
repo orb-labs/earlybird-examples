@@ -5,10 +5,10 @@
 : ${ENVIRONMENT:="local"}
 
 case $ENVIRONMENT in
-    mainnet)
+    prod)
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         ;;
-    testnet)
+    dev)
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         ;;
     local)
@@ -19,15 +19,18 @@ case $ENVIRONMENT in
         ;;
 esac
 
+### other env vars
 : ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
 : ${KEY_INDEX:="0"}
-: ${MNEMONICS:="test test test test test test test test test test test junk"}
 : ${SENDING_MNEMONICS:=$MNEMONICS}
 : ${SENDING_KEY_INDEX:=$KEY_INDEX}
+
+# export env vars needed by the Solidity scripts
 export ENVIRONMENT KEY_INDEX MNEMONICS SENDING_MNEMONICS SENDING_KEY_INDEX
 
 ############################################## HELPER FUNCTIONS ############################################################
 
+### get address from path arg or use placeholder
 address_from_filepath() {
     existing_address_path=$1
     if [ -f $existing_address_path ]
@@ -41,6 +44,10 @@ address_from_filepath() {
 
 ############################################################################################################################
 if [[ -z $CHAINS_DIRECTORY || -z $ENVIRONMENT || -z $KEY_INDEX || -z $MNEMONICS  ]]; then echo "env vars unset" && exit 1;fi
+
+# the deploy will run for each file in the chains directory, 
+# all of which should be shell scripts that set env vars specific to the chain
+# the filename should be the chain name
 for entry in "$CHAINS_DIRECTORY"/*
 do
     . "$entry"
