@@ -55,8 +55,9 @@ do
     . "$entry"
 
     ########################################## GET EXISTING ADDRESSES ######################################################
+    if [[ ! -d "../addresses/${ENVIRONMENT}" ]]; then mkdir "../addresses/${ENVIRONMENT}"; fi
     address_dir_path="../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}""
-    if [[ ! -d $address_dir_path ]]; then echo "address directory not found at $address_dir_path" && exit 1; fi
+    if [[ ! -d $address_dir_path ]]; then mkdir $address_dir_path && exit 1; fi
     
     # get existing addresses of mock app if previously deployed to this chain
     export EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS=`address_from_filepath "$address_dir_path/thunderbird/app.txt"`

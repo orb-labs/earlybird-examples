@@ -45,6 +45,8 @@ for entry in "$CHAINS_DIRECTORY"/*
 do
     . "$entry"
 
+    if [[ ! -d "../addresses/${ENVIRONMENT}" ]]; then mkdir "../addresses/${ENVIRONMENT}"; fi
+    
     address_dir="../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}""
     if [[ ! -d $address_dir ]]; then mkdir $address_dir; fi
 
