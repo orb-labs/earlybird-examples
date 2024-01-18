@@ -5,11 +5,11 @@
 : ${ENVIRONMENT:="local"}
 
 case $ENVIRONMENT in
-    mainnet)
+    prod)
         : ${SENDING_KEY_INDEX:="0"}
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         ;;
-    testnet)
+    dev)
         : ${SENDING_KEY_INDEX:="0"}
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         ;;
