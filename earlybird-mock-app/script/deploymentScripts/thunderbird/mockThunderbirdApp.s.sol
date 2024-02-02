@@ -22,8 +22,8 @@ contract MockThunderbirdAppDeployment is Script {
 
         ISharedSendModule.AppConfig memory appConfigForSending = ISharedSendModule.AppConfig(
             false,
-            vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS"),
-            vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS")
+            vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS"),
+            vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS")
         );
 
         IThunderbirdReceiveModule.AppConfig memory appConfigForReceiving = IThunderbirdReceiveModule.AppConfig(
@@ -79,6 +79,8 @@ contract MockThunderbirdAppDeployment is Script {
             );
             vm.stopBroadcast();
 
+            console.log(vm.envString("RELAYER_FEE_COLLECTOR_ADDRESS"));
+            console.log(vm.envString("ORACLE_FEE_COLLECTOR_ADDRESS"));
             console.log("MockThunderbirdApp already deployed on %s at %s", chainName, expectedMockAppAddress);
             console.log("Resetting configs");
         }
@@ -93,10 +95,11 @@ contract MockThunderbirdAppSendMessage is Script {
         );
         
         ISharedSendModule.AdditionalParams memory additionalParams = ISharedSendModule.AdditionalParams(
-            address(0),
-            true,
-            300000,
-            vm.envAddress("RECEIVER_RELAYER_FEE_COLLECTOR")
+            address(0), // address feeToken;
+            true,       // bool isOrderedMsg;
+            450000,     // uint256 destinationGas;
+            // when using address 0, it will use the default relayer fee collector from the AppConfig
+            address(0) // address expectedRelayerFeeCollector;
         );
 
         vm.startBroadcast(deployerPrivateKey);

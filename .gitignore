@@ -15,3 +15,5 @@ docs/
 .env
 
 node_modules
+
+**/addresses/local/**/*.txt

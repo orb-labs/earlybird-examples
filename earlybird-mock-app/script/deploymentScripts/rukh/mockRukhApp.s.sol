@@ -23,8 +23,8 @@ contract MockRukhAppDeployment is Script {
 
         ISharedSendModule.AppConfig memory appConfigForSending = ISharedSendModule.AppConfig(
             false,
-            vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS"),
-            vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS")
+            vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS"),
+            vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS")
         );
         bool directMsgsEnabled = true;
 
@@ -105,8 +105,9 @@ contract MockRukhAppSendMessage is Script {
         ISharedSendModule.AdditionalParams memory additionalParams = ISharedSendModule.AdditionalParams(
             address(0),
             true,
-            300000,
-            vm.envAddress("RECEIVER_RELAYER_FEE_COLLECTOR")
+            450000,     // uint256 destinationGas;
+            // when using address 0, it will use the default relayer fee collector from the AppConfig
+            address(0) // address expectedRelayerFeeCollector;
         );
 
         vm.startBroadcast(deployerPrivateKey);
