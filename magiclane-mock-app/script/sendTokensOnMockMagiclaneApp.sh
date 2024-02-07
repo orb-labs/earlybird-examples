@@ -105,21 +105,27 @@ while true; do
     export NUMBER_OF_NFTS=$NEW_NUMBER_OF_NFTS
     export NUMBER_OF_SFTS=$NEW_NUMBER_OF_SFTS
 
-    for i in $(seq 0 $NEW_NUMBER_OF_FTS)
-    do
-        export TEST_FT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestFTs/TestFT-"$i".txt)
-    done
+    if [[ $NEW_NUMBER_OF_FTS -gt 0 ]]; then
+        for i in $(seq 0 $(($NEW_NUMBER_OF_FTS - 1)))
+        do
+            export TEST_FT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestFTs/TestFT-"$i".txt)
+        done
+    fi
 
-    for i in $(seq 0 $NEW_NUMBER_OF_NFTS)
-    do
-        export TEST_NFT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestNFTs/TestNFT-"$i".txt)
-    done
+    if [[ $NEW_NUMBER_OF_NFTS -gt 0 ]]; then
+        for i in $(seq 0 $(($NEW_NUMBER_OF_NFTS - 1)))
+        do
+            export TEST_NFT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestNFTs/TestNFT-"$i".txt)
+        done
+    fi
 
-    for i in $(seq 0 $NEW_NUMBER_OF_SFTS)
-    do
-        export TEST_SFT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestSFTs/TestSFT-"$i".txt)
-    done
+    if [[ $NEW_NUMBER_OF_SFTS -gt 0 ]]; then
+        for i in $(seq 0 $(($NEW_NUMBER_OF_SFTS - 1)))
+        do
+            export TEST_SFT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestSFTs/TestSFT-"$i".txt)
+        done
+    fi
 
-    forge script --legacy deploymentScripts/MagiclaneMockApp.s.sol:MagiclaneMockAppSendTokens --rpc-url $RPC_URL --broadcast
+    forge script --legacy deploymentScripts/MagiclaneMockApp.s.sol:MagiclaneMockAppSendMessage --rpc-url $RPC_URL --broadcast
     echo "\n"
 done

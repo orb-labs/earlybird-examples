@@ -24,9 +24,9 @@ contract MagiclaneMockAppDeployment is Script {
         }
 
         if (size == 0) {
-            address magiclaneEndpoint = vm.envAddress("MAGICLANE_SPOKE_ENDPOINT_ADDRESS");
+            address spokeEndpoint = vm.envAddress("MAGICLANE_SPOKE_ENDPOINT_ADDRESS");
             vm.startBroadcast(deployerPrivateKey);
-            MagiclaneMockApp magiclaneMockApp = new MagiclaneMockApp(magiclaneEndpoint);
+            MagiclaneMockApp magiclaneMockApp = new MagiclaneMockApp(spokeEndpoint);
             vm.stopBroadcast();
 
             string memory storagePath =
@@ -49,7 +49,7 @@ contract MagiclaneMockAppSendTokens is Script {
         uint256 sendingPrivateKey =
             vm.deriveKey(vm.envString("SENDING_MNEMONICS"), uint32(vm.envUint("SENDING_KEY_INDEX")));
         address senderAddress = vm.addr(sendingPrivateKey);
-        address magiclaneEndpoint = vm.envAddress("MAGICLANE_SPOKE_ENDPOINT_ADDRESS");
+        address spokeEndpoint = vm.envAddress("MAGICLANE_SPOKE_ENDPOINT_ADDRESS");
         address receiverMockAppAddress = vm.envAddress("RECEIVER_MAGICLANE_MOCK_APP_ADDRESS");
         uint256 numberOfFTs = vm.envUint("NUMBER_OF_FTS");
         uint256 numberOfNFTs = vm.envUint("NUMBER_OF_NFTS");
@@ -64,7 +64,7 @@ contract MagiclaneMockAppSendTokens is Script {
 
             fungibleTokens[i] = ftObject;
             vm.startBroadcast(sendingPrivateKey);
-            IERC20(fungibleTokens[i].tokenAddress).approve(magiclaneEndpoint, fungibleTokens[i].amount);
+            IERC20(fungibleTokens[i].tokenAddress).approve(spokeEndpoint, fungibleTokens[i].amount);
             vm.stopBroadcast();
         }
 
@@ -77,7 +77,7 @@ contract MagiclaneMockAppSendTokens is Script {
 
             nonFungibleTokens[i] = nftObject;
             vm.startBroadcast(sendingPrivateKey);
-            IERC721((nonFungibleTokens[i].tokenAddress)).approve(magiclaneEndpoint, nonFungibleTokens[i].id);
+            IERC721((nonFungibleTokens[i].tokenAddress)).approve(spokeEndpoint, nonFungibleTokens[i].id);
             vm.stopBroadcast();
         }
 
@@ -90,14 +90,18 @@ contract MagiclaneMockAppSendTokens is Script {
 
             semiFungibleTokens[i] = sftObject;
             vm.startBroadcast(sendingPrivateKey);
-            IERC1155(semiFungibleTokens[i].tokenAddress).setApprovalForAll(magiclaneEndpoint, true);
+            IERC1155(semiFungibleTokens[i].tokenAddress).setApprovalForAll(spokeEndpoint, true);
             vm.stopBroadcast();
         }
 
         string memory message = vm.envString("MESSAGE_STRING");
+        
+        // pay out to destination spoke, refund to source spoke/ sender
         bytes32 receiverMagiclaneSpokeId = vm.envBytes32("RECEIVER_MAGICLANE_SPOKE_ID");
         PayoutAndRefund.Info memory info = PayoutAndRefund.Info(
-            receiverMagiclaneSpokeId, abi.encode(receiverMockAppAddress), abi.encode(senderAddress)
+            receiverMagiclaneSpokeId,           // bytes32 instanceId
+            abi.encode(receiverMockAppAddress), // bytes payoutAddress
+            abi.encode(senderAddress)           // bytes refundAddress; 
         );
 
         bytes memory payload = abi.encode(message, senderAddress);
@@ -106,19 +110,19 @@ contract MagiclaneMockAppSendTokens is Script {
 
         IMagiclaneSpokeEndpointSendingFunctions.SendTokensRequest memory sendTokensRequest =
         IMagiclaneSpokeEndpointSendingFunctions.SendTokensRequest(
-            false, // collectTokensThroughHook
-            address(this), // placehloder for tokenSource
-            fungibleTokens,
-            nonFungibleTokens,
-            semiFungibleTokens,
-            payload,
-            info,
-            gasOnHub,
-            gasOnDest
+            false,              // bool collectTokensThroughHook
+            address(this),      // address tokenSource
+            fungibleTokens,     // FTObjectForSendFunctions[] fungibleTokens
+            nonFungibleTokens,  // NFTObjectForSendFunctions[] nonFungibleTokens
+            semiFungibleTokens, // SFTObjectForSendFunctions[] semiFungibleTokens
+            payload,            // bytes message
+            info,               // PayoutAndRefund.Info info
+            gasOnHub,           // Gas.Data gasOnHub
+            gasOnDest           // Gas.Data gasOnDest
         );
 
         vm.startBroadcast(sendingPrivateKey);
-        IMagiclaneSpokeEndpointSendingFunctions(magiclaneEndpoint).sendTokens(sendTokensRequest);
+        IMagiclaneSpokeEndpointSendingFunctions(spokeEndpoint).sendTokens(sendTokensRequest);
         vm.stopBroadcast();
         console.log("sent message and tokens on Magiclane mock app");
     }

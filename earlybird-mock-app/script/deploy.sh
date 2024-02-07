@@ -54,6 +54,9 @@ do
     # run script in environmentVariables/ to set env vars for the chain
     . "$entry"
 
+    # chain-specific idiosyncracies
+    if [[ $CHAIN_NAME == "moonbeam_alpha_testnet" ]]; then SKIP_SIMULATION="--skip-simulation"; else SKIP_SIMULATION=""; fi
+
     ########################################## GET EXISTING ADDRESSES ######################################################
     if [[ ! -d "../addresses/${ENVIRONMENT}" ]]; then mkdir "../addresses/${ENVIRONMENT}"; fi
     address_dir_path="../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}""
@@ -83,21 +86,20 @@ do
     ########################################## DEPLOY THUNDERBIRD VERSION ##################################################
     
     # deploy recs contract
-    forge script --legacy --skip-simulation deploymentScripts/thunderbird/ThunderbirdRecsContract.s.sol:ThunderbirdRecsContractDeployment --rpc-url $RPC_URL --broadcast
+    forge script --legacy $SKIP_SIMULATION deploymentScripts/thunderbird/ThunderbirdRecsContract.s.sol:ThunderbirdRecsContractDeployment --rpc-url $RPC_URL --broadcast
     ### assume the address has been written by the script and read from it
     export THUNDERBIRD_RECS_CONTRACT_ADDRESS=$(<$address_dir_path/thunderbird/recs_contract.txt)
     
     # deploy mock app
-    forge script --legacy --skip-simulation deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppDeployment --rpc-url $RPC_URL --broadcast
+    forge script --legacy $SKIP_SIMULATION deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppDeployment --rpc-url $RPC_URL --broadcast
     
     ########################################## DEPLOY RUKH VERSION ######################################################### 
     
     # deploy recs contract
-    forge script --legacy --skip-simulation deploymentScripts/rukh/RukhRecsContract.s.sol:RukhRecsContractDeployment --rpc-url $RPC_URL --broadcast
+    forge script --legacy $SKIP_SIMULATION deploymentScripts/rukh/RukhRecsContract.s.sol:RukhRecsContractDeployment --rpc-url $RPC_URL --broadcast
     ### assume the address has been written by the script and read from it
     export RUKH_RECS_CONTRACT_ADDRESS=$(<$address_dir_path/rukh/recs_contract.txt)
     
     # deploy mock app
-    forge script --legacy --skip-simulation deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppDeployment --rpc-url $RPC_URL --broadcast
-
+    forge script --legacy $SKIP_SIMULATION deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppDeployment --rpc-url $RPC_URL --broadcast
 done

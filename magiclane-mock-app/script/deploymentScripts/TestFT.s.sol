@@ -13,7 +13,9 @@ contract TestFTDeployment is Script {
             vm.deriveKey(vm.envString("SENDING_MNEMONICS"), uint32(vm.envUint("SENDING_KEY_INDEX")));
         string memory chainName = vm.envString("CHAIN_NAME");
 
-        for (uint256 i = 0; i < 10; i++) {
+        uint256 numberOfTokens = vm.envUint("NUMBER_OF_TOKENS");
+
+        for (uint256 i = 0; i <= numberOfTokens; i++) {
             string memory testFTEnvName = string.concat("EXPECTED_TEST_FT_ADDRESSES_", Strings.toString(i));
             address expectedTestFTAddress = vm.envAddress(testFTEnvName);
 

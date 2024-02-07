@@ -13,6 +13,7 @@ case $ENVIRONMENT in
         ;;
     local)
         : ${MNEMONICS:="test test test test test test test test test test test junk"}
+        : ${NUMBER_OF_TOKENS:="3"}
         ;;
     *)
         echo "invalid environment" && exit 1
@@ -26,7 +27,7 @@ esac
 : ${SENDING_KEY_INDEX:=$KEY_INDEX}
 
 # export env vars needed by the Solidity scripts
-export ENVIRONMENT KEY_INDEX MNEMONICS SENDING_MNEMONICS SENDING_KEY_INDEX
+export ENVIRONMENT KEY_INDEX MNEMONICS SENDING_MNEMONICS SENDING_KEY_INDEX NUMBER_OF_TOKENS
 
 ############################################## HELPER FUNCTIONS ############################################################
 
@@ -68,38 +69,13 @@ do
     if [ ! -d "$nft_address_dir_path" ]; then mkdir $nft_address_dir_path; fi
     if [ ! -d "$sft_address_dir_path" ]; then mkdir $sft_address_dir_path; fi
 
-    export EXPECTED_TEST_FT_ADDRESSES_0=`address_from_filepath "$ft_address_dir_path/testFT-0.txt"`
-    export EXPECTED_TEST_FT_ADDRESSES_1=`address_from_filepath "$ft_address_dir_path/testFT-1.txt"`
-    export EXPECTED_TEST_FT_ADDRESSES_2=`address_from_filepath "$ft_address_dir_path/testFT-2.txt"`
-    export EXPECTED_TEST_FT_ADDRESSES_3=`address_from_filepath "$ft_address_dir_path/testFT-3.txt"`
-    export EXPECTED_TEST_FT_ADDRESSES_4=`address_from_filepath "$ft_address_dir_path/testFT-4.txt"`
-    export EXPECTED_TEST_FT_ADDRESSES_5=`address_from_filepath "$ft_address_dir_path/testFT-5.txt"`
-    export EXPECTED_TEST_FT_ADDRESSES_6=`address_from_filepath "$ft_address_dir_path/testFT-6.txt"`
-    export EXPECTED_TEST_FT_ADDRESSES_7=`address_from_filepath "$ft_address_dir_path/testFT-7.txt"`
-    export EXPECTED_TEST_FT_ADDRESSES_8=`address_from_filepath "$ft_address_dir_path/testFT-8.txt"`
-    export EXPECTED_TEST_FT_ADDRESSES_9=`address_from_filepath "$ft_address_dir_path/testFT-9.txt"`
-
-    export EXPECTED_TEST_NFT_ADDRESSES_0=`address_from_filepath "$nft_address_dir_path/testNFT-0.txt"`
-    export EXPECTED_TEST_NFT_ADDRESSES_1=`address_from_filepath "$nft_address_dir_path/testNFT-1.txt"`
-    export EXPECTED_TEST_NFT_ADDRESSES_2=`address_from_filepath "$nft_address_dir_path/testNFT-2.txt"`
-    export EXPECTED_TEST_NFT_ADDRESSES_3=`address_from_filepath "$nft_address_dir_path/testNFT-3.txt"`
-    export EXPECTED_TEST_NFT_ADDRESSES_4=`address_from_filepath "$nft_address_dir_path/testNFT-4.txt"`
-    export EXPECTED_TEST_NFT_ADDRESSES_5=`address_from_filepath "$nft_address_dir_path/testNFT-5.txt"`
-    export EXPECTED_TEST_NFT_ADDRESSES_6=`address_from_filepath "$nft_address_dir_path/testNFT-6.txt"`
-    export EXPECTED_TEST_NFT_ADDRESSES_7=`address_from_filepath "$nft_address_dir_path/testNFT-7.txt"`
-    export EXPECTED_TEST_NFT_ADDRESSES_8=`address_from_filepath "$nft_address_dir_path/testNFT-8.txt"`
-    export EXPECTED_TEST_NFT_ADDRESSES_9=`address_from_filepath "$nft_address_dir_path/testNFT-9.txt"`
-
-    export EXPECTED_TEST_SFT_ADDRESSES_0=`address_from_filepath "$sft_address_dir_path/testSFT-0.txt"`
-    export EXPECTED_TEST_SFT_ADDRESSES_1=`address_from_filepath "$sft_address_dir_path/testSFT-1.txt"`
-    export EXPECTED_TEST_SFT_ADDRESSES_2=`address_from_filepath "$sft_address_dir_path/testSFT-2.txt"`
-    export EXPECTED_TEST_SFT_ADDRESSES_3=`address_from_filepath "$sft_address_dir_path/testSFT-3.txt"`
-    export EXPECTED_TEST_SFT_ADDRESSES_4=`address_from_filepath "$sft_address_dir_path/testSFT-4.txt"`
-    export EXPECTED_TEST_SFT_ADDRESSES_5=`address_from_filepath "$sft_address_dir_path/testSFT-5.txt"`
-    export EXPECTED_TEST_SFT_ADDRESSES_6=`address_from_filepath "$sft_address_dir_path/testSFT-6.txt"`
-    export EXPECTED_TEST_SFT_ADDRESSES_7=`address_from_filepath "$sft_address_dir_path/testSFT-7.txt"`
-    export EXPECTED_TEST_SFT_ADDRESSES_8=`address_from_filepath "$sft_address_dir_path/testSFT-8.txt"`
-    export EXPECTED_TEST_SFT_ADDRESSES_9=`address_from_filepath "$sft_address_dir_path/testSFT-9.txt"`
+    limit=$NUMBER_OF_TOKENS
+    i=0; while [ $i -le $limit ]; do
+        export EXPECTED_TEST_FT_ADDRESSES_$i=`address_from_filepath "$ft_address_dir_path/testFT-$i.txt"`
+        export EXPECTED_TEST_NFT_ADDRESSES_$i=`address_from_filepath "$nft_address_dir_path/testNFT-$i.txt"`
+        export EXPECTED_TEST_SFT_ADDRESSES_$i=`address_from_filepath "$sft_address_dir_path/testSFT-$i.txt"`
+        i=$((i + 1))
+    done
     
     ########################################## DEPLOY ######################################################################
     export MAGICLANE_SPOKE_ENDPOINT_ADDRESS=$(<../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/magiclane-evm/spokeEndpoint.txt) || exit 1
@@ -111,74 +87,27 @@ do
 
     export MAGICLANE_MOCK_APP_ADDRESS=`address_from_filepath "../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}"/magiclaneMockApp.txt"`
     
-    export TEST_FT_ADDRESSES_0=`address_from_filepath "$ft_address_dir_path/testFT-0.txt"`
-    export TEST_FT_ADDRESSES_1=`address_from_filepath "$ft_address_dir_path/testFT-1.txt"`
-    export TEST_FT_ADDRESSES_2=`address_from_filepath "$ft_address_dir_path/testFT-2.txt"`
-    export TEST_FT_ADDRESSES_3=`address_from_filepath "$ft_address_dir_path/testFT-3.txt"`
-    export TEST_FT_ADDRESSES_4=`address_from_filepath "$ft_address_dir_path/testFT-4.txt"`
-    export TEST_FT_ADDRESSES_5=`address_from_filepath "$ft_address_dir_path/testFT-5.txt"`
-    export TEST_FT_ADDRESSES_6=`address_from_filepath "$ft_address_dir_path/testFT-6.txt"`
-    export TEST_FT_ADDRESSES_7=`address_from_filepath "$ft_address_dir_path/testFT-7.txt"`
-    export TEST_FT_ADDRESSES_8=`address_from_filepath "$ft_address_dir_path/testFT-8.txt"`
-    export TEST_FT_ADDRESSES_9=`address_from_filepath "$ft_address_dir_path/testFT-9.txt"`
-
-    export TEST_NFT_ADDRESSES_0=`address_from_filepath "$nft_address_dir_path/testNFT-0.txt"`
-    export TEST_NFT_ADDRESSES_1=`address_from_filepath "$nft_address_dir_path/testNFT-1.txt"`
-    export TEST_NFT_ADDRESSES_2=`address_from_filepath "$nft_address_dir_path/testNFT-2.txt"`
-    export TEST_NFT_ADDRESSES_3=`address_from_filepath "$nft_address_dir_path/testNFT-3.txt"`
-    export TEST_NFT_ADDRESSES_4=`address_from_filepath "$nft_address_dir_path/testNFT-4.txt"`
-    export TEST_NFT_ADDRESSES_5=`address_from_filepath "$nft_address_dir_path/testNFT-5.txt"`
-    export TEST_NFT_ADDRESSES_6=`address_from_filepath "$nft_address_dir_path/testNFT-6.txt"`
-    export TEST_NFT_ADDRESSES_7=`address_from_filepath "$nft_address_dir_path/testNFT-7.txt"`
-    export TEST_NFT_ADDRESSES_8=`address_from_filepath "$nft_address_dir_path/testNFT-8.txt"`
-    export TEST_NFT_ADDRESSES_9=`address_from_filepath "$nft_address_dir_path/testNFT-9.txt"`
-
-    export TEST_SFT_ADDRESSES_0=`address_from_filepath "$sft_address_dir_path/testSFT-0.txt"`
-    export TEST_SFT_ADDRESSES_1=`address_from_filepath "$sft_address_dir_path/testSFT-1.txt"`
-    export TEST_SFT_ADDRESSES_2=`address_from_filepath "$sft_address_dir_path/testSFT-2.txt"`
-    export TEST_SFT_ADDRESSES_3=`address_from_filepath "$sft_address_dir_path/testSFT-3.txt"`
-    export TEST_SFT_ADDRESSES_4=`address_from_filepath "$sft_address_dir_path/testSFT-4.txt"`
-    export TEST_SFT_ADDRESSES_5=`address_from_filepath "$sft_address_dir_path/testSFT-5.txt"`
-    export TEST_SFT_ADDRESSES_6=`address_from_filepath "$sft_address_dir_path/testSFT-6.txt"`
-    export TEST_SFT_ADDRESSES_7=`address_from_filepath "$sft_address_dir_path/testSFT-7.txt"`
-    export TEST_SFT_ADDRESSES_8=`address_from_filepath "$sft_address_dir_path/testSFT-8.txt"`
-    export TEST_SFT_ADDRESSES_9=`address_from_filepath "$sft_address_dir_path/testSFT-9.txt"`
+    i=0; while [ $i -le $limit ]; do
+        export TEST_FT_ADDRESSES_$i=`address_from_filepath "$ft_address_dir_path/testFT-$i.txt"`
+        export TEST_NFT_ADDRESSES_$i=`address_from_filepath "$nft_address_dir_path/testNFT-$i.txt"`
+        export TEST_SFT_ADDRESSES_$i=`address_from_filepath "$sft_address_dir_path/testSFT-$i.txt"`
+        i=$((i + 1))
+    done
     
-    echo "
-    deployed magiclane mock app and tokens on $CHAIN_NAME
-    magiclane mock app = ${MAGICLANE_MOCK_APP_ADDRESS}
-
-    TestFT_0 = ${TEST_FT_ADDRESSES_0}
-    TestFT_1 = ${TEST_FT_ADDRESSES_1}
-    TestFT_2 = ${TEST_FT_ADDRESSES_2}
-    TestFT_3 = ${TEST_FT_ADDRESSES_3}
-    TestFT_4 = ${TEST_FT_ADDRESSES_4}
-    TestFT_5 = ${TEST_FT_ADDRESSES_5}
-    TestFT_6 = ${TEST_FT_ADDRESSES_6}
-    TestFT_7 = ${TEST_FT_ADDRESSES_7}
-    TestFT_8 = ${TEST_FT_ADDRESSES_8}
-    TestFT_9 = ${TEST_FT_ADDRESSES_9}
-
-    TestNFT_0 = ${TEST_NFT_ADDRESSES_0}
-    TestNFT_1 = ${TEST_NFT_ADDRESSES_1}
-    TestNFT_2 = ${TEST_NFT_ADDRESSES_2}
-    TestNFT_3 = ${TEST_NFT_ADDRESSES_3}
-    TestNFT_4 = ${TEST_NFT_ADDRESSES_4}
-    TestNFT_5 = ${TEST_NFT_ADDRESSES_5}
-    TestNFT_6 = ${TEST_NFT_ADDRESSES_6}
-    TestNFT_7 = ${TEST_NFT_ADDRESSES_7}
-    TestNFT_8 = ${TEST_NFT_ADDRESSES_8}
-    TestNFT_9 = ${TEST_NFT_ADDRESSES_9}
-
-    TestSFT_0 = ${TEST_SFT_ADDRESSES_0}
-    TestSFT_1 = ${TEST_SFT_ADDRESSES_1}
-    TestSFT_2 = ${TEST_SFT_ADDRESSES_2}
-    TestSFT_3 = ${TEST_SFT_ADDRESSES_3}
-    TestSFT_4 = ${TEST_SFT_ADDRESSES_4}
-    TestSFT_5 = ${TEST_SFT_ADDRESSES_5}
-    TestSFT_6 = ${TEST_SFT_ADDRESSES_6}
-    TestSFT_7 = ${TEST_SFT_ADDRESSES_7}
-    TestSFT_8 = ${TEST_SFT_ADDRESSES_8}
-    TestSFT_9 = ${TEST_SFT_ADDRESSES_9}
-    "
+    echo "deployed magiclane mock app and tokens on $CHAIN_NAME"
+    echo "magiclane mock app = ${MAGICLANE_MOCK_APP_ADDRESS}"
+    i=0; while [ $i -le $limit ]; do
+        eval echo "TestFT_$i = \${TEST_FT_ADDRESSES_${i}}"
+        i=$((i + 1))
+    done
+    echo
+    i=0; while [ $i -le $limit ]; do
+        eval echo "TestNFT_$i = \${TEST_NFT_ADDRESSES_$i}"
+        i=$((i + 1))
+    done
+    echo
+    i=0; while [ $i -le $limit ]; do
+        eval echo "TestSFT_$i = \${TEST_SFT_ADDRESSES_$i}"
+        i=$((i + 1))
+    done
 done
