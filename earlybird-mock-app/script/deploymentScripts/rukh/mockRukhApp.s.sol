@@ -5,7 +5,8 @@ import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import "../../../src/RukhVersion/MockApp.sol";
 import "../../../lib/earlybird-evm-interfaces/src/Libraries/Rukh/RukhReceiveModule/IRukhReceiveModule.sol";
-import "../../../lib/earlybird-evm-interfaces/src/Libraries/SharedSendModule/ISharedSendModule.sol";
+import "../../../lib/earlybird-evm-interfaces/src/Libraries/SharedLibraryModules/ISharedSendModule.sol";
+import "../../../lib/earlybird-evm-interfaces/src/Libraries/ILibrary/IRequiredModuleFunctions.sol";
 
 
 contract MockRukhAppDeployment is Script {
@@ -102,7 +103,7 @@ contract MockRukhAppSendMessage is Script {
         );
 
         // Add in expectedRelayerFeeCollector as the 4th argument
-        ISharedSendModule.AdditionalParams memory additionalParams = ISharedSendModule.AdditionalParams(
+        IRequiredModuleFunctions.AdditionalParams memory additionalParams = IRequiredModuleFunctions.AdditionalParams(
             address(0),
             true,
             450000,     // uint256 destinationGas;

@@ -6,7 +6,8 @@ import "forge-std/console.sol";
 import "../../../src/ThunderbirdVersion/MockApp.sol";
 import "../../../lib/earlybird-evm-interfaces/src/Endpoint/IEndpoint/IEndpoint.sol";
 import "../../../lib/earlybird-evm-interfaces/src/Libraries/Thunderbird/ThunderbirdReceiveModule/IThunderbirdReceiveModule.sol";
-import "../../../lib/earlybird-evm-interfaces/src/Libraries/SharedSendModule/ISharedSendModule.sol";
+import "../../../lib/earlybird-evm-interfaces/src/Libraries/SharedLibraryModules/ISharedSendModule.sol";
+import "../../../lib/earlybird-evm-interfaces/src/Libraries/ILibrary/IRequiredModuleFunctions.sol";
 
 contract MockThunderbirdAppDeployment is Script {
     function run() external {
@@ -94,7 +95,7 @@ contract MockThunderbirdAppSendMessage is Script {
             uint32(vm.envUint("SENDING_KEY_INDEX"))
         );
         
-        ISharedSendModule.AdditionalParams memory additionalParams = ISharedSendModule.AdditionalParams(
+        IRequiredModuleFunctions.AdditionalParams memory additionalParams = IRequiredModuleFunctions.AdditionalParams(
             address(0), // address feeToken;
             true,       // bool isOrderedMsg;
             450000,     // uint256 destinationGas;

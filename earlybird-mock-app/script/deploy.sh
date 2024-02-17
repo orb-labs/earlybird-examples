@@ -70,13 +70,13 @@ do
     export EXPECTED_MOCK_RUKH_APP_ADDRESS=`address_from_filepath "$address_dir_path/rukh/app.txt"`
     export EXPECTED_RUKH_RECS_CONTRACT_ADDRESS=`address_from_filepath "$address_dir_path/rukh/recs_contract.txt"`
     
-    # get existing addresses of earlybird, fee collectors, and periphery contracts
+    # get existing addresses of earlybird and periphery contracts
     # previously deployed to this chain (must exist)
     export EARLYBIRD_ENDPOINT_ADDRESS=$(<${address_dir_path}/earlybird-evm/endpoint.txt)
-    export ORACLE_FEE_COLLECTOR_ADDRESS=$(<${address_dir_path}/fee-collectors/oracleFeeCollector.txt)
-    export RELAYER_FEE_COLLECTOR_ADDRESS=$(<${address_dir_path}/fee-collectors/relayerFeeCollector.txt)
     export ORACLE_ADDRESS=$(<${address_dir_path}/periphery-contracts/oracle.txt)
     export RELAYER_ADDRESS=$(<${address_dir_path}/periphery-contracts/relayer.txt)
+    export ORACLE_FEE_COLLECTOR_ADDRESS=$ORACLE_ADDRESS
+    export RELAYER_FEE_COLLECTOR_ADDRESS=$RELAYER_ADDRESS
     
     # error and exit if missing any dependencies
     if [[ -z $EARLYBIRD_ENDPOINT_ADDRESS ]]; then echo "endpoint not set" && exit 2; fi
