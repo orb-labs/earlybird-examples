@@ -102,10 +102,9 @@ contract MockRukhAppSendMessage is Script {
             uint32(vm.envUint("SENDING_KEY_INDEX"))
         );
 
-        // Add in expectedRelayerFeeCollector as the 4th argument
         IRequiredModuleFunctions.AdditionalParams memory additionalParams = IRequiredModuleFunctions.AdditionalParams(
-            address(0),
-            true,
+            address(0), // address feeToken;
+            true,       // bool isOrderedMsg;
             450000,     // uint256 destinationGas;
             // when using address 0, it will use the default relayer fee collector from the AppConfig
             address(0) // address expectedRelayerFeeCollector;
