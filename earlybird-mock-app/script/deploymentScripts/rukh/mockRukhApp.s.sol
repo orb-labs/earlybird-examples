@@ -10,38 +10,13 @@ import "../../../lib/earlybird-evm-interfaces/src/Libraries/SharedSendModule/ISh
 
 contract MockRukhAppDeployment is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.deriveKey(
-            vm.envString("MNEMONICS"), 
-            uint32(vm.envUint("KEY_INDEX"))
-        );
-
+        string memory mnemonics = vm.envString("MNEMONICS");
+        uint256 keyIndex = vm.envUint("KEY_INDEX");
         string memory chainName = vm.envString("CHAIN_NAME");
-
-        address expectedMockAppAddress = vm.envAddress(
-            "EXPECTED_MOCK_RUKH_APP_ADDRESS"
-        );
-
-        ISharedSendModule.AppConfig memory appConfigForSending = ISharedSendModule.AppConfig(
-            false,
-            vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS"),
-            vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS")
-        );
-        bool directMsgsEnabled = true;
-
-        IRukhReceiveModule.AppConfig memory appConfigForReceiving = IRukhReceiveModule.AppConfig(
-            10, //minDisputeTime,
-            10, // minDisputeResolutionExtension,
-            100, //disputeEpochLength,
-            1, //maxValidDisputesPerEpoch,
-            vm.envAddress("ORACLE_ADDRESS"), //oracle,
-            vm.envAddress("RELAYER_ADDRESS"), //_defaultRelayer,
-            vm.envAddress("RUKH_DISPUTER_CONTRACT_ADDRESS"), //_disputersContract,
-            vm.envAddress("RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS"), //_disputeResolver,
-            vm.envAddress("RUKH_RECS_CONTRACT_ADDRESS"), //recsContract,
-            true, // emitMsgProofs,
-            directMsgsEnabled, // directMsgsEnabled,
-            false // msgDeliveryPaused
-        );
+        address expectedMockAppAddress = vm.envAddress("EXPECTED_MOCK_RUKH_APP_ADDRESS");
+        address endpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
+        uint256 deployerPrivateKey = vm.deriveKey(mnemonics, uint32(keyIndex));
+        string memory storagePath = string.concat("addresses/", vm.envString("ENVIRONMENT"), "/", chainName, "/rukh/app.txt");
 
         uint256 size = 0;
         assembly {
@@ -49,47 +24,109 @@ contract MockRukhAppDeployment is Script {
         }
 
         if (size == 0) {
-            address endpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
-            console.log("using endpoint address: ");
-            console.logAddress(endpointAddress);
             vm.startBroadcast(deployerPrivateKey);
-            
+            bool directMsgsEnabled = true;
             MockApp app = new MockApp(
                 endpointAddress, 
                 address(0), 
                 directMsgsEnabled
             );
-
-            app.setLibraryAndConfigs(
-                "Rukh V1",
-                abi.encode(appConfigForSending),
-                abi.encode(appConfigForReceiving)
-            );
             vm.stopBroadcast();
 
-            string memory storagePath = string.concat(
-                "addresses/",
-                vm.envString("ENVIRONMENT"),
-                "/",
-                chainName,
-                "/rukh/app.txt"
-            );
-
-            string memory mockAppAddress = vm.toString(address(app));
-            vm.writeFile(storagePath, mockAppAddress);
+            vm.writeFile(storagePath, vm.toString(address(app)));
             console.log("MockRukhApp deployed on %s", chainName);
-        } else {
+            console.log("using endpoint address: ", endpointAddress);
+        }
+    }
+}
+
+contract MockRukhAppConfigsUpdate is Script {
+    function run() external {
+        string memory mnemonics = vm.envString("MNEMONICS");
+        uint256 keyIndex = vm.envUint("KEY_INDEX");
+        string memory chainName = vm.envString("CHAIN_NAME");
+        address mockAppAddress = vm.envAddress("MOCK_RUKH_APP_ADDRESS");
+        address endpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
+        address oracle = vm.envAddress("ORACLE_ADDRESS");
+        address relayer = vm.envAddress("RELAYER_ADDRESS");
+        address disputerContract = vm.envAddress("RUKH_DISPUTER_CONTRACT_ADDRESS");
+        address disputeResolverContract = vm.envAddress("RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS");
+        address rukhRecsContract = vm.envAddress("RUKH_RECS_CONTRACT_ADDRESS");
+        uint256 deployerPrivateKey = vm.deriveKey(mnemonics, uint32(keyIndex));
+
+        bool selfBroadcasting = false;
+        bytes memory appConfigForSending = abi.encode(
+            ISharedSendModule.AppConfig(
+                selfBroadcasting,
+                oracle,
+                relayer
+            )
+        );
+
+        uint256 minDisputeTime = 10;
+        uint256 minDisputeResolutionExtension = 10;
+        uint256 disputeEpochLength = 100;
+        uint256 maxValidDisputesPerEpoch = 1;
+        bool emitMsgProofs = true;
+        bool directMsgsEnabled = true;
+        bool msgDeliveryPaused = false;
+        bytes memory appConfigForReceiving = abi.encode(
+            IRukhReceiveModule.AppConfig(
+                minDisputeTime,
+                minDisputeResolutionExtension,
+                disputeEpochLength,
+                maxValidDisputesPerEpoch,
+                oracle,
+                relayer,
+                disputerContract,
+                disputeResolverContract,
+                rukhRecsContract, 
+                emitMsgProofs,
+                directMsgsEnabled,
+                msgDeliveryPaused
+            )
+        );
+
+        
+        uint256 size = 0;
+        assembly {
+            size := extcodesize(mockAppAddress)
+        }
+
+        if (size == 0) {
+            console.log("MockRukhApp exists on %s at %s", chainName, mockAppAddress);
             vm.startBroadcast(deployerPrivateKey);
-            MockApp app = MockApp(expectedMockAppAddress);
-            app.setLibraryAndConfigs(
-                "Rukh V1",
-                abi.encode(appConfigForSending),
-                abi.encode(appConfigForReceiving)
-            );
+
+            bytes32 currentAppConfigsForSendingHash;
+            try IEndpoint(endpointAddress).getAppConfigForSending(mockAppAddress) returns (bytes memory currentConfigsForSending) {
+                currentAppConfigsForSendingHash = keccak256(currentConfigsForSending);
+            } catch {}
+
+            bytes32 currentAppConfigsForReceivingHash;
+            try IEndpoint(endpointAddress).getAppConfigForReceiving(mockAppAddress) returns (bytes memory currentConfigsForReceiving) {
+                currentAppConfigsForReceivingHash = keccak256(currentConfigsForReceiving);
+            } catch {}
+            
+            bool sameConfigsForSending = (currentAppConfigsForSendingHash == keccak256(appConfigForSending));
+            bool sameConfigsForReceiving = (currentAppConfigsForReceivingHash == keccak256(appConfigForReceiving));
+
+            if (sameConfigsForSending && sameConfigsForReceiving) {
+                console.log("Configs already set");
+            } else {
+                MockApp(mockAppAddress).setLibraryAndConfigs(
+                    "Rukh V1",
+                    appConfigForSending,
+                    appConfigForReceiving
+                );
+                console.log("Setting configs");
+            }
             vm.stopBroadcast();
 
-            console.log("MockRukhApp already deployed on %s at %s", chainName, expectedMockAppAddress);
-            console.log("Resetting configs");
+            console.log("MockRukhApp configs for sending - selfBroadcasting: %s, oracle: %s, relayer: %s", selfBroadcasting, oracle, relayer);
+            console.log("MockRukhApp configs for receiving - minDisputeTime: %s, minDisputeResolutionExtension: %s, disputeEpochLength: %s", minDisputeTime, minDisputeResolutionExtension, disputeEpochLength);
+            console.log("MockRukhApp configs for receiving - oracle: %s, relayer: %s, maxValidDisputesPerEpoch: %s", oracle, relayer, maxValidDisputesPerEpoch);
+            console.log("MockRukhApp configs for receiving - disputerContract: %s, disputeResolverContract: %s, rukhRecsContract: %s", disputerContract, disputeResolverContract, rukhRecsContract);
+            console.log("MockRukhApp configs for receiving - emitMsgProofs: %s, directMsgsEnabled: %s, msgDeliveryPaused: %s", emitMsgProofs, directMsgsEnabled, msgDeliveryPaused);
         }
     }
 }

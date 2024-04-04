@@ -66,19 +66,23 @@ do
     export EXPECTED_THUNDERBIRD_RECS_CONTRACT_ADDRESS=`address_from_filepath "$address_dir_path/thunderbird/recs_contract.txt"`
     export EXPECTED_MOCK_RUKH_APP_ADDRESS=`address_from_filepath "$address_dir_path/rukh/app.txt"`
     export EXPECTED_RUKH_RECS_CONTRACT_ADDRESS=`address_from_filepath "$address_dir_path/rukh/recs_contract.txt"`
+    export EXPECTED_RUKH_DISPUTER_CONTRACT_ADDRESS=`address_from_filepath "$address_dir_path/rukh/disputer_contract.txt"`
     
-    # get existing addresses of earlybird, fee collectors, and periphery contracts
+    # get existing addresses of earlybird endpoint
     # previously deployed to this chain (must exist)
-    export EARLYBIRD_ENDPOINT_ADDRESS=$(<${address_dir_path}/earlybird-evm/endpoint.txt)
-    export ORACLE_FEE_COLLECTOR_ADDRESS=$(<${address_dir_path}/fee-collectors/oracleFeeCollector.txt)
-    export RELAYER_FEE_COLLECTOR_ADDRESS=$(<${address_dir_path}/fee-collectors/relayerFeeCollector.txt)
-    export ORACLE_ADDRESS=$(<${address_dir_path}/periphery-contracts/oracle.txt)
-    export RELAYER_ADDRESS=$(<${address_dir_path}/periphery-contracts/relayer.txt)
+    earlybird_dir_path="../../../earlybird-evm/addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}""
+    export EARLYBIRD_ENDPOINT_ADDRESS=$(<${earlybird_dir_path}/endpoint.txt)
+
+    # get existing addresses of oracle and relayer
+    # previously deployed to this chain (must exist)
+    periphery_contracts_dir_path="../../../periphery-contracts/addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}""
+    export ORACLE_ADDRESS=$(<${periphery_contracts_dir_path}/oracle.txt)
+    export RELAYER_ADDRESS=$(<${periphery_contracts_dir_path}/relayer.txt)
+    export RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS=$(<${periphery_contracts_dir_path}/disputeResolverContract.txt)
     
     # error and exit if missing any dependencies
     if [[ -z $EARLYBIRD_ENDPOINT_ADDRESS ]]; then echo "endpoint not set" && exit 2; fi
     if [[ -z $ORACLE_ADDRESS || -z $RELAYER_ADDRESS ]]; then echo "oracle and relayer not set" && exit 2; fi
-    if [[ -z $ORACLE_FEE_COLLECTOR_ADDRESS || -z $RELAYER_FEE_COLLECTOR_ADDRESS ]]; then echo "fee collectors not set" && exit 2; fi
 
     ########################################## DEPLOY THUNDERBIRD VERSION ##################################################
     
@@ -89,6 +93,10 @@ do
     
     # deploy mock app
     forge script --legacy --skip-simulation deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppDeployment --rpc-url $RPC_URL --broadcast
+    export MOCK_THUNDERBIRD_APP_ADDRESS=$(<$address_dir_path/thunderbird/app.txt)
+
+    # update configs for mock app
+    forge script --legacy --skip-simulation deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppConfigsUpdate --rpc-url $RPC_URL --broadcast
     
     ########################################## DEPLOY RUKH VERSION ######################################################### 
     
@@ -96,8 +104,17 @@ do
     forge script --legacy --skip-simulation deploymentScripts/rukh/RukhRecsContract.s.sol:RukhRecsContractDeployment --rpc-url $RPC_URL --broadcast
     ### assume the address has been written by the script and read from it
     export RUKH_RECS_CONTRACT_ADDRESS=$(<$address_dir_path/rukh/recs_contract.txt)
+
+    # deploy disputers contract
+    forge script --legacy --skip-simulation deploymentScripts/rukh/RukhDisputerContract.s.sol:RukhDisputerContractDeployment --rpc-url $RPC_URL --broadcast
+    ### assume the address has been written by the script and read from it
+    export RUKH_DISPUTER_CONTRACT_ADDRESS=$(<$address_dir_path/rukh/disputer_contract.txt)
     
     # deploy mock app
     forge script --legacy --skip-simulation deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppDeployment --rpc-url $RPC_URL --broadcast
+    export MOCK_RUKH_APP_ADDRESS=$(<$address_dir_path/rukh/app.txt)
+
+     # update configs for mock app
+    forge script --legacy --skip-simulation deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppConfigsUpdate --rpc-url $RPC_URL --broadcast
 
 done

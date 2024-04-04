@@ -102,14 +102,15 @@ do
     export EXPECTED_TEST_SFT_ADDRESSES_9=`address_from_filepath "$sft_address_dir_path/testSFT-9.txt"`
     
     ########################################## DEPLOY ######################################################################
-    export MAGICLANE_SPOKE_ENDPOINT_ADDRESS=$(<../addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/magiclane-evm/spokeEndpoint.txt) || exit 1
+    magiclane_dir_path="../../../magiclane-evm/addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}""
+    export MAGICLANE_SPOKE_ENDPOINT_ADDRESS=$(<${magiclane_dir_path}/spokeEndpoint.txt)
     
     forge script --legacy deploymentScripts/MagiclaneMockApp.s.sol:MagiclaneMockAppDeployment --rpc-url $RPC_URL --broadcast
     forge script --legacy deploymentScripts/TestFT.s.sol:TestFTDeployment --rpc-url $RPC_URL --broadcast
     forge script --legacy deploymentScripts/TestNFT.s.sol:TestNFTDeployment --rpc-url $RPC_URL --broadcast
     forge script --legacy deploymentScripts/TestSFT.s.sol:TestSFTDeployment --rpc-url $RPC_URL --broadcast
 
-    export MAGICLANE_MOCK_APP_ADDRESS=`address_from_filepath "../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}"/magiclaneMockApp.txt"`
+    export MAGICLANE_MOCK_APP_ADDRESS=`address_from_filepath "${address_dir}/magiclaneMockApp.txt"`
     
     export TEST_FT_ADDRESSES_0=`address_from_filepath "$ft_address_dir_path/testFT-0.txt"`
     export TEST_FT_ADDRESSES_1=`address_from_filepath "$ft_address_dir_path/testFT-1.txt"`

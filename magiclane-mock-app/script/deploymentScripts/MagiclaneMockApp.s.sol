@@ -17,6 +17,9 @@ contract MagiclaneMockAppDeployment is Script {
         uint256 deployerPrivateKey = vm.deriveKey(vm.envString("MNEMONICS"), uint32(vm.envUint("KEY_INDEX")));
         string memory chainName = vm.envString("CHAIN_NAME");
         address expectedMagiclaneMockAppAddress = vm.envAddress("EXPECTED_MAGICLANE_MOCK_APP_ADDRESS");
+        address magiclaneEndpoint = vm.envAddress("MAGICLANE_SPOKE_ENDPOINT_ADDRESS");
+        string memory storagePath =
+                string.concat("addresses/", vm.envString("ENVIRONMENT"), "/", chainName, "/", "magiclaneMockApp.txt");
 
         uint256 size = 0;
         assembly {
@@ -24,19 +27,15 @@ contract MagiclaneMockAppDeployment is Script {
         }
 
         if (size == 0) {
-            address magiclaneEndpoint = vm.envAddress("MAGICLANE_SPOKE_ENDPOINT_ADDRESS");
             vm.startBroadcast(deployerPrivateKey);
             MagiclaneMockApp magiclaneMockApp = new MagiclaneMockApp(magiclaneEndpoint);
             vm.stopBroadcast();
-
-            string memory storagePath =
-                string.concat("addresses/", vm.envString("ENVIRONMENT"), "/", chainName, "/", "magiclaneMockApp.txt");
 
             string memory magiclaneMockAppAddress = vm.toString(address(magiclaneMockApp));
             vm.writeFile(storagePath, magiclaneMockAppAddress);
             console.log("MagiclaneMockApp deployed on %s at %s", chainName, magiclaneMockAppAddress);
         } else {
-            console.log("MagiclaneMockApp already found on %s at %s", chainName, expectedMagiclaneMockAppAddress);
+            console.log("MagiclaneMockApp already deployed on %s at %s", chainName, expectedMagiclaneMockAppAddress);
         }
     }
 }
