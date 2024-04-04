@@ -11,79 +11,107 @@ import "../../../lib/earlybird-evm-interfaces/src/Libraries/ILibrary/IRequiredMo
 
 contract MockThunderbirdAppDeployment is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.deriveKey(
-            vm.envString("MNEMONICS"),
-            uint32(vm.envUint("KEY_INDEX"))
-        );
-
+        string memory mnemonics = vm.envString("MNEMONICS");
+        uint256 keyIndex = vm.envUint("KEY_INDEX");
         string memory chainName = vm.envString("CHAIN_NAME");
-        address expectedMockAppAddress = vm.envAddress(
-            "EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS"
-        );
+        address expectedMockAppAddress = vm.envAddress("EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS");
+        address endpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
+        uint256 deployerPrivateKey = vm.deriveKey(mnemonics, uint32(keyIndex));
+        string memory storagePath = string.concat("addresses/", vm.envString("ENVIRONMENT"), "/", chainName, "/thunderbird/app.txt");
 
-        ISharedSendModule.AppConfig memory appConfigForSending = ISharedSendModule.AppConfig(
-            false,
-            vm.envAddress("ORACLE_FEE_COLLECTOR_ADDRESS"),
-            vm.envAddress("RELAYER_FEE_COLLECTOR_ADDRESS")
-        );
-
-        IThunderbirdReceiveModule.AppConfig memory appConfigForReceiving = IThunderbirdReceiveModule.AppConfig(
-            vm.envAddress("ORACLE_ADDRESS"), //oracle,
-            vm.envAddress("RELAYER_ADDRESS"), //_defaultRelayer,
-            vm.envAddress("THUNDERBIRD_RECS_CONTRACT_ADDRESS"), //recsContract
-            true, // emitMsgProofs
-            false, // directMsgsEnabled
-            false // msgDeliveryPaused
-        );
-
-        uint256 size = 0;
+        uint256 size;
         assembly {
             size := extcodesize(expectedMockAppAddress)
         }
 
         if (size == 0) {
-            address endpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
-            console.log("using endpoint address: ");
-            console.logAddress(endpointAddress);
             vm.startBroadcast(deployerPrivateKey);
-            
             MockApp app = new MockApp(
                 endpointAddress,
                 address(0)
             );
-
-            app.setLibraryAndConfigs(
-                "Thunderbird V1",
-                abi.encode(appConfigForSending),
-                abi.encode(appConfigForReceiving)
-            );
             vm.stopBroadcast();
 
-            string memory storagePath = string.concat(
-                "addresses/",
-                vm.envString("ENVIRONMENT"),
-                "/",
-                chainName,
-                "/thunderbird/app.txt"
-            );
-
-            string memory mockAppAddress = vm.toString(address(app));
-            vm.writeFile(storagePath, mockAppAddress);
+            vm.writeFile(storagePath, vm.toString(address(app)));
             console.log("MockThunderbirdApp deployed on %s", chainName);
-        } else {
+            console.log("using endpoint address: ", endpointAddress);
+        }
+    }
+}
+
+contract MockThunderbirdAppConfigsUpdate is Script {
+    function run() external {
+        string memory mnemonics = vm.envString("MNEMONICS");
+        uint256 keyIndex = vm.envUint("KEY_INDEX");
+        string memory chainName = vm.envString("CHAIN_NAME");
+        address mockAppAddress = vm.envAddress("MOCK_THUNDERBIRD_APP_ADDRESS");
+        address endpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
+        address oracle = vm.envAddress("ORACLE_ADDRESS");
+        address relayer = vm.envAddress("RELAYER_ADDRESS");
+        address thunderbirdRecsContract = vm.envAddress("THUNDERBIRD_RECS_CONTRACT_ADDRESS");
+        uint256 deployerPrivateKey = vm.deriveKey(mnemonics, uint32(keyIndex));
+
+        bool selfBroadcasting = false;
+        bytes memory appConfigForSending = abi.encode(
+            ISharedSendModule.AppConfig(
+                selfBroadcasting,
+                oracle,
+                relayer
+            )
+        );
+
+        bool emitMsgProofs = true;
+        bool directMsgsEnabled = false;
+        bool msgDeliveryPaused = false;
+        bytes memory appConfigForReceiving = abi.encode(
+            IThunderbirdReceiveModule.AppConfig(
+                oracle,
+                relayer,
+                thunderbirdRecsContract,
+                emitMsgProofs,
+                directMsgsEnabled,
+                msgDeliveryPaused
+            )
+        );
+
+        uint256 size;
+        assembly {
+            size := extcodesize(mockAppAddress)
+        }
+
+        if (size > 0) {
+            console.log("MockThunderbirdApp exists on %s at %s", chainName, mockAppAddress);
             vm.startBroadcast(deployerPrivateKey);
-            MockApp app = MockApp(expectedMockAppAddress);
-            app.setLibraryAndConfigs(
-                "Thunderbird V1",
-                abi.encode(appConfigForSending),
-                abi.encode(appConfigForReceiving)
-            );
+
+            bytes32 currentAppConfigsForSendingHash;
+            try IEndpoint(endpointAddress).getAppConfigForSending(mockAppAddress) returns (bytes memory currentConfigsForSending) {
+                currentAppConfigsForSendingHash = keccak256(currentConfigsForSending);
+            } catch {}
+
+            bytes32 currentAppConfigsForReceivingHash;
+            try IEndpoint(endpointAddress).getAppConfigForReceiving(mockAppAddress) returns (bytes memory currentConfigsForReceiving) {
+                currentAppConfigsForReceivingHash = keccak256(currentConfigsForReceiving);
+            } catch {}
+            
+            bool sameConfigsForSending = (currentAppConfigsForSendingHash == keccak256(appConfigForSending));
+            bool sameConfigsForReceiving = (currentAppConfigsForReceivingHash == keccak256(appConfigForReceiving));
+
+            if (sameConfigsForSending && sameConfigsForReceiving) {
+                console.log("Configs already set");
+            } else {
+                MockApp(mockAppAddress).setLibraryAndConfigs(
+                    "Thunderbird V1",
+                    appConfigForSending,
+                    appConfigForReceiving
+                );
+                console.log("Setting configs");
+            }
             vm.stopBroadcast();
 
-            console.log(vm.envString("RELAYER_FEE_COLLECTOR_ADDRESS"));
-            console.log(vm.envString("ORACLE_FEE_COLLECTOR_ADDRESS"));
-            console.log("MockThunderbirdApp already deployed on %s at %s", chainName, expectedMockAppAddress);
-            console.log("Resetting configs");
+            
+            console.log("MockThunderbirdApp configs for sending - selfBroadcasting: %s, oracle: %s, relayer: %s", selfBroadcasting, oracle, relayer);
+            console.log("MockThunderbirdApp configs for receiving - oracle: %s, relayer: %s, recsContract: %s", oracle, relayer, thunderbirdRecsContract);
+            console.log("MockThunderbirdApp configs for receiving - emitMsgProofs: %s, directMsgsEnabled: %s, msgDeliveryPaused: %s", emitMsgProofs, directMsgsEnabled, msgDeliveryPaused);
         }
     }
 }
