@@ -17,7 +17,7 @@ contract MagiclaneMockAppDeployment is Script {
         uint256 deployerPrivateKey = vm.deriveKey(vm.envString("MNEMONICS"), uint32(vm.envUint("KEY_INDEX")));
         string memory chainName = vm.envString("CHAIN_NAME");
         address expectedMagiclaneMockAppAddress = vm.envAddress("EXPECTED_MAGICLANE_MOCK_APP_ADDRESS");
-        address magiclaneEndpoint = vm.envAddress("MAGICLANE_SPOKE_ENDPOINT_ADDRESS");
+        address magiclaneSpokeEndpoint = vm.envAddress("MAGICLANE_SPOKE_ENDPOINT_ADDRESS");
         string memory storagePath =
                 string.concat("addresses/", vm.envString("ENVIRONMENT"), "/", chainName, "/", "magiclaneMockApp.txt");
 
@@ -28,7 +28,7 @@ contract MagiclaneMockAppDeployment is Script {
 
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
-            MagiclaneMockApp magiclaneMockApp = new MagiclaneMockApp(spokeEndpoint);
+            MagiclaneMockApp magiclaneMockApp = new MagiclaneMockApp(magiclaneSpokeEndpoint);
             vm.stopBroadcast();
 
             string memory magiclaneMockAppAddress = vm.toString(address(magiclaneMockApp));
