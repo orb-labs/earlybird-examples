@@ -3,57 +3,63 @@ pragma solidity 0.8.17;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import "../../../src/RukhVersion/MockApp.sol";
-import "../../../lib/earlybird-evm-interfaces/src/Libraries/Rukh/RukhReceiveModule/IRukhReceiveModule.sol";
-import "../../../lib/earlybird-evm-interfaces/src/Libraries/SharedLibraryModules/ISharedSendModule.sol";
-import "../../../lib/earlybird-evm-interfaces/src/Libraries/ILibrary/IRequiredModuleFunctions.sol";
+import "../../src/RukhVersion/MockApp.sol";
+import "../../lib/earlybird-evm-interfaces/src/Libraries/Rukh/RukhReceiveModule/IRukhReceiveModule.sol";
+import "../../lib/earlybird-evm-interfaces/src/Libraries/SharedLibraryModules/ISharedSendModule.sol";
+import "../../lib/earlybird-evm-interfaces/src/Libraries/ILibrary/IRequiredModuleFunctions.sol";
 
 
-contract MockRukhAppDeployment is Script {
+contract MockRukhV1AppDeployment is Script {
     function run() external {
         string memory mnemonics = vm.envString("MNEMONICS");
-        uint256 keyIndex = vm.envUint("KEY_INDEX");
         string memory chainName = vm.envString("CHAIN_NAME");
-        address expectedMockAppAddress = vm.envAddress("EXPECTED_MOCK_RUKH_APP_ADDRESS");
-        address endpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
+        uint256 keyIndex = vm.envUint("KEY_INDEX");
         uint256 deployerPrivateKey = vm.deriveKey(mnemonics, uint32(keyIndex));
-        string memory storagePath = string.concat("addresses/", vm.envString("ENVIRONMENT"), "/", chainName, "/rukh/app.txt");
+
+        address expectedMockRukhV1AppAddress = vm.envAddress("EXPECTED_MOCK_RUKH_V1_APP_ADDRESS");
+        address earlybirdEndpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
+        string memory storagePath = string.concat("addresses/", vm.envString("ENVIRONMENT"), "/", chainName, "/mockRukhV1App.txt");
 
         uint256 size = 0;
         assembly {
-            size := extcodesize(expectedMockAppAddress)
+            size := extcodesize(expectedMockRukhV1AppAddress)
         }
 
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
             bool directMsgsEnabled = true;
             MockApp app = new MockApp(
-                endpointAddress, 
+                earlybirdEndpointAddress,
                 address(0), 
                 directMsgsEnabled
             );
             vm.stopBroadcast();
 
-            vm.writeFile(storagePath, vm.toString(address(app)));
-            console.log("MockRukhApp deployed on %s", chainName);
-            console.log("using endpoint address: ", endpointAddress);
+            string memory mockRukhV1AppAddress = vm.toString(address(app));
+            vm.writeFile(storagePath, mockRukhV1AppAddress);
+            console.log("MockRukhV1App deployed on: %s, at: %s, using earlybird endpoint address at: %s", chainName, mockRukhV1AppAddress, earlybirdEndpointAddress);
+        } else {
+            string memory mockRukhV1AppAddress = vm.toString(expectedMockRukhV1AppAddress);
+            vm.writeFile(storagePath, vm.toString(expectedMockRukhV1AppAddress));
+            console.log("MockRukhV1App deployed on: %s, at: %s, using earlybird endpoint address at: %s", chainName, mockRukhV1AppAddress, earlybirdEndpointAddress);
         }
     }
 }
 
-contract MockRukhAppConfigsUpdate is Script {
+contract MockRukhV1AppConfigsUpdate is Script {
     function run() external {
         string memory mnemonics = vm.envString("MNEMONICS");
-        uint256 keyIndex = vm.envUint("KEY_INDEX");
         string memory chainName = vm.envString("CHAIN_NAME");
-        address mockAppAddress = vm.envAddress("MOCK_RUKH_APP_ADDRESS");
-        address endpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
+        uint256 keyIndex = vm.envUint("KEY_INDEX");
+        uint256 deployerPrivateKey = vm.deriveKey(mnemonics, uint32(keyIndex));
+
+        address mockRukhV1AppAddress = vm.envAddress("MOCK_RUKH_V1_APP_ADDRESS");
+        address earlybirdEndpointAddress = vm.envAddress("EARLYBIRD_ENDPOINT_ADDRESS");
         address oracle = vm.envAddress("ORACLE_ADDRESS");
         address relayer = vm.envAddress("RELAYER_ADDRESS");
         address disputerContract = vm.envAddress("RUKH_DISPUTER_CONTRACT_ADDRESS");
         address disputeResolverContract = vm.envAddress("RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS");
-        address rukhRecsContract = vm.envAddress("RUKH_RECS_CONTRACT_ADDRESS");
-        uint256 deployerPrivateKey = vm.deriveKey(mnemonics, uint32(keyIndex));
+        address mockRukhV1RecsContract = vm.envAddress("MOCK_RUKH_V1_RECS_CONTRACT_ADDRESS");
 
         bool selfBroadcasting = false;
         bytes memory appConfigForSending = abi.encode(
@@ -81,30 +87,28 @@ contract MockRukhAppConfigsUpdate is Script {
                 relayer,
                 disputerContract,
                 disputeResolverContract,
-                rukhRecsContract, 
+                mockRukhV1RecsContract, 
                 emitMsgProofs,
                 directMsgsEnabled,
                 msgDeliveryPaused
             )
         );
-
         
         uint256 size = 0;
         assembly {
-            size := extcodesize(mockAppAddress)
+            size := extcodesize(mockRukhV1AppAddress)
         }
 
         if (size == 0) {
-            console.log("MockRukhApp exists on %s at %s", chainName, mockAppAddress);
             vm.startBroadcast(deployerPrivateKey);
 
             bytes32 currentAppConfigsForSendingHash;
-            try IEndpoint(endpointAddress).getAppConfigForSending(mockAppAddress) returns (bytes memory currentConfigsForSending) {
+            try IEndpoint(earlybirdEndpointAddress).getAppConfigForSending(mockRukhV1AppAddress) returns (bytes memory currentConfigsForSending) {
                 currentAppConfigsForSendingHash = keccak256(currentConfigsForSending);
             } catch {}
 
             bytes32 currentAppConfigsForReceivingHash;
-            try IEndpoint(endpointAddress).getAppConfigForReceiving(mockAppAddress) returns (bytes memory currentConfigsForReceiving) {
+            try IEndpoint(earlybirdEndpointAddress).getAppConfigForReceiving(mockRukhV1AppAddress) returns (bytes memory currentConfigsForReceiving) {
                 currentAppConfigsForReceivingHash = keccak256(currentConfigsForReceiving);
             } catch {}
             
@@ -112,27 +116,28 @@ contract MockRukhAppConfigsUpdate is Script {
             bool sameConfigsForReceiving = (currentAppConfigsForReceivingHash == keccak256(appConfigForReceiving));
 
             if (sameConfigsForSending && sameConfigsForReceiving) {
-                console.log("Configs already set");
+                console.log("MockRukhV1App configs already set");
             } else {
-                MockApp(mockAppAddress).setLibraryAndConfigs(
+                MockApp(mockRukhV1AppAddress).setLibraryAndConfigs(
                     "Rukh V1",
                     appConfigForSending,
                     appConfigForReceiving
                 );
-                console.log("Setting configs");
+                console.log("MockRukhV1App configs set");
             }
             vm.stopBroadcast();
 
-            console.log("MockRukhApp configs for sending - selfBroadcasting: %s, oracle: %s, relayer: %s", selfBroadcasting, oracle, relayer);
-            console.log("MockRukhApp configs for receiving - minDisputeTime: %s, minDisputeResolutionExtension: %s, disputeEpochLength: %s", minDisputeTime, minDisputeResolutionExtension, disputeEpochLength);
-            console.log("MockRukhApp configs for receiving - oracle: %s, relayer: %s, maxValidDisputesPerEpoch: %s", oracle, relayer, maxValidDisputesPerEpoch);
-            console.log("MockRukhApp configs for receiving - disputerContract: %s, disputeResolverContract: %s, rukhRecsContract: %s", disputerContract, disputeResolverContract, rukhRecsContract);
-            console.log("MockRukhApp configs for receiving - emitMsgProofs: %s, directMsgsEnabled: %s, msgDeliveryPaused: %s", emitMsgProofs, directMsgsEnabled, msgDeliveryPaused);
+            console.log("MockRukhV1App exists on %s at %s", chainName, mockRukhV1AppAddress);
+            console.log("MockRukhV1App configs for sending - selfBroadcasting: %s, oracle: %s, relayer: %s", selfBroadcasting, oracle, relayer);
+            console.log("MockRukhV1App configs for receiving - minDisputeTime: %s, minDisputeResolutionExtension: %s, disputeEpochLength: %s", minDisputeTime, minDisputeResolutionExtension, disputeEpochLength);
+            console.log("MockRukhV1App configs for receiving - oracle: %s, relayer: %s, maxValidDisputesPerEpoch: %s", oracle, relayer, maxValidDisputesPerEpoch);
+            console.log("MockRukhV1App configs for receiving - disputerContract: %s, disputeResolverContract: %s, recsContract: %s", disputerContract, disputeResolverContract, mockRukhV1RecsContract);
+            console.log("MockRukhV1App configs for receiving - emitMsgProofs: %s, directMsgsEnabled: %s, msgDeliveryPaused: %s", emitMsgProofs, directMsgsEnabled, msgDeliveryPaused);
         }
     }
 }
 
-contract MockRukhAppSendMessage is Script {
+contract MockRukhV1AppSendMessage is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.deriveKey(
             vm.envString("SENDING_MNEMONICS"),
@@ -149,7 +154,7 @@ contract MockRukhAppSendMessage is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        MockApp(vm.envAddress("MOCK_RUKH_APP_ADDRESS")).sendMessage(
+        MockApp(vm.envAddress("MOCK_RUKH_V1_APP_ADDRESS")).sendMessage(
             vm.envBytes32("RECEIVER_EARLYBIRD_INSTANCE_ID"),
             abi.encode(vm.envAddress("RECEIVER_ADDRESS")),
             vm.envString("MESSAGE_STRING"),
@@ -159,9 +164,9 @@ contract MockRukhAppSendMessage is Script {
     }
 }
 
-contract MockRukhAppGetAllMessages is Script {
+contract MockRukhV1AppGetAllMessages is Script {
     function run() external view {
-        address mockAppAddress = vm.envAddress("MOCK_RUKH_APP_ADDRESS");
+        address mockAppAddress = vm.envAddress("MOCK_RUKH_V1_APP_ADDRESS");
         string memory chainName = vm.envString("CHAIN_NAME");
         string[] memory receivedMessages = MockApp(mockAppAddress).getAllReceivedMessages();
         string[] memory sentMessages = MockApp(mockAppAddress).getAllSentMessages();

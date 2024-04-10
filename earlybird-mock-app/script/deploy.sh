@@ -1,38 +1,5 @@
-############################################### SETTING ENVIRONMENT VARIABLES ##############################################
-
-# set env vars if unset
-### default environment
-: ${ENVIRONMENT:="local"}
-
-case $ENVIRONMENT in
-    prod)
-        : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
-        ;;
-    dev)
-        : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
-        : ${RUKH_DISPUTER_CONTRACT_ADDRESS:="0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f"}
-        : ${RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS:="0x5B18a2DdF5E71013DA70D5737EDe125f6d809fE9"}
-        ;;
-    local)
-        : ${MNEMONICS:="test test test test test test test test test test test junk"}
-        : ${RUKH_DISPUTER_CONTRACT_ADDRESS:="0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f"}
-        : ${RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS:="0x5B18a2DdF5E71013DA70D5737EDe125f6d809fE9"}
-        ;;
-    *)
-        echo "invalid environment" && exit 1
-        ;;
-esac
-
-### other env vars
-: ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
-: ${KEY_INDEX:="0"}
-: ${ORACLE_MNEMONICS:="$MNEMONICS"}
-: ${ORACLE_KEY_INDEX:="0"}
-: ${RELAYER_MNEMONICS:="$MNEMONICS"}
-: ${RELAYER_KEY_INDEX:="1"}
-
-# export env vars needed by the Solidity scripts
-export ENVIRONMENT KEY_INDEX MNEMONICS ORACLE_MNEMONICS ORACLE_KEY_INDEX RELAYER_MNEMONICS RELAYER_KEY_INDEX RUKH_DISPUTER_CONTRACT_ADDRESS RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS
+export LOCAL_ADDRESSES_DIRECTORY="../addresses"
+export LOCAL_ADDRESSES_DIRECTORY_FOR_ENVIRONMENT="$LOCAL_ADDRESSES_DIRECTORY/${ENVIRONMENT}"
 
 ############################################## Helper Functions ############################################################
 
@@ -48,8 +15,24 @@ address_from_filepath() {
 }
 
 ############################################################################################################################
-if [[ -z $CHAINS_DIRECTORY ]]; then echo "env vars unset" && exit 1;fi
-for entry in "$CHAINS_DIRECTORY"/*
+if [[ -z $GLOBAL_ADDRESSES_DIRECTORY || -z $CHAIN_CONFIGS_DIRECTORY || -z $ENVIRONMENT || -z $KEY_INDEX || -z $MNEMONICS ]]; then echo "env vars unset" && exit 1;fi
+
+# create local address directory
+if [[ ! -d $LOCAL_ADDRESSES_DIRECTORY ]]; then mkdir $LOCAL_ADDRESSES_DIRECTORY; fi
+
+# create local address directory for environment
+if [[ ! -d $LOCAL_ADDRESSES_DIRECTORY_FOR_ENVIRONMENT ]]; then mkdir $LOCAL_ADDRESSES_DIRECTORY_FOR_ENVIRONMENT; fi
+
+# create global address directory
+if [[ ! -d $GLOBAL_ADDRESSES_DIRECTORY ]]; then mkdir $GLOBAL_ADDRESSES_DIRECTORY; fi
+
+# create global address directory for environment
+if [[ ! -d $GLOBAL_ADDRESSES_DIRECTORY_FOR_ENVIRONMENT ]]; then mkdir $GLOBAL_ADDRESSES_DIRECTORY_FOR_ENVIRONMENT; fi
+
+# the deploy will run for each file in the chains directory, 
+# all of which should be shell scripts that set env vars specific to the chain
+# the filename should be the chain name
+for entry in "$CHAIN_CONFIGS_DIRECTORY/chains"/*
 do
     # run script in environmentVariables/ to set env vars for the chain
     . "$entry"
@@ -58,66 +41,63 @@ do
     if [[ $CHAIN_NAME == "moonbeam_alpha_testnet" ]]; then SKIP_SIMULATION="--skip-simulation"; else SKIP_SIMULATION=""; fi
 
     ########################################## GET EXISTING ADDRESSES ######################################################
-    if [[ ! -d "../addresses/${ENVIRONMENT}" ]]; then mkdir "../addresses/${ENVIRONMENT}"; fi
-    address_dir_path="../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}""
-    if [[ ! -d $address_dir_path ]]; then mkdir $address_dir_path; fi
-    if [[ ! -d $address_dir_path/thunderbird ]]; then mkdir $address_dir_path/thunderbird; fi
-    if [[ ! -d $address_dir_path/rukh ]]; then mkdir $address_dir_path/rukh; fi
+    # create local directory for chain
+    local_address_dir_path_for_chain="$LOCAL_ADDRESSES_DIRECTORY_FOR_ENVIRONMENT/${CHAIN_NAME}"
+    if [[ ! -d $local_address_dir_path_for_chain ]]; then mkdir $local_address_dir_path_for_chain; fi
+
+    # create global directory for chain
+    global_address_dir_path_for_chain="$GLOBAL_ADDRESSES_DIRECTORY_FOR_ENVIRONMENT/${CHAIN_NAME}"
+    if [[ ! -d $global_address_dir_path_for_chain ]]; then mkdir $global_address_dir_path_for_chain; fi
     
     # get existing addresses of mock app if previously deployed to this chain
-    export EXPECTED_MOCK_THUNDERBIRD_APP_ADDRESS=`address_from_filepath "$address_dir_path/thunderbird/app.txt"`
-    export EXPECTED_THUNDERBIRD_RECS_CONTRACT_ADDRESS=`address_from_filepath "$address_dir_path/thunderbird/recs_contract.txt"`
-    export EXPECTED_MOCK_RUKH_APP_ADDRESS=`address_from_filepath "$address_dir_path/rukh/app.txt"`
-    export EXPECTED_RUKH_RECS_CONTRACT_ADDRESS=`address_from_filepath "$address_dir_path/rukh/recs_contract.txt"`
-    export EXPECTED_RUKH_DISPUTER_CONTRACT_ADDRESS=`address_from_filepath "$address_dir_path/rukh/disputer_contract.txt"`
+    export EXPECTED_MOCK_THUNDERBIRD_V1_APP_ADDRESS=`address_from_filepath "$global_address_dir_path_for_chain/mockThunderbirdV1App.txt"`
+    export EXPECTED_MOCK_THUNDERBIRD_V1_RECS_CONTRACT_ADDRESS=`address_from_filepath "$global_address_dir_path_for_chain/mockThunderbirdV1RecsContract.txt"`
+    export EXPECTED_MOCK_RUKH_V1_APP_ADDRESS=`address_from_filepath "$global_address_dir_path_for_chain/mockRukhV1App.txt"`
+    export EXPECTED_MOCK_RUKH_V1_RECS_CONTRACT_ADDRESS=`address_from_filepath "$global_address_dir_path_for_chain/mockRukhV1RecsContract.txt"`
     
     # get existing addresses of earlybird endpoint
-    # previously deployed to this chain (must exist)
-    earlybird_dir_path="../../../earlybird-evm/addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}""
-    export EARLYBIRD_ENDPOINT_ADDRESS=$(<${earlybird_dir_path}/endpoint.txt)
+    export EARLYBIRD_ENDPOINT_ADDRESS=$(<${global_address_dir_path_for_chain}/earlybirdEndpoint.txt)
+    if [[ -z $EARLYBIRD_ENDPOINT_ADDRESS ]]; then echo "endpoint not set" && exit 2; fi
 
     # get existing addresses of oracle and relayer
     # previously deployed to this chain (must exist)
-    periphery_contracts_dir_path="../../../periphery-contracts/addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}""
-    export ORACLE_ADDRESS=$(<${periphery_contracts_dir_path}/oracle.txt)
-    export RELAYER_ADDRESS=$(<${periphery_contracts_dir_path}/relayer.txt)
-    export RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS=$(<${periphery_contracts_dir_path}/disputeResolverContract.txt)
-    
-    # error and exit if missing any dependencies
-    if [[ -z $EARLYBIRD_ENDPOINT_ADDRESS ]]; then echo "endpoint not set" && exit 2; fi
-    if [[ -z $ORACLE_ADDRESS || -z $RELAYER_ADDRESS ]]; then echo "oracle and relayer not set" && exit 2; fi
+    export ORACLE_ADDRESS=$(<${global_address_dir_path_for_chain}/oracle.txt)
+    export RELAYER_ADDRESS=$(<${global_address_dir_path_for_chain}/relayer.txt)
+    export RUKH_DISPUTER_CONTRACT_ADDRESS=$(<${global_address_dir_path_for_chain}/disputerContract.txt)
+    export RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS=$(<${global_address_dir_path_for_chain}/disputeResolverContract.txt)
+    if [[ -z $ORACLE_ADDRESS || -z $RELAYER_ADDRESS || -z $RUKH_DISPUTER_CONTRACT_ADDRESS || -z $RUKH_DISPUTE_RESOLVER_CONTRACT_ADDRESS ]]; then echo "periphery contracts are not set" && exit 2; fi
 
     ########################################## DEPLOY THUNDERBIRD VERSION ##################################################
     
     # deploy recs contract
-    forge script --legacy $SKIP_SIMULATION deploymentScripts/thunderbird/ThunderbirdRecsContract.s.sol:ThunderbirdRecsContractDeployment --rpc-url $RPC_URL --broadcast
+    forge script --legacy $SKIP_SIMULATION deploymentScripts/mockThunderbirdV1RecsContract.s.sol:MockThunderbirdV1RecsContractDeployment --rpc-url $RPC_URL --broadcast
     ### assume the address has been written by the script and read from it
-    export THUNDERBIRD_RECS_CONTRACT_ADDRESS=$(<$address_dir_path/thunderbird/recs_contract.txt)
+    export MOCK_THUNDERBIRD_V1_RECS_CONTRACT_ADDRESS=$(<$local_address_dir_path_for_chain/mockThunderbirdV1RecsContract.txt)
     
     # deploy mock app
-    forge script --legacy --skip-simulation deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppDeployment --rpc-url $RPC_URL --broadcast
-    export MOCK_THUNDERBIRD_APP_ADDRESS=$(<$address_dir_path/thunderbird/app.txt)
+    forge script --legacy --skip-simulation deploymentScripts/mockThunderbirdV1App.s.sol:MockThunderbirdV1AppDeployment --rpc-url $RPC_URL --broadcast
+    export MOCK_THUNDERBIRD_V1_APP_ADDRESS=$(<$local_address_dir_path_for_chain/mockThunderbirdV1App.txt)
 
     # update configs for mock app
-    forge script --legacy --skip-simulation deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppConfigsUpdate --rpc-url $RPC_URL --broadcast
+    forge script --legacy --skip-simulation deploymentScripts/mockThunderbirdV1App.s.sol:MockThunderbirdV1AppConfigsUpdate --rpc-url $RPC_URL --broadcast
     
     ########################################## DEPLOY RUKH VERSION ######################################################### 
     
     # deploy recs contract
-    forge script --legacy $SKIP_SIMULATION deploymentScripts/rukh/RukhRecsContract.s.sol:RukhRecsContractDeployment --rpc-url $RPC_URL --broadcast
+    forge script --legacy $SKIP_SIMULATION deploymentScripts/mockRukhV1RecsContract.s.sol:MockRukhV1RecsContractDeployment --rpc-url $RPC_URL --broadcast
     ### assume the address has been written by the script and read from it
-    export RUKH_RECS_CONTRACT_ADDRESS=$(<$address_dir_path/rukh/recs_contract.txt)
-
-    # deploy disputers contract
-    forge script --legacy --skip-simulation deploymentScripts/rukh/RukhDisputerContract.s.sol:RukhDisputerContractDeployment --rpc-url $RPC_URL --broadcast
-    ### assume the address has been written by the script and read from it
-    export RUKH_DISPUTER_CONTRACT_ADDRESS=$(<$address_dir_path/rukh/disputer_contract.txt)
+    export MOCK_RUKH_V1_RECS_CONTRACT_ADDRESS=$(<$local_address_dir_path_for_chain/mockRukhV1RecsContract.txt)
     
     # deploy mock app
-    forge script --legacy --skip-simulation deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppDeployment --rpc-url $RPC_URL --broadcast
-    export MOCK_RUKH_APP_ADDRESS=$(<$address_dir_path/rukh/app.txt)
+    forge script --legacy --skip-simulation deploymentScripts/mockRukhV1App.s.sol:MockRukhV1AppDeployment --rpc-url $RPC_URL --broadcast
+    export MOCK_RUKH_V1_APP_ADDRESS=$(<$local_address_dir_path_for_chain/mockRukhV1App.txt)
 
-     # update configs for mock app
-    forge script --legacy --skip-simulation deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppConfigsUpdate --rpc-url $RPC_URL --broadcast
-
+    # update configs for mock app
+    forge script --legacy --skip-simulation deploymentScripts/mockRukhV1App.s.sol:MockRukhV1AppConfigsUpdate --rpc-url $RPC_URL --broadcast
 done
+
+# migrate the written addresses from the local to the global addresses directory
+echo "migrating local address directory"
+cp -R $LOCAL_ADDRESSES_DIRECTORY_FOR_ENVIRONMENT/. $GLOBAL_ADDRESSES_DIRECTORY_FOR_ENVIRONMENT/
+rm -rf $LOCAL_ADDRESSES_DIRECTORY
+echo "local address directory migrated"

@@ -2,12 +2,13 @@
 
 # set env vars if unset
 : ${ENVIRONMENT:="local"}
-: ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
+export ENVIRONMENT
 
+CHAIN_CONFIGS_DIRECTORY="environmentVariables/${ENVIRONMENT}"
 ############################################## DEPLOY MOCK APP #############################################################
 script_dir=`pwd`
 
-for entry in "$CHAINS_DIRECTORY"/*
+for entry in "$CHAIN_CONFIGS_DIRECTORY"/*
 do
     . "$entry"
     echo "\n\n########### mock_app $CHAIN_NAME ###########"

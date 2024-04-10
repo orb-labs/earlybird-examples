@@ -9,7 +9,7 @@ export ENVIRONMENT=${ENVIRONMENT:-local}
 # Uncomment for mainnet
 # export ENVIRONMENT="mainnet"
 
-chains_directory="environmentVariables/$ENVIRONMENT"
+CHAIN_CONFIGS_DIRECTORY="environmentVariables/$ENVIRONMENT"
 
 export MNEMONICS="test test test test test test test test test test test junk"
 export SENDING_KEY_INDEX=5

@@ -1,2 +1,0 @@
-cd script
-. deploy.sh

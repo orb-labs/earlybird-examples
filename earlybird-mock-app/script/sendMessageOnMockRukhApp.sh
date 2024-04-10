@@ -27,12 +27,10 @@ esac
 # export env vars needed by the Solidity scripts
 export ENVIRONMENT KEY_INDEX MNEMONICS SENDING_MNEMONICS SENDING_KEY_INDEX
 
-### other env vars
-: ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
-
+CHAIN_CONFIGS_DIRECTORY="environmentVariables/${ENVIRONMENT}"
 ############################################## SENDING MESSAGE TO APP ############################################################
 i=0
-for entry in "$CHAINS_DIRECTORY"/*
+for entry in "$CHAIN_CONFIGS_DIRECTORY"/*
 do
     . "$entry"
     chains[$i]=$CHAIN_NAME
@@ -58,7 +56,7 @@ while true; do
     echo "Enter message you will like to send:"
     read NEWMESSAGE
 
-    destinationChainConfigsPath="$CHAINS_DIRECTORY/"$destinationChain".sh" 
+    destinationChainConfigsPath="$CHAIN_CONFIGS_DIRECTORY/"$destinationChain".sh" 
     destination_mock_rukh_app_address_path="../addresses/"${ENVIRONMENT}"/"$destinationChain"/rukh/app.txt"
     . "$destinationChainConfigsPath"
 
@@ -72,7 +70,7 @@ while true; do
         export RECEIVER_RELAYER_FEE_COLLECTOR=$(<"../addresses/"${ENVIRONMENT}"/"$destinationChain"/fee-collectors/relayerFeeCollector.txt")
     fi
 
-    sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
+    sourceChainConfigsPath="$CHAIN_CONFIGS_DIRECTORY/""$sourceChain"".sh" 
     source_mock_rukh_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/app.txt"
     . "$sourceChainConfigsPath"
 

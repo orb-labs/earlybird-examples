@@ -9,7 +9,7 @@ export ENVIRONMENT=${ENVIRONMENT:-local}
 # Uncomment for mainnet
 # export ENVIRONMENT="production"
 
-chains_directory="environmentVariables/$ENVIRONMENT"
+CHAIN_CONFIGS_DIRECTORY="environmentVariables/$ENVIRONMENT"
 
 export SENDING_KEY_INDEX=5
 
@@ -19,8 +19,6 @@ then
     export SENDING_KEY_INDEX=0
     export SENDING_MNEMONICS=$(op read "op://Security/RukhPingPongApp/Sending_mnemonic_phrase")
 fi
-
-
 ############################################## Helper Functions #########################################################################################
 
 address_from_filepath() {

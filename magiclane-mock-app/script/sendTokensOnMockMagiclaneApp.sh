@@ -27,12 +27,10 @@ esac
 # export env vars needed by the Solidity scripts
 export ENVIRONMENT KEY_INDEX MNEMONICS SENDING_MNEMONICS SENDING_KEY_INDEX
 
-### other env vars
-: ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
-
+CHAIN_CONFIGS_DIRECTORY="environmentVariables/${ENVIRONMENT}"
 ############################################## SENDING MESSAGE TO APP ############################################################
 i=0
-for entry in "$CHAINS_DIRECTORY"/*
+for entry in "$CHAIN_CONFIGS_DIRECTORY"/*
 do
     . "$entry"
     chains[$i]=$CHAIN_NAME
@@ -79,7 +77,7 @@ while true; do
         break # valid choice was made; exit prompt.
     done
 
-    destinationChainConfigsPath="$CHAINS_DIRECTORY/"$destinationChain".sh" 
+    destinationChainConfigsPath="$CHAIN_CONFIGS_DIRECTORY/"$destinationChain".sh" 
     destination_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$destinationChain"/magiclaneMockApp.txt"
     . ${destinationChainConfigsPath}
 
@@ -92,10 +90,10 @@ while true; do
         echo "$ENVIRONMENT destination mock thunderbird app address not found at $destination_magiclane_mock_app_address_path" && exit 10
     fi
 
-    sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
+    sourceChainConfigsPath="$CHAIN_CONFIGS_DIRECTORY/""$sourceChain"".sh" 
     source_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/magiclaneMockApp.txt"
 
-    sourceChainConfigsPath="$CHAINS_DIRECTORY/""$sourceChain"".sh" 
+    sourceChainConfigsPath="$CHAIN_CONFIGS_DIRECTORY/""$sourceChain"".sh" 
     source_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/magiclaneMockApp.txt"
     . "$sourceChainConfigsPath"
 

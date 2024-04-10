@@ -1,34 +1,3 @@
-############################################### SETTING ENVIRONMENT VARIABLES ##############################################
-
-# set env vars if unset
-### default environment
-: ${ENVIRONMENT:="local"}
-
-case $ENVIRONMENT in
-    prod)
-        : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
-        ;;
-    dev)
-        : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
-        ;;
-    local)
-        : ${MNEMONICS:="test test test test test test test test test test test junk"}
-        : ${NUMBER_OF_TOKENS:="3"}
-        ;;
-    *)
-        echo "invalid environment" && exit 1
-        ;;
-esac
-
-### other env vars
-: ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
-: ${KEY_INDEX:="0"}
-: ${SENDING_MNEMONICS:=$MNEMONICS}
-: ${SENDING_KEY_INDEX:=$KEY_INDEX}
-
-# export env vars needed by the Solidity scripts
-export ENVIRONMENT KEY_INDEX MNEMONICS SENDING_MNEMONICS SENDING_KEY_INDEX NUMBER_OF_TOKENS
-
 ############################################## HELPER FUNCTIONS ############################################################
 
 ### get address from path arg or use placeholder
@@ -44,12 +13,12 @@ address_from_filepath() {
 }
 
 ############################################################################################################################
-if [[ -z $CHAINS_DIRECTORY || -z $ENVIRONMENT || -z $KEY_INDEX || -z $MNEMONICS  ]]; then echo "env vars unset" && exit 1;fi
+if [[ -z $CHAIN_CONFIGS_DIRECTORY || -z $ENVIRONMENT || -z $KEY_INDEX || -z $MNEMONICS  ]]; then echo "env vars unset" && exit 1;fi
 
 # the deploy will run for each file in the chains directory, 
 # all of which should be shell scripts that set env vars specific to the chain
 # the filename should be the chain name
-for entry in "$CHAINS_DIRECTORY"/*
+for entry in "$CHAIN_CONFIGS_DIRECTORY"/*
 do
     . "$entry"
 

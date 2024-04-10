@@ -2,12 +2,11 @@
 
 # set env vars if unset
 : ${ENVIRONMENT:="local"}
-
 export ENVIRONMENT
 
-: ${CHAINS_DIRECTORY:="environmentVariables/${ENVIRONMENT}"}
+CHAIN_CONFIGS_DIRECTORY="environmentVariables/${ENVIRONMENT}"
 
-for entry in "$CHAINS_DIRECTORY"/*
+for entry in "$CHAIN_CONFIGS_DIRECTORY"/*
 do
     . "$entry"
     address_dir="../addresses/${ENVIRONMENT}/${CHAIN_NAME}"

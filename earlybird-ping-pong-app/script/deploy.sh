@@ -1,16 +1,3 @@
-############################################################# SETTING ENVIRONMENT VARIABLES ################################################################
-
-export ENVIRONMENT=${ENVIRONMENT:-local}
-
-# Uncomment for public testnet
-# export ENVIRONMENT="testnet"
-# export MNEMONICS=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`
-
-# Uncomment for mainnet
-# export ENVIRONMENT="production"
-
-chains_directory="environmentVariables/$ENVIRONMENT"
-
 ############################################## Helper Functions #########################################################################################
 
 address_from_filepath() {
@@ -32,7 +19,7 @@ export EXPECTED_RUKH_VERSION_PINGPONG_APP_ADDRESS=`address_from_filepath "addres
 export EXPECTED_THUNDERBIRD_VERSION_PINGPONG_APP_ADDRESS=`address_from_filepath "addresses/"$ENVIRONMENT"/"$CHAIN_NAME"/rukh/app.txt"`
 
 ############################################## DEPLOYING RukhVersion PingPong App TO CHAINS ############################################################
-for entry in "$chains_directory"/*
+for entry in "$CHAIN_CONFIGS_DIRECTORY"/*
 do
     # run scripts in environmentVariables/ to set env vars for the chain
     . "$entry"
