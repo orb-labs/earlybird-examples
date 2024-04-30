@@ -30,10 +30,9 @@ contract MockApp is IReceiver, Ownable {
     string[] public allReceivedMessages;
 
     // Constructor hardcodes the endpoint address.
-    constructor(address _endpoint, address _defaultFeeToken, bool _directMsgsEnabled) {
+    constructor(address _endpoint, address _defaultFeeToken) {
         endpoint = _endpoint;
         defaultFeeToken = _defaultFeeToken;
-        directMsgsEnabled = _directMsgsEnabled;
     }
 
     // Modifier to ensure only the endpoint (if direct messages is disabled) or library receive module (if enabled) can call a function

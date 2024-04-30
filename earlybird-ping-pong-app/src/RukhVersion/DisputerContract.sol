@@ -26,9 +26,13 @@ contract DisputerContract is IDisputerContractForRukhReceiveModule, Ownable {
     // mapping of dispute to dispute submitters
     mapping(bytes32 => address) public disputesToDisputeSubmitters;
 
-    constructor(address _app, address _rukhLibraryReceiveModule) {
-        app = _app;
+    constructor(address _rukhLibraryReceiveModule) {
         rukhLibraryReceiveModule = _rukhLibraryReceiveModule;
+    }
+
+    // Update the app address
+    function updateApp(address _app) external onlyOwner {
+        app = _app;
     }
 
     function disputeResolved(bytes32 _disputedMsgProofHash, uint256 _disputeVerdict) external {

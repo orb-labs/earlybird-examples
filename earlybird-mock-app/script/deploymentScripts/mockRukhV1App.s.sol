@@ -27,11 +27,9 @@ contract MockRukhV1AppDeployment is Script {
 
         if (size == 0) {
             vm.startBroadcast(deployerPrivateKey);
-            bool directMsgsEnabled = true;
             MockApp app = new MockApp(
                 earlybirdEndpointAddress,
-                address(0), 
-                directMsgsEnabled
+                address(0)
             );
             vm.stopBroadcast();
 
