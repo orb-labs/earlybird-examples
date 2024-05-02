@@ -132,17 +132,17 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
     }
 
     // Updates the send module configs of the earlybird library we are using
-    function updateSendModuleConfigs(
+    function updateAppConfigForSending(
         bool _isSelfBroadcasting,
         address _sendingOracleAddress,
         address _sendingRelayerAddress
     ) external onlyOwner {
         isSelfBroadcasting = _isSelfBroadcasting;
         bytes memory sendModuleConfigs = abi.encode(_isSelfBroadcasting, _sendingOracleAddress, _sendingRelayerAddress);
-        IEndpointFunctionsForApps(endpoint).updateSendModuleConfigs(sendModuleConfigs);
+        IEndpointFunctionsForApps(endpoint).updateAppConfigForSending(sendModuleConfigs);
     }
 
-    function updateReceiveModuleConfigs(
+    function updateAppConfigForReceiving(
         uint256 _minDisputeTime,
         uint256 _minDisputeResolutionExtension,
         uint256 _disputeEpochLength,
@@ -181,7 +181,7 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
             _msgDeliveryPaused
         );
 
-        IEndpointFunctionsForApps(endpoint).updateReceiveModuleConfigs(receiveModuleConfigs);
+        IEndpointFunctionsForApps(endpoint).updateAppConfigForReceiving(receiveModuleConfigs);
     }
 
     function updateDefaultFeeToken(address _feeToken) external onlyOwner {
@@ -192,13 +192,13 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
         ERC20(_tokenAddress).approve(endpoint, _amount);
     }
 
-    function getFees(uint256 _dstChainId, address _dstAddress, uint256 pings) public returns (uint256) {
+    function getFees(bytes32 _dstChainId, address _dstAddress, uint256 pings) public returns (uint256) {
         bytes memory payload = abi.encode(pings);
         bool isOrderedMsg = true;
         bytes memory additionalParams = abi.encode(defaultFeeToken, isOrderedMsg, 500000);
         bytes memory _dst = abi.encode(_dstAddress);
         
-        (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getSendingFeeEstimate(
+        (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getEstimatedFeeForSending(
             address(this),
             _dstChainId,
             _dst,
@@ -222,7 +222,7 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
         return totalNativeTokenFee * pings;
     }
 
-    function sendPing(uint256 _dstChainId, address _dstAddress, uint256 pings, uint256 totalNativeTokenFee) private {
+    function sendPing(bytes32 _dstChainId, address _dstAddress, uint256 pings, uint256 totalNativeTokenFee) private {
         bytes memory payload = abi.encode(pings);
         bool isOrderedMsg = true;
         bytes memory additionalParams = abi.encode(defaultFeeToken, isOrderedMsg, 500000);
@@ -238,14 +238,14 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
         emit Ping(pings);
     }
 
-    function ping(uint256 _dstChainId, address _dstAddress, uint256 pings) public whenNotPaused payable {
+    function ping(bytes32 _dstChainId, address _dstAddress, uint256 pings) public whenNotPaused payable {
         uint256 totalNativeTokenFee = this.getFees(_dstChainId, _dstAddress, pings);
         require(totalNativeTokenFee <= msg.value, "Too many pings, too little coin, friend");
         sendPing(_dstChainId, _dstAddress, pings, totalNativeTokenFee);
     }
 
     function receiveMsg(
-        uint256 _senderChainId,
+        bytes32 _senderChainId,
         bytes memory _sender,
         uint256 _nonce,
         bytes memory _payload,
@@ -292,7 +292,7 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
     receive() external payable {}
 
     function getAllRecs(
-        uint256,
+        bytes32,
         bytes memory,
         uint256,
         bytes memory _payload
@@ -327,7 +327,7 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
     }
 
     function getRecRelayer(
-        uint256,
+        bytes32,
         bytes memory,
         uint256,
         bytes memory _payload

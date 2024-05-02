@@ -15,7 +15,7 @@ const wallet = ethers.Wallet.fromPhrase(MNEMONICS, provider);
 
 // Fetching abis
 const thunderbirdPingPongAppData = require('../out/ThunderbirdVersion/PingPong.sol/PingPong.json');
-const rukhDisputersContractData = require('../out/RukhVersion/DisputerContract.sol/DisputerContract.json');
+const rukhDisputersContractData = require('../out/DisputerContract.sol/DisputerContract.json');
 const rukhPingPongAppData = require('../out/RukhVersion/PingPong.sol/PingPong.json');
 
 // Function for deploying earlybird ping pong app
@@ -141,7 +141,7 @@ async function useOrDeployThunderbirdPingPongApp(
 * @param {string} rukhLibraryReceiveModule - 20 byte string representing the rukh library receive module
 * @returns {string} rukhDisputerContractAddress - 20 byte string representing the deployed rukh disputer contract address
 */
-async function useOrDeployRukhDisputerContract(expectedRukhDisputerContract, rukhPingPongApp, rukhLibraryReceiveModule) {
+async function useOrDeployRukhDisputerContract(expectedRukhDisputerContract, rukhLibraryReceiveModule) {
     let rukhDisputerContractAddress;
 
     // Check if the expected magiclane mock app exists
@@ -151,8 +151,8 @@ async function useOrDeployRukhDisputerContract(expectedRukhDisputerContract, ruk
     if (expectedRukhDisputerContractCode == '0x') {
         const rukhDisputerContractFactory = new ethers.ContractFactory(rukhDisputersContractData.abi, rukhDisputersContractData.bytecode, wallet);
         const rukhDisputerContract = await rukhDisputerContractFactory.deploy(rukhLibraryReceiveModule);
-
         await rukhDisputerContract.waitForDeployment();
+
         rukhDisputerContractAddress = await rukhDisputerContract.getAddress();
         console.log("Rukh Disputers Contract deployed on %s at %s", CHAIN_NAME, rukhDisputerContractAddress);
     } else {
@@ -224,21 +224,21 @@ async function useOrDeployRukhPingPongApp(
 
 /**
 * Function for fetching already deployed rukh disputer contract or deploying it if it does not exist
-* @param {string} rukhDisputerContract - 20 byte string representing the rukh disputer contract
+* @param {string} rukhDisputerContractAddress - 20 byte string representing the rukh disputer contract address
 * @param {string} expectedAppAddress - 20 byte string representing the expected app address
 */
-async function updateAppAddressOnRukhDisputerContract(rukhDisputerContract, expectedAppAddress) {
+async function updateAppAddressOnRukhDisputerContract(rukhDisputerContractAddress, expectedAppAddress) {
     // Check if the rukh disputer contract exists
-    let rukhDisputerContractCode = await provider.getCode(rukhDisputerContract);
+    let rukhDisputerContractCode = await provider.getCode(rukhDisputerContractAddress);
 
     // If it does get the current app address
     if (rukhDisputerContractCode != '0x') {
-        const rukhDisputerContract = new ethers.Contract(rukhDisputerContract, rukhDisputersContractData.abi, provider);
+        let rukhDisputerContract = new ethers.Contract(rukhDisputerContractAddress, rukhDisputersContractData.abi, provider);
         let currentAppAddress = await rukhDisputerContract.app();
 
         // Check if the current app address matches ehat is expected, if not update
         if (currentAppAddress != expectedAppAddress) {
-            rukhDisputerContract = new ethers.Contract(rukhDisputerContract, rukhDisputersContractData.abi, wallet);
+            rukhDisputerContract = new ethers.Contract(rukhDisputerContractAddress, rukhDisputersContractData.abi, wallet);
             let updateTx = await rukhDisputerContract.updateApp(expectedAppAddress);
             await updateTx.wait();
             console.log("Rukh Disputers Contract app address updated to %s on %s", expectedAppAddress, CHAIN_NAME);

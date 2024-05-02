@@ -111,17 +111,17 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
     }
 
     // Updates the send module configs of the earlybird library we are using
-    function updateSendModuleConfigs(
+    function updateAppConfigForSending(
         bool _isSelfBroadcasting,
         address _sendingOracleAddress,
         address _sendingRelayerAddress
     ) external onlyOwner {
         isSelfBroadcasting = _isSelfBroadcasting;
         bytes memory sendModuleConfigs = abi.encode(_isSelfBroadcasting, _sendingOracleAddress, _sendingRelayerAddress);
-        IEndpointFunctionsForApps(endpoint).updateSendModuleConfigs(sendModuleConfigs);
+        IEndpointFunctionsForApps(endpoint).updateAppConfigForSending(sendModuleConfigs);
     }
 
-    function updateReceiveModuleConfigs(
+    function updateAppConfigForReceiving(
         address _receivingOracle,
         address payable _receivingDefaultRelayer,
         address _recsContract,
@@ -145,7 +145,7 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
             _msgDeliveryPaused
         );
 
-        IEndpointFunctionsForApps(endpoint).updateReceiveModuleConfigs(receiveModuleConfigs);
+        IEndpointFunctionsForApps(endpoint).updateAppConfigForReceiving(receiveModuleConfigs);
     }
 
     function updateDefaultFeeToken(address _feeToken) external onlyOwner {
@@ -156,13 +156,13 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
         ERC20(_tokenAddress).approve(endpoint, _amount);
     }
 
-    function getFees(uint256 _dstChainId, address _dstAddress, uint256 pings) public returns (uint256) {
+    function getFees(bytes32 _dstChainId, address _dstAddress, uint256 pings) public returns (uint256) {
         bytes memory payload = abi.encode(pings);
         bool isOrderedMsg = true;
         bytes memory additionalParams = abi.encode(defaultFeeToken, isOrderedMsg, 500000);
         bytes memory _dst = abi.encode(_dstAddress);
         
-        (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getSendingFeeEstimate(
+        (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getEstimatedFeeForSending(
             address(this),
             _dstChainId,
             _dst,
@@ -186,7 +186,7 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
         return totalNativeTokenFee * pings;
     }
 
-    function sendPing(uint256 _dstChainId, address   _dstAddress, uint256 pings, uint256 totalNativeTokenFee) private {
+    function sendPing(bytes32 _dstChainId, address   _dstAddress, uint256 pings, uint256 totalNativeTokenFee) private {
         bytes memory payload = abi.encode(pings);
         bool isOrderedMsg = true;
         bytes memory additionalParams = abi.encode(defaultFeeToken, isOrderedMsg, 500000);
@@ -203,7 +203,7 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
     }
 
 
-    function ping(uint256 _dstChainId, address _dstAddress, uint256 pings) public whenNotPaused payable {
+    function ping(bytes32 _dstChainId, address _dstAddress, uint256 pings) public whenNotPaused payable {
         uint256 totalNativeTokenFee = this.getFees(_dstChainId, _dstAddress, pings);
         require(totalNativeTokenFee <= msg.value, "Too many pings, too little coin, friend");
         sendPing(_dstChainId, _dstAddress, pings, totalNativeTokenFee);
@@ -211,7 +211,7 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
 
 
     function receiveMsg(
-        uint256 _senderChainId,
+        bytes32 _senderChainId,
         bytes memory _sender,
         uint256 _nonce,
         bytes memory _payload,
@@ -242,7 +242,7 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
     }
 
     function getAllRecs(
-        uint256,
+        bytes32,
         bytes memory,
         uint256,
         bytes memory _payload
@@ -257,7 +257,7 @@ contract PingPong is IReceiver, IRecsContractForThunderbirdReceiveModule, Ownabl
     }
 
     function getRecRelayer(
-        uint256,
+        bytes32,
         bytes memory,
         uint256,
         bytes memory _payload

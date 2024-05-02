@@ -35,7 +35,8 @@ contract DisputerContract is IDisputerContractForRukhReceiveModule, Ownable {
         app = _app;
     }
 
-    function disputeResolved(bytes32 _disputedMsgProofHash, uint256 _disputeVerdict) external {
+    function disputeResolved(address _app, bytes32 _disputedMsgProofHash, uint256 _disputeVerdict) external {
+        require(_app == app);
         require(msg.sender == rukhLibraryReceiveModule);
         require(_disputeVerdict == uint256(IRukhReceiveModule.DisputeVerdictType.MSG_PROOF_INVALID));
 
