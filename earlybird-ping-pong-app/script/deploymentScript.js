@@ -253,8 +253,9 @@ async function updateAppAddressOnRukhDisputerContract(rukhDisputerContractAddres
       provider
     );
     let currentAppAddress = await rukhDisputerContract.app();
+    
 
-    // Check if the current app address matches ehat is expected, if not update
+    // Check if the current app address matches what is expected, if not update
     if (currentAppAddress != expectedAppAddress) {
       rukhDisputerContract = new ethers.Contract(rukhDisputerContractAddress, rukhDisputersContractData.abi, wallet);
       let updateTx = await rukhDisputerContract.updateApp(expectedAppAddress);

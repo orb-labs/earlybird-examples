@@ -47,59 +47,18 @@ const deployEarlybirdMockApp = async () => {
       earlybirdPeripheryContractsData.relayer
     );
 
-    // Instantiate abi encoder
-    let abiCoder = new ethers.AbiCoder();
-
-    // Creating mock thunderbird V1 app configs for sending
-    let mockThunderbirdV1AppConfigsForSending = {
-      isSelfBroadcasting: false,
-      oracleFeeCollector: earlybirdPeripheryContractsData.oracle,
-      relayerFeeCollector: earlybirdPeripheryContractsData.relayer,
-    };
-
-    // Encoding mock thunderbird V1 app configs for sending
-    let encodedMockThunderbirdV1AppConfigsForSending = abiCoder.encode(
-      ["tuple(bool a, address b, address c) d"],
-      [
-        [
-          mockThunderbirdV1AppConfigsForSending.isSelfBroadcasting,
-          mockThunderbirdV1AppConfigsForSending.oracleFeeCollector,
-          mockThunderbirdV1AppConfigsForSending.relayerFeeCollector,
-        ],
-      ]
-    );
-
-    // Creating mock thunderbird V1 app configs for receiving
-    let mockThunderbirdV1AppConfigsForReceiving = {
-      oracle: earlybirdPeripheryContractsData.oracle,
-      relayer: earlybirdPeripheryContractsData.relayer,
-      recsContract: mockThunderbirdV1RecsContract,
-      emitMsgProofs: true,
-      directMsgsEnabled: false,
-      msgDeliveryPaused: false,
-    };
-
-    // Encoding mock thunderbird V1 app configs for receiving
-    let encodedMockThunderbirdV1AppConfigsForReceiving = abiCoder.encode(
-      ["tuple(address a, address b, address c, bool d, bool e, bool f) g"],
-      [
-        [
-          mockThunderbirdV1AppConfigsForReceiving.oracle,
-          mockThunderbirdV1AppConfigsForReceiving.relayer,
-          mockThunderbirdV1AppConfigsForReceiving.recsContract,
-          mockThunderbirdV1AppConfigsForReceiving.emitMsgProofs,
-          mockThunderbirdV1AppConfigsForReceiving.directMsgsEnabled,
-          mockThunderbirdV1AppConfigsForReceiving.msgDeliveryPaused,
-        ],
-      ]
+    // Get configs for mock thunderbird V1 app
+    let configsForMockThunderbirdV1App = await getConfigsForMockThunderbirdV1App(
+      mockThunderbirdV1RecsContract, 
+      earlybirdPeripheryContractsData
     );
 
     // Update configs for mock thunderbird v1 app
     await updateConfigsForMockThunderbirdV1App(
       mockThunderbirdV1App,
       earlybirdData.earlybirdEndpoint,
-      encodedMockThunderbirdV1AppConfigsForSending,
-      encodedMockThunderbirdV1AppConfigsForReceiving
+      configsForMockThunderbirdV1App.encodedMockThunderbirdV1AppConfigsForSending,
+      configsForMockThunderbirdV1App.encodedMockThunderbirdV1AppConfigsForReceiving
     );
 
     // Get or deploy mock rukh v1 app
@@ -114,82 +73,28 @@ const deployEarlybirdMockApp = async () => {
       earlybirdPeripheryContractsData.relayer
     );
 
-    // Creating mock rukh V1 app configs for sending
-    let mockRukhV1AppConfigsForSending = {
-      isSelfBroadcasting: false,
-      oracleFeeCollector: earlybirdPeripheryContractsData.oracle,
-      relayerFeeCollector: earlybirdPeripheryContractsData.relayer,
-    };
-
-    // Encoding mock rukh V1 app configs for sending
-    let encodedMockRukhV1AppConfigsForSending = abiCoder.encode(
-      ["tuple(bool a, address b, address c) d"],
-      [
-        [
-          mockRukhV1AppConfigsForSending.isSelfBroadcasting,
-          mockRukhV1AppConfigsForSending.oracleFeeCollector,
-          mockRukhV1AppConfigsForSending.relayerFeeCollector,
-        ],
-      ]
-    );
-
-    // Creating mock thunderbird V1 app configs for receiving
-    let mockRukhV1AppConfigsForReceiving = {
-      minDisputeTime: 10,
-      minDisputeResolutionExtension: 10,
-      disputeEpochLength: 100,
-      maxValidDisputesPerEpoch: 1,
-      oracle: earlybirdPeripheryContractsData.oracle,
-      defaultRelayer: earlybirdPeripheryContractsData.relayer,
-      disputersContract: earlybirdPeripheryContractsData.disputerContract,
-      disputeResolver: earlybirdPeripheryContractsData.disputeResolver,
-      recsContract: mockRukhV1RecsContract,
-      emitMsgProofs: true,
-      directMsgsEnabled: true,
-      msgDeliveryPaused: false,
-    };
-
-    // Encoding mock thunderbird V1 app configs for receiving
-    let encodedMockRukhV1AppConfigsForReceiving = abiCoder.encode(
-      [
-        "tuple(uint256 a, uint256 b, uint256 c, uint256 d, address e, address f, address g, address h, address i, bool j, bool k, bool l) m",
-      ],
-      [
-        [
-          mockRukhV1AppConfigsForReceiving.minDisputeTime,
-          mockRukhV1AppConfigsForReceiving.minDisputeResolutionExtension,
-          mockRukhV1AppConfigsForReceiving.disputeEpochLength,
-          mockRukhV1AppConfigsForReceiving.maxValidDisputesPerEpoch,
-          mockRukhV1AppConfigsForReceiving.oracle,
-          mockRukhV1AppConfigsForReceiving.defaultRelayer,
-          mockRukhV1AppConfigsForReceiving.disputersContract,
-          mockRukhV1AppConfigsForReceiving.disputeResolver,
-          mockRukhV1AppConfigsForReceiving.recsContract,
-          mockRukhV1AppConfigsForReceiving.emitMsgProofs,
-          mockRukhV1AppConfigsForReceiving.directMsgsEnabled,
-          mockRukhV1AppConfigsForReceiving.msgDeliveryPaused,
-        ],
-      ]
+    // Get configs for mock rukh V1 app
+    let configsForMockRukhV1App = await getConfigsForMockRukhV1App(
+      mockRukhV1RecsContract, 
+      earlybirdPeripheryContractsData
     );
 
     // Update configs for mock rukh v1 app
     await updateConfigsForMockRukhV1App(
       mockRukhV1App,
       earlybirdData.earlybirdEndpoint,
-      encodedMockRukhV1AppConfigsForSending,
-      encodedMockRukhV1AppConfigsForReceiving
+      configsForMockRukhV1App.encodedMockRukhV1AppConfigsForSending,
+      configsForMockRukhV1App.encodedMockRukhV1AppConfigsForReceiving
     );
 
     // Create earlybird data map
     let earlybirdMockAppData = {
       mockThunderbirdV1App: mockThunderbirdV1App,
       mockThunderbirdV1RecsContract: mockThunderbirdV1RecsContract,
-      mockThunderbirdV1AppConfigsForSending: mockThunderbirdV1AppConfigsForSending,
-      mockThunderbirdV1AppConfigsForReceiving: mockThunderbirdV1AppConfigsForReceiving,
       mockRukhV1App: mockRukhV1App,
       mockRukhV1RecsContract: mockRukhV1RecsContract,
-      mockRukhV1AppConfigsForSending: mockRukhV1AppConfigsForSending,
-      mockRukhV1AppConfigsForReceiving: mockRukhV1AppConfigsForReceiving,
+      configsForMockThunderbirdV1App: configsForMockThunderbirdV1App,
+      configsForMockRukhV1App: configsForMockRukhV1App,
     };
 
     // Save earlybird mock app data
@@ -476,6 +381,144 @@ async function updateConfigsForMockRukhV1App(
       await setConfigsTx.wait();
       console.log("MockRukhV1App on %s configs set", CHAIN_NAME);
     }
+  }
+}
+
+/**
+ * Function for getting ad creating configs for mock thunderbird V1 app
+ * @param {string} mockThunderbirdV1RecsContract - 20 byte string representing the mock thunderbird V1 recs contract
+ * @param {Map<String, String>} earlybirdPeripheryContractsData - map indicating the earlybird periphery contract data
+ * @returns {Map<String, Any>} map containing all the configs for mock thunderbird V1 app
+ */
+async function getConfigsForMockThunderbirdV1App(mockThunderbirdV1RecsContract, earlybirdPeripheryContractsData) {
+  // Instantiate abi encoder
+  let abiCoder = new ethers.AbiCoder();
+
+  // Creating mock thunderbird V1 app configs for sending
+  let mockThunderbirdV1AppConfigsForSending = {
+    isSelfBroadcasting: false,
+    oracleFeeCollector: earlybirdPeripheryContractsData.oracle,
+    relayerFeeCollector: earlybirdPeripheryContractsData.relayer,
+  };
+
+  // Encoding mock thunderbird V1 app configs for sending
+  let encodedMockThunderbirdV1AppConfigsForSending = abiCoder.encode(
+    ["tuple(bool a, address b, address c) d"],
+    [
+      [
+        mockThunderbirdV1AppConfigsForSending.isSelfBroadcasting,
+        mockThunderbirdV1AppConfigsForSending.oracleFeeCollector,
+        mockThunderbirdV1AppConfigsForSending.relayerFeeCollector,
+      ],
+    ]
+  );
+
+  // Creating mock thunderbird V1 app configs for receiving
+  let mockThunderbirdV1AppConfigsForReceiving = {
+    oracle: earlybirdPeripheryContractsData.oracle,
+    relayer: earlybirdPeripheryContractsData.relayer,
+    recsContract: mockThunderbirdV1RecsContract,
+    emitMsgProofs: true,
+    directMsgsEnabled: false,
+    msgDeliveryPaused: false,
+  };
+
+  // Encoding mock thunderbird V1 app configs for receiving
+  let encodedMockThunderbirdV1AppConfigsForReceiving = abiCoder.encode(
+    ["tuple(address a, address b, address c, bool d, bool e, bool f) g"],
+    [
+      [
+        mockThunderbirdV1AppConfigsForReceiving.oracle,
+        mockThunderbirdV1AppConfigsForReceiving.relayer,
+        mockThunderbirdV1AppConfigsForReceiving.recsContract,
+        mockThunderbirdV1AppConfigsForReceiving.emitMsgProofs,
+        mockThunderbirdV1AppConfigsForReceiving.directMsgsEnabled,
+        mockThunderbirdV1AppConfigsForReceiving.msgDeliveryPaused,
+      ],
+    ]
+  );
+
+  return {
+    encodedMockThunderbirdV1AppConfigsForSending: encodedMockThunderbirdV1AppConfigsForSending,
+    encodedMockThunderbirdV1AppConfigsForReceiving: encodedMockThunderbirdV1AppConfigsForReceiving,
+    mockThunderbirdV1AppConfigsForSending: mockThunderbirdV1AppConfigsForSending,
+    mockThunderbirdV1AppConfigsForReceiving: mockThunderbirdV1AppConfigsForReceiving
+  }
+}
+
+/**
+ * Function for getting ad creating configs for mock rukh V1 app
+ * @param {string} mockRukhV1RecsContract - 20 byte string representing the mock rukh V1 recs contract
+ * @param {Map<String, String>} earlybirdPeripheryContractsData - map indicating the earlybird periphery contract data
+ * @returns {Map<String, Any>} map containing all the configs for mock rukh V1 app
+ */
+async function getConfigsForMockRukhV1App(mockRukhV1RecsContract, earlybirdPeripheryContractsData) {
+  // Instantiate abi encoder
+  let abiCoder = new ethers.AbiCoder();
+
+  // Creating mock rukh V1 app configs for sending
+  let mockRukhV1AppConfigsForSending = {
+    isSelfBroadcasting: false,
+    oracleFeeCollector: earlybirdPeripheryContractsData.oracle,
+    relayerFeeCollector: earlybirdPeripheryContractsData.relayer,
+  };
+
+  // Encoding mock rukh V1 app configs for sending
+  let encodedMockRukhV1AppConfigsForSending = abiCoder.encode(
+    ["tuple(bool a, address b, address c) d"],
+    [
+      [
+        mockRukhV1AppConfigsForSending.isSelfBroadcasting,
+        mockRukhV1AppConfigsForSending.oracleFeeCollector,
+        mockRukhV1AppConfigsForSending.relayerFeeCollector,
+      ],
+    ]
+  );
+
+  // Creating mock thunderbird V1 app configs for receiving
+  let mockRukhV1AppConfigsForReceiving = {
+    minDisputeTime: 10,
+    minDisputeResolutionExtension: 10,
+    disputeEpochLength: 100,
+    maxValidDisputesPerEpoch: 1,
+    oracle: earlybirdPeripheryContractsData.oracle,
+    defaultRelayer: earlybirdPeripheryContractsData.relayer,
+    disputersContract: earlybirdPeripheryContractsData.disputerContract,
+    disputeResolver: earlybirdPeripheryContractsData.disputeResolver,
+    recsContract: mockRukhV1RecsContract,
+    emitMsgProofs: true,
+    directMsgsEnabled: true,
+    msgDeliveryPaused: false,
+  };
+
+  // Encoding mock thunderbird V1 app configs for receiving
+  let encodedMockRukhV1AppConfigsForReceiving = abiCoder.encode(
+    [
+      "tuple(uint256 a, uint256 b, uint256 c, uint256 d, address e, address f, address g, address h, address i, bool j, bool k, bool l) m",
+    ],
+    [
+      [
+        mockRukhV1AppConfigsForReceiving.minDisputeTime,
+        mockRukhV1AppConfigsForReceiving.minDisputeResolutionExtension,
+        mockRukhV1AppConfigsForReceiving.disputeEpochLength,
+        mockRukhV1AppConfigsForReceiving.maxValidDisputesPerEpoch,
+        mockRukhV1AppConfigsForReceiving.oracle,
+        mockRukhV1AppConfigsForReceiving.defaultRelayer,
+        mockRukhV1AppConfigsForReceiving.disputersContract,
+        mockRukhV1AppConfigsForReceiving.disputeResolver,
+        mockRukhV1AppConfigsForReceiving.recsContract,
+        mockRukhV1AppConfigsForReceiving.emitMsgProofs,
+        mockRukhV1AppConfigsForReceiving.directMsgsEnabled,
+        mockRukhV1AppConfigsForReceiving.msgDeliveryPaused,
+      ],
+    ]
+  );
+
+  return {
+    encodedMockRukhV1AppConfigsForSending: encodedMockRukhV1AppConfigsForSending,
+    encodedMockRukhV1AppConfigsForReceiving: encodedMockRukhV1AppConfigsForReceiving,
+    mockRukhV1AppConfigsForSending: mockRukhV1AppConfigsForSending,
+    mockRukhV1AppConfigsForReceiving: mockRukhV1AppConfigsForReceiving
   }
 }
 
