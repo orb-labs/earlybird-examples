@@ -49,7 +49,7 @@ const deployEarlybirdMockApp = async () => {
 
     // Get configs for mock thunderbird V1 app
     let configsForMockThunderbirdV1App = await getConfigsForMockThunderbirdV1App(
-      mockThunderbirdV1RecsContract, 
+      mockThunderbirdV1RecsContract,
       earlybirdPeripheryContractsData
     );
 
@@ -75,7 +75,7 @@ const deployEarlybirdMockApp = async () => {
 
     // Get configs for mock rukh V1 app
     let configsForMockRukhV1App = await getConfigsForMockRukhV1App(
-      mockRukhV1RecsContract, 
+      mockRukhV1RecsContract,
       earlybirdPeripheryContractsData
     );
 
@@ -442,8 +442,8 @@ async function getConfigsForMockThunderbirdV1App(mockThunderbirdV1RecsContract, 
     encodedMockThunderbirdV1AppConfigsForSending: encodedMockThunderbirdV1AppConfigsForSending,
     encodedMockThunderbirdV1AppConfigsForReceiving: encodedMockThunderbirdV1AppConfigsForReceiving,
     mockThunderbirdV1AppConfigsForSending: mockThunderbirdV1AppConfigsForSending,
-    mockThunderbirdV1AppConfigsForReceiving: mockThunderbirdV1AppConfigsForReceiving
-  }
+    mockThunderbirdV1AppConfigsForReceiving: mockThunderbirdV1AppConfigsForReceiving,
+  };
 }
 
 /**
@@ -518,8 +518,8 @@ async function getConfigsForMockRukhV1App(mockRukhV1RecsContract, earlybirdPerip
     encodedMockRukhV1AppConfigsForSending: encodedMockRukhV1AppConfigsForSending,
     encodedMockRukhV1AppConfigsForReceiving: encodedMockRukhV1AppConfigsForReceiving,
     mockRukhV1AppConfigsForSending: mockRukhV1AppConfigsForSending,
-    mockRukhV1AppConfigsForReceiving: mockRukhV1AppConfigsForReceiving
-  }
+    mockRukhV1AppConfigsForReceiving: mockRukhV1AppConfigsForReceiving,
+  };
 }
 
 /**

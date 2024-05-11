@@ -253,7 +253,6 @@ async function updateAppAddressOnRukhDisputerContract(rukhDisputerContractAddres
       provider
     );
     let currentAppAddress = await rukhDisputerContract.app();
-    
 
     // Check if the current app address matches what is expected, if not update
     if (currentAppAddress != expectedAppAddress) {
