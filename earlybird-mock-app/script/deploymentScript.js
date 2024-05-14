@@ -2,9 +2,9 @@ const { ethers } = require("ethers");
 const fs = require("node:fs");
 
 // Fetching environment variables
+const MNEMONICS = process.env.MNEMONICS;
 const CHAIN_NAME = process.env.CHAIN_NAME;
 const RPC_URL = process.env.RPC_URL;
-const MNEMONICS = process.env.MNEMONICS;
 const EARLYBIRD_DATA_FILE_PATH = process.env.EARLYBIRD_DATA_FILE_PATH;
 const EARLYBIRD_PERIPHERY_CONTRACTS_DATA_FILE_PATH = process.env.EARLYBIRD_PERIPHERY_CONTRACTS_DATA_FILE_PATH;
 const EARLYBIRD_MOCK_APP_DATA_FILE_PATH = process.env.EARLYBIRD_MOCK_APP_DATA_FILE_PATH;
