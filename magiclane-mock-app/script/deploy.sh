@@ -17,8 +17,8 @@ do
     deployment_addresses_dir_for_chain="$DEPLOYMENT_ADDRESSES_DIRECTORY/${CHAIN_NAME}"
 
     # fetch file paths
-    export MAGICLANE_MOCK_APP_DATA_FILE_PATH="$deployment_addresses_dir_for_chain/magiclaneMockApp.txt"
-    export MAGICLANE_SPOKE_DATA_FILE_PATH="$deployment_addresses_dir_for_chain/magiclaneSpokeData.txt"
+    export MAGICLANE_MOCK_APP_DATA_FILE_PATH="$deployment_addresses_dir_for_chain/magiclaneMockApp.json"
+    export MAGICLANE_SPOKE_DATA_FILE_PATH="$deployment_addresses_dir_for_chain/magiclaneSpokeData.json"
 
     # deploy the earlybird mock app
     node deploymentScript.js

@@ -15,9 +15,9 @@ do
     deployment_address_dir_for_chain="$DEPLOYMENT_ADDRESSES_DIRECTORY/${CHAIN_NAME}"
     
     # fetch file paths
-    export EARLYBIRD_DATA_FILE_PATH="$deployment_address_dir_for_chain/earlybirdData.txt"
-    export EARLYBIRD_PERIPHERY_CONTRACTS_DATA_FILE_PATH="$deployment_address_dir_for_chain/earlybirdPeripheryContractsData.txt"
-    export EARLYBIRD_PING_PONG_APP_DATA_FILE_PATH="$deployment_address_dir_for_chain/earlybirdPingPongAppData.txt"
+    export EARLYBIRD_DATA_FILE_PATH="$deployment_address_dir_for_chain/earlybirdData.json"
+    export EARLYBIRD_PERIPHERY_CONTRACTS_DATA_FILE_PATH="$deployment_address_dir_for_chain/earlybirdPeripheryContractsData.json"
+    export EARLYBIRD_PING_PONG_APP_DATA_FILE_PATH="$deployment_address_dir_for_chain/earlybirdPingPongAppData.json"
 
     # deploy the earlybird mock app
     node deploymentScript.js
