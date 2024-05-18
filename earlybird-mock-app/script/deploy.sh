@@ -1,4 +1,4 @@
-if [[ -z $DEPLOYMENT_CONFIGS_DIRECTORY || -z $MNEMONICS || -z $KEY_INDEX ]]; then echo "env vars unset" && exit 1; fi
+if [[ -z $DEPLOYMENT_CONFIGS_DIRECTORY || -z $DEPLOYMENT_ADDRESSES_DIRECTORY || -z $MNEMONICS || -z $KEY_INDEX ]]; then echo "env vars unset" && exit 1; fi
 
 # build and compile contracts
 forge build
@@ -11,14 +11,20 @@ do
     # run script to set env vars for the chain
     . "$entry"
 
-    # create deployment directory for chain
-    deployment_addresses_dir_for_chain="$DEPLOYMENT_ADDRESSES_DIRECTORY/${CHAIN_NAME}"
-    
-    # fetch file paths
-    export EARLYBIRD_DATA_FILE_PATH="$deployment_addresses_dir_for_chain/earlybirdData.json"
-    export EARLYBIRD_PERIPHERY_CONTRACTS_DATA_FILE_PATH="$deployment_addresses_dir_for_chain/earlybirdPeripheryContractsData.json"
-    export EARLYBIRD_MOCK_APP_DATA_FILE_PATH="$deployment_addresses_dir_for_chain/earlybirdMockAppData.json"
+    # fetch deployment addresses for the chain
+    export DEPLOYMENT_ADDRESSES_FILE_PATH="$DEPLOYMENT_ADDRESSES_DIRECTORY/${CHAIN_NAME}.json"
 
     # deploy the earlybird mock app
     node deploymentScript.js
 done
+
+# create earlybird examples abi directory
+earlybird_examples_abi_directory="$CONTRACT_ABI_DIRECTORY/earlybird-examples-abi"
+if [[ ! -d $earlybird_examples_abi_directory ]]; then mkdir $earlybird_examples_abi_directory; fi
+
+# create earlybird mock app abi directory
+earlybird_mock_app_abi_directory="$CONTRACT_ABI_DIRECTORY/earlybird-examples-abi/earlybird-mock-app-abi"
+if [[ ! -d $earlybird_mock_app_abi_directory ]]; then mkdir $earlybird_mock_app_abi_directory; fi
+
+# copy out file to earlybird mock app abi directory
+cp -R ../out/. $earlybird_mock_app_abi_directory
