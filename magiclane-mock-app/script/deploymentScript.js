@@ -36,11 +36,11 @@ const deployMagiclaneMockApp = async () => {
     // Get or deploy magiclane mock app
     let magiclaneMockApp = await useOrDeployMagiclaneMockApp(
       expectedMagiclaneMockAppData.magiclaneMockApp,
-      magiclaneSpokeData.magiclaneSpoke
+      magiclaneSpokeData.magiclaneSpokeEndpoint
     );
 
-    // Create magiclane mock app data map
-    let magiclaneMockAppData = {
+    // Create magiclane mock app deployment data map
+    let magiclaneMockAppDeploymentData = {
       magiclaneMockApp: magiclaneMockApp,
     };
 
@@ -52,7 +52,7 @@ const deployMagiclaneMockApp = async () => {
 
       // Creating test fungible tokens
       let ftName = "testFT_".concat(i);
-      magiclaneMockAppData[ftName] = await useOrDeployTestFungibleToken(
+      magiclaneMockAppDeploymentData[ftName] = await useOrDeployTestFungibleToken(
         expectedMagiclaneMockAppData[ftName],
         ftName,
         mintReceipient,
@@ -61,7 +61,7 @@ const deployMagiclaneMockApp = async () => {
 
       // Creating test non fungible tokens
       let nftName = "testNFT_".concat(i);
-      magiclaneMockAppData[nftName] = await useOrDeployTestNonFungibleToken(
+      magiclaneMockAppDeploymentData[nftName] = await useOrDeployTestNonFungibleToken(
         expectedMagiclaneMockAppData[nftName],
         nftName,
         mintReceipient,
@@ -70,7 +70,7 @@ const deployMagiclaneMockApp = async () => {
 
       // Creating test semi fungible tokens
       let sftName = "testSFT_".concat(i);
-      magiclaneMockAppData[sftName] = await useOrDeployTestSemiFungibleToken(
+      magiclaneMockAppDeploymentData[sftName] = await useOrDeployTestSemiFungibleToken(
         expectedMagiclaneMockAppData[sftName],
         sftName,
         mintReceipient,
@@ -80,7 +80,7 @@ const deployMagiclaneMockApp = async () => {
     }
 
     // Save magiclane mock app data
-    deploymentAddresses.magiclaneMockAppDeploymentData = magiclaneMockAppData;
+    deploymentAddresses.magiclaneMockAppDeploymentData = magiclaneMockAppDeploymentData;
 
     // Save deployment addresses
     fs.writeFileSync(DEPLOYMENT_ADDRESSES_FILE_PATH, JSON.stringify(deploymentAddresses, null, "\t"));
