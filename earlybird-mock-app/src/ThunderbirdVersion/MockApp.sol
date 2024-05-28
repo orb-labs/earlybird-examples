@@ -1,18 +1,18 @@
 // src/ThunderbirdVersion/MockApp.sol
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity ^0.8.17;
 pragma experimental ABIEncoderV2;
 
 import "../../utils/TestToken.sol";
-import "earlybird/src/IReceiver/IReceiver.sol";
-import "earlybird/src/Endpoint/IEndpoint/IEndpointFunctionsForApps.sol";
-import "earlybird/src/Endpoint/IEndpoint/IEndpointGetFunctions.sol";
-import "earlybird/src/Endpoint/IEndpoint/IEndpoint.sol";
+import "earlybird/src/EarlybirdMsgReceiver/IEarlybirdMsgReceiver.sol";
+import "earlybird/src/EarlybirdEndpoint/IEarlybirdEndpointFunctionsForApps.sol";
+import "earlybird/src/EarlybirdEndpoint/IEarlybirdEndpointGetFunctions.sol";
+import "earlybird/src/EarlybirdEndpoint/IEarlybirdEndpoint.sol";
 
-contract MockApp is IReceiver {
+contract MockApp is IEarlybirdMsgReceiver {
     // name of the library that the application is using
-    string public libraryName = "Thunderbird V1";
-    
+    string public libraryName = "Thunderbird";
+
     // Endpoint address
     address public endpoint;
 
@@ -41,19 +41,17 @@ contract MockApp is IReceiver {
         bytes memory _appConfigForSending,
         bytes memory _appConfigForReceiving
     ) external {
-        IEndpointFunctionsForApps(endpoint).setLibraryAndConfigs(
-            _libraryName,
-            _appConfigForSending,
-            _appConfigForReceiving
+        IEarlybirdEndpointFunctionsForApps(endpoint).setLibraryAndConfigs(
+            _libraryName, _appConfigForSending, _appConfigForReceiving
         );
     }
 
     function updateAppConfigForSending(bytes memory _appConfigForSending) external {
-        IEndpointFunctionsForApps(endpoint).updateAppConfigForSending(_appConfigForSending);
+        IEarlybirdEndpointFunctionsForApps(endpoint).updateAppConfigForSending(_appConfigForSending);
     }
 
     function updateAppConfigForReceiving(bytes memory _appConfigForReceiving) external {
-        IEndpointFunctionsForApps(endpoint).updateAppConfigForReceiving(_appConfigForReceiving);
+        IEarlybirdEndpointFunctionsForApps(endpoint).updateAppConfigForReceiving(_appConfigForReceiving);
     }
 
     function sendMessage(
@@ -67,20 +65,16 @@ contract MockApp is IReceiver {
         bytes memory payload = abi.encode(_message);
 
         // Check how much it costs to send messages with the default token
-        (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getEstimatedFeeForSending(
-            address(this),
-            _receiverInstanceId,
-            _receiver,
-            payload,
-            _additionalParams
-        );
+        (bool isTokenAccepted, uint256 feeEstimated) = IEarlybirdEndpointGetFunctions(endpoint)
+            .getEstimatedFeeForSending(address(this), _receiverInstanceId, _receiver, payload, _additionalParams);
 
         // Check that the fee token we indicated is accepted
         require(isTokenAccepted, "Default fee token is not accepted by oracle and relayer");
 
         // Get protocol fee and add it to token fees if
-        (bool isProtocolFeeOn, address protocolFeeToken, uint256 protocolFeeAmount) = IEndpointGetFunctions(endpoint)
-            .getProtocolFee(address(this), uint256(IEndpoint.ModuleType.SEND));
+        (bool isProtocolFeeOn, address protocolFeeToken, uint256 protocolFeeAmount) = IEarlybirdEndpointGetFunctions(
+            endpoint
+        ).getProtocolFee(address(this), uint256(IEarlybirdEndpoint.ModuleType.SEND));
 
         uint256 totalNativeTokenFee;
         if (!isProtocolFeeOn) {
@@ -89,21 +83,12 @@ contract MockApp is IReceiver {
             totalNativeTokenFee = _handleSendingAndProtocolFees(feeEstimated, protocolFeeAmount, protocolFeeToken);
         }
 
-        IEndpointFunctionsForApps(endpoint).sendMessage{value: totalNativeTokenFee}(
-            _receiverInstanceId,
-            _receiver,
-            payload,
-            _additionalParams
+        IEarlybirdEndpointFunctionsForApps(endpoint).sendMessage{value: totalNativeTokenFee}(
+            _receiverInstanceId, _receiver, payload, _additionalParams
         );
     }
 
-    function receiveMsg(
-        bytes32,
-        bytes memory,
-        uint256,
-        bytes memory _payload,
-        bytes memory
-    ) external onlyEndpoint {
+    function receiveMsg(bytes32, bytes memory, uint256, bytes memory _payload, bytes memory) external onlyEndpoint {
         string memory message = abi.decode(_payload, (string));
         allReceivedMessages.push(message);
     }
@@ -142,11 +127,10 @@ contract MockApp is IReceiver {
     }
 
     // Private function that handles the checks, calculations and approvals of sending and protocol fees.
-    function _handleSendingAndProtocolFees(
-        uint256 _sendingFee,
-        uint256 _protocolFee,
-        address _protocolFeeToken
-    ) private returns (uint256 totalNativeTokenFee) {
+    function _handleSendingAndProtocolFees(uint256 _sendingFee, uint256 _protocolFee, address _protocolFeeToken)
+        private
+        returns (uint256 totalNativeTokenFee)
+    {
         if ((_protocolFeeToken == defaultFeeToken) && (defaultFeeToken == address(0))) {
             // Both fees are in native tokens
             totalNativeTokenFee = _sendingFee + _protocolFee;
@@ -187,9 +171,8 @@ contract MockApp is IReceiver {
             );
             ERC20(defaultFeeToken).approve(endpoint, totalERC20Fee);
         } else if (
-            (_protocolFeeToken != defaultFeeToken) &&
-            (defaultFeeToken != address(0)) &&
-            (_protocolFeeToken != address(0))
+            (_protocolFeeToken != defaultFeeToken) && (defaultFeeToken != address(0))
+                && (_protocolFeeToken != address(0))
         ) {
             // Fees are listed in two different ERC20 tokens
             require(
