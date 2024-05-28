@@ -31,10 +31,18 @@ const deployEarlybirdMockApp = async () => {
     let earlybirdData = await readDeploymentAddressesForProtocol(deploymentAddresses, "earlybirdDeploymentData", "");
 
     // Read earlybird periphery contracts data on spoke chain
-    let earlybirdPeripheryContractsData = await readDeploymentAddressesForProtocol(deploymentAddresses, "earlybirdPeripheryContractsDeploymentData", "");
+    let earlybirdPeripheryContractsData = await readDeploymentAddressesForProtocol(
+      deploymentAddresses,
+      "earlybirdPeripheryContractsDeploymentData",
+      ""
+    );
 
     // Read expected earlybird mock app data
-    let expectedEarlybirdMockAppData = await readDeploymentAddressesForProtocol(deploymentAddresses, "earlybirdMockAppDeploymentData", emptyEarlybirdMockAppDeploymentData());
+    let expectedEarlybirdMockAppData = await readDeploymentAddressesForProtocol(
+      deploymentAddresses,
+      "earlybirdMockAppDeploymentData",
+      emptyEarlybirdMockAppDeploymentData()
+    );
 
     // Get or deploy mock thunderbird v1 app
     let mockThunderbirdV1App = await useOrDeployMockThunderbirdV1App(
@@ -531,41 +539,41 @@ async function getConfigsForMockRukhV1App(mockRukhV1RecsContract, earlybirdPerip
  */
 async function readData(file_path, throw_err_if_empty) {
   try {
-      data = fs.readFileSync(file_path);
-      return JSON.parse(data);
-    } catch (err) {
-      if (throw_err_if_empty == true) {
-        throw(err)
-      } else {
-        return {};
-      }
+    data = fs.readFileSync(file_path);
+    return JSON.parse(data);
+  } catch (err) {
+    if (throw_err_if_empty == true) {
+      throw err;
+    } else {
+      return {};
     }
-}
-
-/**
-* Function for reading deployment addresses for protocol from a file.
-* @param {Map<String, String>} deployment_addresses - map containing all the deployment addresses
-* @param {string} protocol - string indicating the protocol for which we are fetching deployed data
-* @param {Map<String, String>} defaultData - map containing default data that is returned if the 
-*                                            deployed contract data is not found in the deployment addresses map
-* @returns {Map<String, String>} - map containing all the deployed contract data
-*/
-async function readDeploymentAddressesForProtocol(deployment_addresses, protocol, defaultData) {
-  let protocolData = deployment_addresses[protocol];
-  if (protocolData === undefined) {
-      if (defaultData == "") {
-        throw "protocol not found";
-      } else {
-        return defaultData;
-      }
-  } else {
-      return protocolData;
   }
 }
 
 /**
-* Function that returns an empty earlybird mock app deployment data map
-*/
+ * Function for reading deployment addresses for protocol from a file.
+ * @param {Map<String, String>} deployment_addresses - map containing all the deployment addresses
+ * @param {string} protocol - string indicating the protocol for which we are fetching deployed data
+ * @param {Map<String, String>} defaultData - map containing default data that is returned if the
+ *                                            deployed contract data is not found in the deployment addresses map
+ * @returns {Map<String, String>} - map containing all the deployed contract data
+ */
+async function readDeploymentAddressesForProtocol(deployment_addresses, protocol, defaultData) {
+  let protocolData = deployment_addresses[protocol];
+  if (protocolData === undefined) {
+    if (defaultData == "") {
+      throw "protocol not found";
+    } else {
+      return defaultData;
+    }
+  } else {
+    return protocolData;
+  }
+}
+
+/**
+ * Function that returns an empty earlybird mock app deployment data map
+ */
 function emptyEarlybirdMockAppDeploymentData() {
   return {
     mockThunderbirdV1App: ethers.ZeroAddress,

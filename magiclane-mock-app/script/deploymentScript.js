@@ -28,10 +28,18 @@ const deployMagiclaneMockApp = async () => {
     let deploymentAddresses = await readData(DEPLOYMENT_ADDRESSES_FILE_PATH, false);
 
     // Read magiclane data on spoke chain
-    let magiclaneSpokeData = await readDeploymentAddressesForProtocol(deploymentAddresses, "magiclaneSpokeDeploymentData", "");
+    let magiclaneSpokeData = await readDeploymentAddressesForProtocol(
+      deploymentAddresses,
+      "magiclaneSpokeDeploymentData",
+      ""
+    );
 
     // Read expected magiclane mock app data
-    let expectedMagiclaneMockAppData = await readDeploymentAddressesForProtocol(deploymentAddresses, "magiclaneMockAppDeploymentData", emptyMagiclaneMockAppDeploymentData());
+    let expectedMagiclaneMockAppData = await readDeploymentAddressesForProtocol(
+      deploymentAddresses,
+      "magiclaneMockAppDeploymentData",
+      emptyMagiclaneMockAppDeploymentData()
+    );
 
     // Get or deploy magiclane mock app
     let magiclaneMockApp = await useOrDeployMagiclaneMockApp(
@@ -291,41 +299,41 @@ async function useOrDeployTestSemiFungibleToken(
  */
 async function readData(file_path, throw_err_if_empty) {
   try {
-      data = fs.readFileSync(file_path);
-      return JSON.parse(data);
-    } catch (err) {
-      if (throw_err_if_empty == true) {
-        throw(err)
-      } else {
-        return {};
-      }
+    data = fs.readFileSync(file_path);
+    return JSON.parse(data);
+  } catch (err) {
+    if (throw_err_if_empty == true) {
+      throw err;
+    } else {
+      return {};
     }
-}
-
-/**
-* Function for reading deployment addresses for protocol from a file.
-* @param {Map<String, String>} deployment_addresses - map containing all the deployment addresses
-* @param {string} protocol - string indicating the protocol for which we are fetching deployed data
-* @param {Map<String, String>} defaultData - map containing default data that is returned if the 
-*                                            deployed contract data is not found in the deployment addresses map
-* @returns {Map<String, String>} - map containing all the deployed contract data
-*/
-async function readDeploymentAddressesForProtocol(deployment_addresses, protocol, defaultData) {
-  let protocolData = deployment_addresses[protocol];
-  if (protocolData === undefined) {
-      if (defaultData == "") {
-        throw "protocol not found";
-      } else {
-        return defaultData;
-      }
-  } else {
-      return protocolData;
   }
 }
 
 /**
-* Function that returns an empty magiclane mock app deployment data map
-*/
+ * Function for reading deployment addresses for protocol from a file.
+ * @param {Map<String, String>} deployment_addresses - map containing all the deployment addresses
+ * @param {string} protocol - string indicating the protocol for which we are fetching deployed data
+ * @param {Map<String, String>} defaultData - map containing default data that is returned if the
+ *                                            deployed contract data is not found in the deployment addresses map
+ * @returns {Map<String, String>} - map containing all the deployed contract data
+ */
+async function readDeploymentAddressesForProtocol(deployment_addresses, protocol, defaultData) {
+  let protocolData = deployment_addresses[protocol];
+  if (protocolData === undefined) {
+    if (defaultData == "") {
+      throw "protocol not found";
+    } else {
+      return defaultData;
+    }
+  } else {
+    return protocolData;
+  }
+}
+
+/**
+ * Function that returns an empty magiclane mock app deployment data map
+ */
 function emptyMagiclaneMockAppDeploymentData() {
   return {
     magiclaneMockApp: ethers.ZeroAddress,
