@@ -83,10 +83,7 @@ const deployEarlybirdMockApp = async () => {
     );
 
     // Get configs for mock rukh app
-    let configsForMockRukhApp = await getConfigsForMockRukhApp(
-      mockRukhRecsContract,
-      earlybirdPeripheryContractsData
-    );
+    let configsForMockRukhApp = await getConfigsForMockRukhApp(mockRukhRecsContract, earlybirdPeripheryContractsData);
 
     // Update configs for mock rukh app
     await updateConfigsForMockRukhApp(
@@ -188,11 +185,7 @@ async function useOrDeployMockThunderbirdRecsContract(expectedMockThunderbirdRec
     await mockThunderbirdRecsContract.waitForDeployment();
 
     mockThunderbirdRecsContractAddress = await mockThunderbirdRecsContract.getAddress();
-    console.log(
-      "MockThunderbirdRecsContract deployed on: %s, at: %s",
-      CHAIN_NAME,
-      mockThunderbirdRecsContractAddress
-    );
+    console.log("MockThunderbirdRecsContract deployed on: %s, at: %s", CHAIN_NAME, mockThunderbirdRecsContractAddress);
   } else {
     mockThunderbirdRecsContractAddress = expectedMockThunderbirdRecsContract;
     console.log(
@@ -238,7 +231,7 @@ async function updateConfigsForMockThunderbirdApp(
     try {
       currentAppConfigsForSending = await earlybirdEndpointContract.getAppConfigForSending(mockThunderbirdApp);
       currentAppConfigsForReceiving = await earlybirdEndpointContract.getAppConfigForReceiving(mockThunderbirdApp);
-    } catch { }
+    } catch {}
 
     if (
       currentAppConfigsForSending == appConfigsForSending &&
@@ -252,7 +245,7 @@ async function updateConfigsForMockThunderbirdApp(
         wallet
       );
       const setConfigsTx = await mockThunderbirdAppContract.setLibraryAndConfigs(
-        "Thunderbird ",
+        "Thunderbird",
         appConfigsForSending,
         appConfigsForReceiving
       );
@@ -373,7 +366,7 @@ async function updateConfigsForMockRukhApp(
     try {
       currentAppConfigsForSending = await earlybirdEndpointContract.getAppConfigForSending(mockRukhApp);
       currentAppConfigsForReceiving = await earlybirdEndpointContract.getAppConfigForReceiving(mockRukhApp);
-    } catch { }
+    } catch {}
 
     if (
       currentAppConfigsForSending == appConfigsForSending &&
@@ -383,7 +376,7 @@ async function updateConfigsForMockRukhApp(
     } else {
       const mockRukhAppContract = new ethers.Contract(mockRukhApp, mockRukhAppFactoryData.abi, wallet);
       const setConfigsTx = await mockRukhAppContract.setLibraryAndConfigs(
-        "Rukh ",
+        "Rukh",
         appConfigsForSending,
         appConfigsForReceiving
       );

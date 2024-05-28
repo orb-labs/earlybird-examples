@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity ^0.8.17;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
@@ -63,6 +63,7 @@ contract MockRukhV1AppConfigsUpdate is Script {
         bytes memory appConfigForSending = abi.encode(
             ISharedSendModule.AppConfig(
                 selfBroadcasting,
+                false,
                 oracle,
                 relayer
             )
@@ -101,12 +102,12 @@ contract MockRukhV1AppConfigsUpdate is Script {
             vm.startBroadcast(deployerPrivateKey);
 
             bytes32 currentAppConfigsForSendingHash;
-            try IEndpoint(earlybirdEndpointAddress).getAppConfigForSending(mockRukhV1AppAddress) returns (bytes memory currentConfigsForSending) {
+            try IEarlybirdEndpoint(earlybirdEndpointAddress).getAppConfigForSending(mockRukhV1AppAddress) returns (bytes memory currentConfigsForSending) {
                 currentAppConfigsForSendingHash = keccak256(currentConfigsForSending);
             } catch {}
 
             bytes32 currentAppConfigsForReceivingHash;
-            try IEndpoint(earlybirdEndpointAddress).getAppConfigForReceiving(mockRukhV1AppAddress) returns (bytes memory currentConfigsForReceiving) {
+            try IEarlybirdEndpoint(earlybirdEndpointAddress).getAppConfigForReceiving(mockRukhV1AppAddress) returns (bytes memory currentConfigsForReceiving) {
                 currentAppConfigsForReceivingHash = keccak256(currentConfigsForReceiving);
             } catch {}
             
