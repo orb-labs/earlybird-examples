@@ -4,8 +4,8 @@ pragma solidity 0.8.17;
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import "../../src/ThunderbirdVersion/MockApp.sol";
-import "../../lib/earlybird-evm-interfaces/src/Endpoint/IEndpoint/IEndpoint.sol";
-import "../../lib/earlybird-evm-interfaces/src/Libraries/Thunderbird/ThunderbirdReceiveModule/IThunderbirdReceiveModule.sol";
+import "../../lib/earlybird-evm-interfaces/src/EarlybirdEndpoint/IEarlybirdEndpoint.sol";
+import "../../lib/earlybird-evm-interfaces/src/Libraries/Thunderbird/IThunderbirdReceiveModule.sol";
 import "../../lib/earlybird-evm-interfaces/src/Libraries/SharedLibraryModules/ISharedSendModule.sol";
 import "../../lib/earlybird-evm-interfaces/src/Libraries/ILibrary/IRequiredModuleFunctions.sol";
 

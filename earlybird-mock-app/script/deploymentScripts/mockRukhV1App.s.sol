@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import "../../src/RukhVersion/MockApp.sol";
-import "../../lib/earlybird-evm-interfaces/src/Libraries/Rukh/RukhReceiveModule/IRukhReceiveModule.sol";
+import "../../lib/earlybird-evm-interfaces/src/Libraries/Rukh/IRukhReceiveModule.sol";
 import "../../lib/earlybird-evm-interfaces/src/Libraries/SharedLibraryModules/ISharedSendModule.sol";
 import "../../lib/earlybird-evm-interfaces/src/Libraries/ILibrary/IRequiredModuleFunctions.sol";
 
