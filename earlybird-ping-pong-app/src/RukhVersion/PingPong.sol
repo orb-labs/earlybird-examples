@@ -16,15 +16,15 @@ pragma solidity ^0.8.17;
 import "openzeppelin-contracts/access/Ownable.sol";
 import "openzeppelin-contracts/security/Pausable.sol";
 import "openzeppelin-contracts/token/ERC20/ERC20.sol";
-import "earlybird/src/IReceiver/IReceiver.sol";
-import "earlybird/src/Endpoint/IEndpoint/IEndpoint.sol";
-import "earlybird/src/Endpoint/IEndpoint/IEndpointFunctionsForApps.sol";
-import "earlybird/src/Endpoint/IEndpoint/IEndpointGetFunctions.sol";
-import "earlybird/src/Libraries/Rukh/RukhReceiveModule/IRecsContractForRukhReceiveModule.sol";
+import "earlybird/src/EarlybirdMsgReceiver/IEarlybirdMsgReceiver.sol";
+import "earlybird/src/EarlybirdEndpoint/IEarlybirdEndpoint.sol";
+import "earlybird/src/EarlybirdEndpoint/IEarlybirdEndpointFunctionsForApps.sol";
+import "earlybird/src/EarlybirdEndpoint/IEarlybirdEndpointGetFunctions.sol";
+import "earlybird/src/Libraries/Rukh/IRukhReceiveModuleRecsContract.sol";
 
-contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Pausable {
+contract PingPong is IEarlybirdMsgReceiver, IRukhReceiveModuleRecsContract, Ownable, Pausable {
     // name of the library that the application is using
-    string public libraryName = "Rukh V1";
+    string public libraryName = "Rukh";
 
     // Endpoint address
     address public endpoint;
@@ -47,6 +47,9 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
     // Whether app wants to self broadcast messages or not. If app decides to self broadcast,
     // the burden of paying the oracle and relayer as well as ordering its nonces rest of the developer.
     bool private isSelfBroadcasting = false;
+
+    // Whether the app want to use gas efficient broadcasting or not.
+    bool private useGasEfficientBroadcasting = false;
 
     // The least amount of blocks we are allowed to wait for disputes to a message proof.
     uint256 private minDisputeTime = 10;
@@ -73,7 +76,7 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
     bool private msgDeliveryPaused = false;
 
     // event emitted during every ping call
-    event Ping(uint pings);
+    event Ping(uint256 pings);
 
     // Constructor hardcodes the endpoint address.
     constructor(
@@ -91,7 +94,8 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
         receiveDefaultRelayer = _receiveDefaultRelayer;
         receiveBackupRelayer = _receiveBackupRelayer;
 
-        bytes memory sendModuleConfigs = abi.encode(isSelfBroadcasting, _sendingOracleAddress, _sendingRelayerAddress);
+        bytes memory sendModuleConfigs =
+            abi.encode(isSelfBroadcasting, useGasEfficientBroadcasting, _sendingOracleAddress, _sendingRelayerAddress);
         bytes memory receiveModuleConfigs = abi.encode(
             minDisputeTime,
             minDisputeResolutionExtension,
@@ -107,8 +111,10 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
             msgDeliveryPaused
         );
 
-        IEndpointFunctionsForApps(endpoint).setLibraryAndConfigs(libraryName, sendModuleConfigs, receiveModuleConfigs);
-        (,, libraryReceiveModule, ) = IEndpointGetFunctions(endpoint).getLibraryInfo(libraryName);
+        IEarlybirdEndpointFunctionsForApps(endpoint).setLibraryAndConfigs(
+            libraryName, sendModuleConfigs, receiveModuleConfigs
+        );
+        (,, libraryReceiveModule,) = IEarlybirdEndpointGetFunctions(endpoint).getLibraryInfo(libraryName);
     }
 
     // Modifier used for the receive function to endure that the only address
@@ -134,12 +140,14 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
     // Updates the send module configs of the earlybird library we are using
     function updateAppConfigForSending(
         bool _isSelfBroadcasting,
+        bool _useGasEfficientBroadcasting,
         address _sendingOracleAddress,
         address _sendingRelayerAddress
     ) external onlyOwner {
         isSelfBroadcasting = _isSelfBroadcasting;
-        bytes memory sendModuleConfigs = abi.encode(_isSelfBroadcasting, _sendingOracleAddress, _sendingRelayerAddress);
-        IEndpointFunctionsForApps(endpoint).updateAppConfigForSending(sendModuleConfigs);
+        bytes memory sendModuleConfigs =
+            abi.encode(_isSelfBroadcasting, _useGasEfficientBroadcasting, _sendingOracleAddress, _sendingRelayerAddress);
+        IEarlybirdEndpointFunctionsForApps(endpoint).updateAppConfigForSending(sendModuleConfigs);
     }
 
     function updateAppConfigForReceiving(
@@ -181,7 +189,7 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
             _msgDeliveryPaused
         );
 
-        IEndpointFunctionsForApps(endpoint).updateAppConfigForReceiving(receiveModuleConfigs);
+        IEarlybirdEndpointFunctionsForApps(endpoint).updateAppConfigForReceiving(receiveModuleConfigs);
     }
 
     function updateDefaultFeeToken(address _feeToken) external onlyOwner {
@@ -197,21 +205,17 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
         bool isOrderedMsg = true;
         bytes memory additionalParams = abi.encode(defaultFeeToken, isOrderedMsg, 500000);
         bytes memory _dst = abi.encode(_dstAddress);
-        
-        (bool isTokenAccepted, uint256 feeEstimated) = IEndpointGetFunctions(endpoint).getEstimatedFeeForSending(
-            address(this),
-            _dstChainId,
-            _dst,
-            payload,
-            additionalParams
-        );
+
+        (bool isTokenAccepted, uint256 feeEstimated) = IEarlybirdEndpointGetFunctions(endpoint)
+            .getEstimatedFeeForSending(address(this), _dstChainId, _dst, payload, additionalParams);
 
         // Check that the fee token we indicated is accepted
         require(isTokenAccepted, "PingPong: Default fee token is not accepted by oracle and relayer");
 
         // Get protocol fee and add it to token fees if
-        (bool isProtocolFeeOn, address protocolFeeToken, uint256 protocolFeeAmount) = IEndpointGetFunctions(endpoint)
-            .getProtocolFee(address(this), uint256(IEndpoint.ModuleType.SEND));
+        (bool isProtocolFeeOn, address protocolFeeToken, uint256 protocolFeeAmount) = IEarlybirdEndpointGetFunctions(
+            endpoint
+        ).getProtocolFee(address(this), uint256(IEarlybirdEndpoint.ModuleType.SEND));
 
         uint256 totalNativeTokenFee;
         if (!isProtocolFeeOn) {
@@ -228,17 +232,14 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
         bytes memory additionalParams = abi.encode(defaultFeeToken, isOrderedMsg, 500000);
         bytes memory _dst = abi.encode(_dstAddress);
 
-        IEndpointFunctionsForApps(endpoint).sendMessage{value: totalNativeTokenFee}(
-            _dstChainId,
-            _dst,
-            payload,
-            additionalParams
+        IEarlybirdEndpointFunctionsForApps(endpoint).sendMessage{value: totalNativeTokenFee}(
+            _dstChainId, _dst, payload, additionalParams
         );
 
         emit Ping(pings);
     }
 
-    function ping(bytes32 _dstChainId, address _dstAddress, uint256 pings) public whenNotPaused payable {
+    function ping(bytes32 _dstChainId, address _dstAddress, uint256 pings) public payable whenNotPaused {
         uint256 totalNativeTokenFee = this.getFees(_dstChainId, _dstAddress, pings);
         require(totalNativeTokenFee <= msg.value, "Too many pings, too little coin, friend");
         sendPing(_dstChainId, _dstAddress, pings, totalNativeTokenFee);
@@ -257,7 +258,7 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
             uint256 recommendedDisputeResolutionExtension,
             bytes32 revealedMsgSecret,
             address recommendedRelayer
-        ) = IRecsContractForRukhReceiveModule(recsContract).getAllRecs(_senderChainId, _sender, _nonce, _payload);
+        ) = IRukhReceiveModuleRecsContract(recsContract).getAllRecs(_senderChainId, _sender, _nonce, _payload);
 
         // Get the supplied values
         (
@@ -269,10 +270,9 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
 
         // Revert if supplied values are not correct
         require(
-            (recommendedDisputeTime == suppliedDisputeTime) &&
-                (recommendedDisputeResolutionExtension == suppliedDisputeResolutionExtension) &&
-                (revealedMsgSecret == suppliedMsgSecret) &&
-                (recommendedRelayer == relayer),
+            (recommendedDisputeTime == suppliedDisputeTime)
+                && (recommendedDisputeResolutionExtension == suppliedDisputeResolutionExtension)
+                && (revealedMsgSecret == suppliedMsgSecret) && (recommendedRelayer == relayer),
             "PingPong: Msg Delivered with wrong rec values"
         );
 
@@ -283,20 +283,15 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
         uint256 pings = abi.decode(_payload, (uint256));
 
         // Call the ping function again.
-        if (pings > 0)  { 
-            ping(_senderChainId, sendBackAddress, pings--); 
+        if (pings > 0) {
+            ping(_senderChainId, sendBackAddress, pings--);
         }
     }
 
     // allow this contract to receive ether
     receive() external payable {}
 
-    function getAllRecs(
-        bytes32,
-        bytes memory,
-        uint256,
-        bytes memory _payload
-    )
+    function getAllRecs(bytes32, bytes memory, uint256, bytes memory _payload)
         public
         view
         returns (
@@ -326,12 +321,11 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
         }
     }
 
-    function getRecRelayer(
-        bytes32,
-        bytes memory,
-        uint256,
-        bytes memory _payload
-    ) public view returns (address payable recRelayer) {
+    function getRecRelayer(bytes32, bytes memory, uint256, bytes memory _payload)
+        public
+        view
+        returns (address payable recRelayer)
+    {
         // RecRelayer is the default relayer for every odd ping and the backup relayer for even pings
         uint256 pingCount = abi.decode(_payload, (uint256));
         if (pingCount % 2 == 1) recRelayer = payable(receiveDefaultRelayer);
@@ -339,11 +333,10 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
     }
 
     // Private function that handles the checks, calculations and approvals of sending and protocol fees.
-    function _handleSendingAndProtocolFees(
-        uint256 _sendingFee,
-        uint256 _protocolFee,
-        address _protocolFeeToken
-    ) private returns (uint256 totalNativeTokenFee) {
+    function _handleSendingAndProtocolFees(uint256 _sendingFee, uint256 _protocolFee, address _protocolFeeToken)
+        private
+        returns (uint256 totalNativeTokenFee)
+    {
         if ((_protocolFeeToken == defaultFeeToken) && (defaultFeeToken == address(0))) {
             // Both fees are in native tokens
             totalNativeTokenFee = _sendingFee + _protocolFee;
@@ -384,9 +377,8 @@ contract PingPong is IReceiver, IRecsContractForRukhReceiveModule, Ownable, Paus
             );
             ERC20(defaultFeeToken).approve(endpoint, totalERC20Fee);
         } else if (
-            (_protocolFeeToken != defaultFeeToken) &&
-            (defaultFeeToken != address(0)) &&
-            (_protocolFeeToken != address(0))
+            (_protocolFeeToken != defaultFeeToken) && (defaultFeeToken != address(0))
+                && (_protocolFeeToken != address(0))
         ) {
             // Fees are listed in two different ERC20 tokens
             require(
