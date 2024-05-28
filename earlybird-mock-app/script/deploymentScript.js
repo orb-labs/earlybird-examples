@@ -12,11 +12,11 @@ const provider = new ethers.JsonRpcProvider(RPC_URL);
 const wallet = ethers.Wallet.fromPhrase(MNEMONICS, provider);
 
 // Fetching abis
-const earlybirdEndpointV1FactoryData = require("../out/IEndpoint.sol/IEndpoint.json");
-const mockThunderbirdV1AppFactoryData = require("../out/ThunderbirdVersion/MockApp.sol/MockApp.json");
-const mockThunderbirdV1RecsContractFactoryData = require("../out/ThunderbirdVersion/RecsContract.sol/RecsContract.json");
-const mockRukhV1AppFactoryData = require("../out/RukhVersion/MockApp.sol/MockApp.json");
-const mockRukhV1RecsContractFactoryData = require("../out/RukhVersion/RecsContract.sol/RecsContract.json");
+const earlybirdEndpointFactoryData = require("../out/IEarlybirdEndpoint.sol/IEarlybirdEndpoint.json");
+const mockThunderbirdAppFactoryData = require("../out/ThunderbirdVersion/MockApp.sol/MockApp.json");
+const mockThunderbirdRecsContractFactoryData = require("../out/ThunderbirdVersion/RecsContract.sol/RecsContract.json");
+const mockRukhAppFactoryData = require("../out/RukhVersion/MockApp.sol/MockApp.json");
+const mockRukhRecsContractFactoryData = require("../out/RukhVersion/RecsContract.sol/RecsContract.json");
 
 // Function for deploying earlybird mock app
 const deployEarlybirdMockApp = async () => {
@@ -44,66 +44,66 @@ const deployEarlybirdMockApp = async () => {
       emptyEarlybirdMockAppDeploymentData()
     );
 
-    // Get or deploy mock thunderbird v1 app
-    let mockThunderbirdV1App = await useOrDeployMockThunderbirdV1App(
-      expectedEarlybirdMockAppData.mockThunderbirdV1App,
+    // Get or deploy mock thunderbird app
+    let mockThunderbirdApp = await useOrDeployMockThunderbirdApp(
+      expectedEarlybirdMockAppData.mockThunderbirdApp,
       earlybirdData.earlybirdEndpoint
     );
 
-    // Get or deploy mock thunderbird v1 recs contract
-    let mockThunderbirdV1RecsContract = await useOrDeployMockThunderbirdV1RecsContract(
-      expectedEarlybirdMockAppData.mockThunderbirdV1RecsContract,
+    // Get or deploy mock thunderbird recs contract
+    let mockThunderbirdRecsContract = await useOrDeployMockThunderbirdRecsContract(
+      expectedEarlybirdMockAppData.mockThunderbirdRecsContract,
       earlybirdPeripheryContractsData.relayer
     );
 
-    // Get configs for mock thunderbird V1 app
-    let configsForMockThunderbirdV1App = await getConfigsForMockThunderbirdV1App(
-      mockThunderbirdV1RecsContract,
+    // Get configs for mock thunderbird app
+    let configsForMockThunderbirdApp = await getConfigsForMockThunderbirdApp(
+      mockThunderbirdRecsContract,
       earlybirdPeripheryContractsData
     );
 
-    // Update configs for mock thunderbird v1 app
-    await updateConfigsForMockThunderbirdV1App(
-      mockThunderbirdV1App,
+    // Update configs for mock thunderbird app
+    await updateConfigsForMockThunderbirdApp(
+      mockThunderbirdApp,
       earlybirdData.earlybirdEndpoint,
-      configsForMockThunderbirdV1App.encodedMockThunderbirdV1AppConfigsForSending,
-      configsForMockThunderbirdV1App.encodedMockThunderbirdV1AppConfigsForReceiving
+      configsForMockThunderbirdApp.encodedMockThunderbirdAppConfigsForSending,
+      configsForMockThunderbirdApp.encodedMockThunderbirdAppConfigsForReceiving
     );
 
-    // Get or deploy mock rukh v1 app
-    let mockRukhV1App = await useOrDeployMockRukhV1App(
-      expectedEarlybirdMockAppData.mockRukhV1App,
+    // Get or deploy mock rukh app
+    let mockRukhApp = await useOrDeployMockRukhApp(
+      expectedEarlybirdMockAppData.mockRukhApp,
       earlybirdData.earlybirdEndpoint
     );
 
-    // Get or deploy mock rukh v1 recs contract
-    let mockRukhV1RecsContract = await useOrDeployMockRukhV1RecsContract(
-      expectedEarlybirdMockAppData.mockRukhV1RecsContract,
+    // Get or deploy mock rukh recs contract
+    let mockRukhRecsContract = await useOrDeployMockRukhRecsContract(
+      expectedEarlybirdMockAppData.mockRukhRecsContract,
       earlybirdPeripheryContractsData.relayer
     );
 
-    // Get configs for mock rukh V1 app
-    let configsForMockRukhV1App = await getConfigsForMockRukhV1App(
-      mockRukhV1RecsContract,
+    // Get configs for mock rukh app
+    let configsForMockRukhApp = await getConfigsForMockRukhApp(
+      mockRukhRecsContract,
       earlybirdPeripheryContractsData
     );
 
-    // Update configs for mock rukh v1 app
-    await updateConfigsForMockRukhV1App(
-      mockRukhV1App,
+    // Update configs for mock rukh app
+    await updateConfigsForMockRukhApp(
+      mockRukhApp,
       earlybirdData.earlybirdEndpoint,
-      configsForMockRukhV1App.encodedMockRukhV1AppConfigsForSending,
-      configsForMockRukhV1App.encodedMockRukhV1AppConfigsForReceiving
+      configsForMockRukhApp.encodedMockRukhAppConfigsForSending,
+      configsForMockRukhApp.encodedMockRukhAppConfigsForReceiving
     );
 
     // Create earlybird mock app deployment data map
     deploymentAddresses.earlybirdMockAppDeploymentData = {
-      mockThunderbirdV1App: mockThunderbirdV1App,
-      mockThunderbirdV1RecsContract: mockThunderbirdV1RecsContract,
-      mockRukhV1App: mockRukhV1App,
-      mockRukhV1RecsContract: mockRukhV1RecsContract,
-      configsForMockThunderbirdV1App: configsForMockThunderbirdV1App,
-      configsForMockRukhV1App: configsForMockRukhV1App,
+      mockThunderbirdApp: mockThunderbirdApp,
+      mockThunderbirdRecsContract: mockThunderbirdRecsContract,
+      mockRukhApp: mockRukhApp,
+      mockRukhRecsContract: mockRukhRecsContract,
+      configsForMockThunderbirdApp: configsForMockThunderbirdApp,
+      configsForMockRukhApp: configsForMockRukhApp,
     };
 
     // Save deployment addresses
@@ -117,375 +117,379 @@ const deployEarlybirdMockApp = async () => {
 };
 
 /**
- * Function for fetching already deployed mock thunderbird V1 app or deploying it if it does not exist
- * @param {string} expectedMockThunderbirdV1App - 20 byte string representing the expected mock thunderbird V1 App
+ * Function for fetching already deployed mock thunderbird app or deploying it if it does not exist
+ * @param {string} expectedMockThunderbirdApp - 20 byte string representing the expected mock thunderbird App
  * @param {string} earlybirdEndpointAddress - 20 byte string representing the earlybird endpoint address
- * @returns {string} mockThunderbirdV1AppAddress - 20 byte string representing the deployed mock thunderbird V1 App Address
+ * @returns {string} mockThunderbirdAppAddress - 20 byte string representing the deployed mock thunderbird App Address
  */
-async function useOrDeployMockThunderbirdV1App(expectedMockThunderbirdV1App, earlybirdEndpointAddress) {
-  let mockThunderbirdV1AppAddress;
+async function useOrDeployMockThunderbirdApp(expectedMockThunderbirdApp, earlybirdEndpointAddress) {
+  let mockThunderbirdAppAddress;
 
-  // Check if the expected mock thunderbird v1 app exists
-  let expectedMockThunderbirdV1AppCode = await provider.getCode(expectedMockThunderbirdV1App);
+  // Check if the expected mock thunderbird app exists
+  let expectedMockThunderbirdAppCode = await provider.getCode(expectedMockThunderbirdApp);
 
   // Check if the earlybird endpoint exists
   let earlybirdEndpointCode = await provider.getCode(earlybirdEndpointAddress);
 
   // If not, deploy earlybird endpoint
-  if (expectedMockThunderbirdV1AppCode == "0x" && earlybirdEndpointCode != "0x") {
-    const mockThunderbirdV1AppFactory = new ethers.ContractFactory(
-      mockThunderbirdV1AppFactoryData.abi,
-      mockThunderbirdV1AppFactoryData.bytecode,
+  if (expectedMockThunderbirdAppCode == "0x" && earlybirdEndpointCode != "0x") {
+    const mockThunderbirdAppFactory = new ethers.ContractFactory(
+      mockThunderbirdAppFactoryData.abi,
+      mockThunderbirdAppFactoryData.bytecode,
       wallet
     );
-    const mockThunderbirdV1AppContract = await mockThunderbirdV1AppFactory.deploy(
+    const mockThunderbirdAppContract = await mockThunderbirdAppFactory.deploy(
       earlybirdEndpointAddress,
       ethers.ZeroAddress
     );
-    await mockThunderbirdV1AppContract.waitForDeployment();
+    await mockThunderbirdAppContract.waitForDeployment();
 
-    mockThunderbirdV1AppAddress = await mockThunderbirdV1AppContract.getAddress();
+    mockThunderbirdAppAddress = await mockThunderbirdAppContract.getAddress();
     console.log(
-      "MockThunderbirdV1App deployed on: %s, at: %s, using earlybird endpoint: %s",
+      "MockThunderbirdApp deployed on: %s, at: %s, using earlybird endpoint: %s",
       CHAIN_NAME,
-      mockThunderbirdV1AppAddress,
+      mockThunderbirdAppAddress,
       earlybirdEndpointAddress
     );
   } else {
-    mockThunderbirdV1AppAddress = expectedMockThunderbirdV1App;
+    mockThunderbirdAppAddress = expectedMockThunderbirdApp;
     console.log(
-      "MockThunderbirdV1App already deployed on: %s, at: %s, using earlybird endpoint: %s",
+      "MockThunderbirdApp already deployed on: %s, at: %s, using earlybird endpoint: %s",
       CHAIN_NAME,
-      mockThunderbirdV1AppAddress,
+      mockThunderbirdAppAddress,
       earlybirdEndpointAddress
     );
   }
 
   // return
-  return mockThunderbirdV1AppAddress;
+  return mockThunderbirdAppAddress;
 }
 
 /**
- * Function for fetching already deployed mock thunderbird V1 recs contract or deploying it if it does not exist
- * @param {string} expectedMockThunderbirdV1RecsContract - 20 byte string representing the expected mock thunderbird V1 recs contract
+ * Function for fetching already deployed mock thunderbird  recs contract or deploying it if it does not exist
+ * @param {string} expectedMockThunderbirdRecsContract - 20 byte string representing the expected mock thunderbird  recs contract
  * @param {string} relayerAddress - 20 byte string representing the relayer address
- * @returns {string} mockThunderbirdV1RecsContractAddress - 20 byte string representing the deployed mock thunderbird V1 recs contract address
+ * @returns {string} mockThunderbirdRecsContractAddress - 20 byte string representing the deployed mock thunderbird  recs contract address
  */
-async function useOrDeployMockThunderbirdV1RecsContract(expectedMockThunderbirdV1RecsContract, relayerAddress) {
-  let mockThunderbirdV1RecsContractAddress;
+async function useOrDeployMockThunderbirdRecsContract(expectedMockThunderbirdRecsContract, relayerAddress) {
+  let mockThunderbirdRecsContractAddress;
 
-  // Check if the expected mock thunderbird v1 recs contract exists
-  let expectedMockThunderbirdV1RecsContractCode = await provider.getCode(expectedMockThunderbirdV1RecsContract);
+  // Check if the expected mock thunderbird  recs contract exists
+  let expectedMockThunderbirdRecsContractCode = await provider.getCode(expectedMockThunderbirdRecsContract);
 
   // If not, deploy earlybird endpoint
-  if (expectedMockThunderbirdV1RecsContractCode == "0x") {
-    const mockThunderbirdV1RecsContractFactory = new ethers.ContractFactory(
-      mockThunderbirdV1RecsContractFactoryData.abi,
-      mockThunderbirdV1RecsContractFactoryData.bytecode,
+  if (expectedMockThunderbirdRecsContractCode == "0x") {
+    const mockThunderbirdRecsContractFactory = new ethers.ContractFactory(
+      mockThunderbirdRecsContractFactoryData.abi,
+      mockThunderbirdRecsContractFactoryData.bytecode,
       wallet
     );
-    const mockThunderbirdV1RecsContract = await mockThunderbirdV1RecsContractFactory.deploy(relayerAddress);
-    await mockThunderbirdV1RecsContract.waitForDeployment();
+    const mockThunderbirdRecsContract = await mockThunderbirdRecsContractFactory.deploy(relayerAddress);
+    await mockThunderbirdRecsContract.waitForDeployment();
 
-    mockThunderbirdV1RecsContractAddress = await mockThunderbirdV1RecsContract.getAddress();
+    mockThunderbirdRecsContractAddress = await mockThunderbirdRecsContract.getAddress();
     console.log(
-      "MockThunderbirdV1RecsContract deployed on: %s, at: %s",
+      "MockThunderbirdRecsContract deployed on: %s, at: %s",
       CHAIN_NAME,
-      mockThunderbirdV1RecsContractAddress
+      mockThunderbirdRecsContractAddress
     );
   } else {
-    mockThunderbirdV1RecsContractAddress = expectedMockThunderbirdV1RecsContract;
+    mockThunderbirdRecsContractAddress = expectedMockThunderbirdRecsContract;
     console.log(
-      "MockThunderbirdV1RecsContract already deployed on: %s, at: %s",
+      "MockThunderbirdRecsContract already deployed on: %s, at: %s",
       CHAIN_NAME,
-      mockThunderbirdV1RecsContractAddress
+      mockThunderbirdRecsContractAddress
     );
   }
 
   // return
-  return mockThunderbirdV1RecsContractAddress;
+  return mockThunderbirdRecsContractAddress;
 }
 
 /**
- * Function for updating configs for mock thunderbird V1 app
- * @param {string} mockThunderbirdV1App - 20 byte string representing the expected mock rukh V1 recs contract
+ * Function for updating configs for mock thunderbird  app
+ * @param {string} mockThunderbirdApp - 20 byte string representing the expected mock rukh  recs contract
  * @param {string} earlybirdEndpointAddress - 20 byte string representing the relayer address
- * @param {string} appConfigsForSending - encoded map indicating the mock thunderbird V1 app configs for sending messages
- * @param {string} appConfigsForReceiving - encoded map indicating the mock thunderbird V1 app configs for receiving messages
+ * @param {string} appConfigsForSending - encoded map indicating the mock thunderbird  app configs for sending messages
+ * @param {string} appConfigsForReceiving - encoded map indicating the mock thunderbird  app configs for receiving messages
  */
-async function updateConfigsForMockThunderbirdV1App(
-  mockThunderbirdV1App,
+async function updateConfigsForMockThunderbirdApp(
+  mockThunderbirdApp,
   earlybirdEndpointAddress,
   appConfigsForSending,
   appConfigsForReceiving
 ) {
-  // Check if the mock rukh v1 app exists
-  let mockThunderbirdV1AppCode = await provider.getCode(mockThunderbirdV1App);
+  // Check if the mock rukh  app exists
+  let mockThunderbirdAppCode = await provider.getCode(mockThunderbirdApp);
 
   // Check if the earlybird endpoint exists
   let earlybirdEndpointCode = await provider.getCode(earlybirdEndpointAddress);
 
   // If not, throw error
-  if (mockThunderbirdV1AppCode != "0x" && earlybirdEndpointCode != "0x") {
+  if (mockThunderbirdAppCode != "0x" && earlybirdEndpointCode != "0x") {
     const earlybirdEndpointContract = new ethers.Contract(
       earlybirdEndpointAddress,
-      earlybirdEndpointV1FactoryData.abi,
+      earlybirdEndpointFactoryData.abi,
       provider
     );
 
     let currentAppConfigsForSending;
     let currentAppConfigsForReceiving;
     try {
-      currentAppConfigsForSending = await earlybirdEndpointContract.getAppConfigForSending(mockThunderbirdV1App);
-      currentAppConfigsForReceiving = await earlybirdEndpointContract.getAppConfigForReceiving(mockThunderbirdV1App);
-    } catch {}
+      currentAppConfigsForSending = await earlybirdEndpointContract.getAppConfigForSending(mockThunderbirdApp);
+      currentAppConfigsForReceiving = await earlybirdEndpointContract.getAppConfigForReceiving(mockThunderbirdApp);
+    } catch { }
 
     if (
       currentAppConfigsForSending == appConfigsForSending &&
       currentAppConfigsForReceiving == appConfigsForReceiving
     ) {
-      console.log("MockThunderbirdV1App on %s configs already set", CHAIN_NAME);
+      console.log("MockThunderbirdApp on %s configs already set", CHAIN_NAME);
     } else {
-      const mockThunderbirdV1AppContract = new ethers.Contract(
-        mockThunderbirdV1App,
-        mockThunderbirdV1AppFactoryData.abi,
+      const mockThunderbirdAppContract = new ethers.Contract(
+        mockThunderbirdApp,
+        mockThunderbirdAppFactoryData.abi,
         wallet
       );
-      const setConfigsTx = await mockThunderbirdV1AppContract.setLibraryAndConfigs(
-        "Thunderbird V1",
+      const setConfigsTx = await mockThunderbirdAppContract.setLibraryAndConfigs(
+        "Thunderbird ",
         appConfigsForSending,
         appConfigsForReceiving
       );
       await setConfigsTx.wait();
-      console.log("MockThunderbirdV1App on %s configs set", CHAIN_NAME);
+      console.log("MockThunderbirdApp on %s configs set", CHAIN_NAME);
     }
   }
 }
 
 /**
- * Function for fetching already deployed mock thunderbird V1 recs contract or deploying it if it does not exist
- * @param {string} expectedMockRukhV1App - 20 byte string representing the expected mock rukh V1 app
+ * Function for fetching already deployed mock thunderbird  recs contract or deploying it if it does not exist
+ * @param {string} expectedMockRukhApp - 20 byte string representing the expected mock rukh  app
  * @param {string} earlybirdEndpointAddress - 20 byte string representing the earlybird endpoint address
- * @returns {string} mockRukhV1AppAddress - 20 byte string representing the deployed mock rukh V1 app address
+ * @returns {string} mockRukhAppAddress - 20 byte string representing the deployed mock rukh  app address
  */
-async function useOrDeployMockRukhV1App(expectedMockRukhV1App, earlybirdEndpointAddress) {
-  let mockRukhV1AppAddress;
+async function useOrDeployMockRukhApp(expectedMockRukhApp, earlybirdEndpointAddress) {
+  let mockRukhAppAddress;
 
-  // Check if the expected mock rukh v1 app exists
-  let expectedMockRukhV1AppCode = await provider.getCode(expectedMockRukhV1App);
+  // Check if the expected mock rukh  app exists
+  let expectedMockRukhAppCode = await provider.getCode(expectedMockRukhApp);
 
   // Check if the earlybird endpoint exists
   let earlybirdEndpointCode = await provider.getCode(earlybirdEndpointAddress);
 
   // If not, deploy earlybird endpoint
-  if (expectedMockRukhV1AppCode == "0x" && earlybirdEndpointCode != "0x") {
-    const mockRukhV1AppFactory = new ethers.ContractFactory(
-      mockRukhV1AppFactoryData.abi,
-      mockRukhV1AppFactoryData.bytecode,
+  if (expectedMockRukhAppCode == "0x" && earlybirdEndpointCode != "0x") {
+    const mockRukhAppFactory = new ethers.ContractFactory(
+      mockRukhAppFactoryData.abi,
+      mockRukhAppFactoryData.bytecode,
       wallet
     );
-    const mockRukhV1AppContract = await mockRukhV1AppFactory.deploy(earlybirdEndpointAddress, ethers.ZeroAddress);
-    await mockRukhV1AppContract.waitForDeployment();
+    const mockRukhAppContract = await mockRukhAppFactory.deploy(earlybirdEndpointAddress, ethers.ZeroAddress);
+    await mockRukhAppContract.waitForDeployment();
 
-    mockRukhV1AppAddress = await mockRukhV1AppContract.getAddress();
+    mockRukhAppAddress = await mockRukhAppContract.getAddress();
     console.log(
-      "MockRukhV1App deployed on: %s, at: %s, using earlybird endpoint: %s",
+      "MockRukhApp deployed on: %s, at: %s, using earlybird endpoint: %s",
       CHAIN_NAME,
-      mockRukhV1AppAddress,
+      mockRukhAppAddress,
       earlybirdEndpointAddress
     );
   } else {
-    mockRukhV1AppAddress = expectedMockRukhV1App;
+    mockRukhAppAddress = expectedMockRukhApp;
     console.log(
-      "MockRukhV1App already deployed on: %s, at: %s, using earlybird endpoint: %s",
+      "MockRukhApp already deployed on: %s, at: %s, using earlybird endpoint: %s",
       CHAIN_NAME,
-      mockRukhV1AppAddress,
+      mockRukhAppAddress,
       earlybirdEndpointAddress
     );
   }
 
   // return
-  return mockRukhV1AppAddress;
+  return mockRukhAppAddress;
 }
 
 /**
- * Function for fetching already deployed mock rukh V1 recs contract or deploying it if it does not exist
- * @param {string} expectedMockRukhV1RecsContract - 20 byte string representing the expected mock rukh V1 recs contract
+ * Function for fetching already deployed mock rukh  recs contract or deploying it if it does not exist
+ * @param {string} expectedMockRukhRecsContract - 20 byte string representing the expected mock rukh  recs contract
  * @param {string} relayerAddress - 20 byte string representing the relayer address
- * @returns {string} mockRukhV1RecsContractAddress - 20 byte string representing the deployed mock rukh V1 recs contract address
+ * @returns {string} mockRukhRecsContractAddress - 20 byte string representing the deployed mock rukh  recs contract address
  */
-async function useOrDeployMockRukhV1RecsContract(expectedMockRukhV1RecsContract, relayerAddress) {
-  let mockRukhV1RecsContractAddress;
+async function useOrDeployMockRukhRecsContract(expectedMockRukhRecsContract, relayerAddress) {
+  let mockRukhRecsContractAddress;
 
-  // Check if the expected mock thunderbird v1 recs contract exists
-  let expectedMockRukhV1RecsContractCode = await provider.getCode(expectedMockRukhV1RecsContract);
+  // Check if the expected mock thunderbird  recs contract exists
+  let expectedMockRukhRecsContractCode = await provider.getCode(expectedMockRukhRecsContract);
 
   // If not, deploy earlybird endpoint
-  if (expectedMockRukhV1RecsContractCode == "0x") {
-    const mockRukhV1RecsContractFactory = new ethers.ContractFactory(
-      mockRukhV1RecsContractFactoryData.abi,
-      mockRukhV1RecsContractFactoryData.bytecode,
+  if (expectedMockRukhRecsContractCode == "0x") {
+    const mockRukhRecsContractFactory = new ethers.ContractFactory(
+      mockRukhRecsContractFactoryData.abi,
+      mockRukhRecsContractFactoryData.bytecode,
       wallet
     );
-    const mockRukhV1RecsContract = await mockRukhV1RecsContractFactory.deploy(relayerAddress);
-    await mockRukhV1RecsContract.waitForDeployment();
+    const mockRukhRecsContract = await mockRukhRecsContractFactory.deploy(relayerAddress);
+    await mockRukhRecsContract.waitForDeployment();
 
-    mockRukhV1RecsContractAddress = await mockRukhV1RecsContract.getAddress();
-    console.log("MockRukhV1RecsContract deployed on: %s, at: %s", CHAIN_NAME, mockRukhV1RecsContractAddress);
+    mockRukhRecsContractAddress = await mockRukhRecsContract.getAddress();
+    console.log("MockRukhRecsContract deployed on: %s, at: %s", CHAIN_NAME, mockRukhRecsContractAddress);
   } else {
-    mockRukhV1RecsContractAddress = expectedMockRukhV1RecsContract;
-    console.log("MockRukhV1RecsContract already deployed on: %s, at: %s", CHAIN_NAME, mockRukhV1RecsContractAddress);
+    mockRukhRecsContractAddress = expectedMockRukhRecsContract;
+    console.log("MockRukhRecsContract already deployed on: %s, at: %s", CHAIN_NAME, mockRukhRecsContractAddress);
   }
 
   // return
-  return mockRukhV1RecsContractAddress;
+  return mockRukhRecsContractAddress;
 }
 
 /**
- * Function for updating configs for mock rukh V1 app
- * @param {string} mockRukhV1App - 20 byte string representing the expected mock rukh V1 recs contract
+ * Function for updating configs for mock rukh  app
+ * @param {string} mockRukhApp - 20 byte string representing the expected mock rukh  recs contract
  * @param {string} earlybirdEndpointAddress - 20 byte string representing the relayer address
- * @param {string} appConfigsForSending - encoded map indicating the mock rukh V1 app configs for sending messages
- * @param {string} appConfigsForReceiving - encoded map indicating the mock rukh V1 app configs for receiving messages
+ * @param {string} appConfigsForSending - encoded map indicating the mock rukh  app configs for sending messages
+ * @param {string} appConfigsForReceiving - encoded map indicating the mock rukh  app configs for receiving messages
  */
-async function updateConfigsForMockRukhV1App(
-  mockRukhV1App,
+async function updateConfigsForMockRukhApp(
+  mockRukhApp,
   earlybirdEndpointAddress,
   appConfigsForSending,
   appConfigsForReceiving
 ) {
-  // Check if the mock rukh v1 app exists
-  let mockRukhV1AppCode = await provider.getCode(mockRukhV1App);
+  // Check if the mock rukh  app exists
+  let mockRukhAppCode = await provider.getCode(mockRukhApp);
 
   // Check if the earlybird endpoint exists
   let earlybirdEndpointCode = await provider.getCode(earlybirdEndpointAddress);
 
   // If not, throw error
-  if (mockRukhV1AppCode != "0x" && earlybirdEndpointCode != "0x") {
+  if (mockRukhAppCode != "0x" && earlybirdEndpointCode != "0x") {
     const earlybirdEndpointContract = new ethers.Contract(
       earlybirdEndpointAddress,
-      earlybirdEndpointV1FactoryData.abi,
+      earlybirdEndpointFactoryData.abi,
       provider
     );
 
     let currentAppConfigsForSending;
     let currentAppConfigsForReceiving;
     try {
-      currentAppConfigsForSending = await earlybirdEndpointContract.getAppConfigForSending(mockRukhV1App);
-      currentAppConfigsForReceiving = await earlybirdEndpointContract.getAppConfigForReceiving(mockRukhV1App);
-    } catch {}
+      currentAppConfigsForSending = await earlybirdEndpointContract.getAppConfigForSending(mockRukhApp);
+      currentAppConfigsForReceiving = await earlybirdEndpointContract.getAppConfigForReceiving(mockRukhApp);
+    } catch { }
 
     if (
       currentAppConfigsForSending == appConfigsForSending &&
       currentAppConfigsForReceiving == appConfigsForReceiving
     ) {
-      console.log("MockRukhV1App on %s configs already set", CHAIN_NAME);
+      console.log("MockRukhApp on %s configs already set", CHAIN_NAME);
     } else {
-      const mockRukhV1AppContract = new ethers.Contract(mockRukhV1App, mockRukhV1AppFactoryData.abi, wallet);
-      const setConfigsTx = await mockRukhV1AppContract.setLibraryAndConfigs(
-        "Rukh V1",
+      const mockRukhAppContract = new ethers.Contract(mockRukhApp, mockRukhAppFactoryData.abi, wallet);
+      const setConfigsTx = await mockRukhAppContract.setLibraryAndConfigs(
+        "Rukh ",
         appConfigsForSending,
         appConfigsForReceiving
       );
       await setConfigsTx.wait();
-      console.log("MockRukhV1App on %s configs set", CHAIN_NAME);
+      console.log("MockRukhApp on %s configs set", CHAIN_NAME);
     }
   }
 }
 
 /**
- * Function for getting ad creating configs for mock thunderbird V1 app
- * @param {string} mockThunderbirdV1RecsContract - 20 byte string representing the mock thunderbird V1 recs contract
+ * Function for getting ad creating configs for mock thunderbird  app
+ * @param {string} mockThunderbirdRecsContract - 20 byte string representing the mock thunderbird  recs contract
  * @param {Map<String, String>} earlybirdPeripheryContractsData - map indicating the earlybird periphery contract data
- * @returns {Map<String, Any>} map containing all the configs for mock thunderbird V1 app
+ * @returns {Map<String, Any>} map containing all the configs for mock thunderbird  app
  */
-async function getConfigsForMockThunderbirdV1App(mockThunderbirdV1RecsContract, earlybirdPeripheryContractsData) {
+async function getConfigsForMockThunderbirdApp(mockThunderbirdRecsContract, earlybirdPeripheryContractsData) {
   // Instantiate abi encoder
   let abiCoder = new ethers.AbiCoder();
 
-  // Creating mock thunderbird V1 app configs for sending
-  let mockThunderbirdV1AppConfigsForSending = {
+  // Creating mock thunderbird  app configs for sending
+  let mockThunderbirdAppConfigsForSending = {
     isSelfBroadcasting: false,
+    useGasEfficientBroadcasting: false,
     oracleFeeCollector: earlybirdPeripheryContractsData.oracle,
     relayerFeeCollector: earlybirdPeripheryContractsData.relayer,
   };
 
-  // Encoding mock thunderbird V1 app configs for sending
-  let encodedMockThunderbirdV1AppConfigsForSending = abiCoder.encode(
-    ["tuple(bool a, address b, address c) d"],
+  // Encoding mock thunderbird  app configs for sending
+  let encodedMockThunderbirdAppConfigsForSending = abiCoder.encode(
+    ["tuple(bool a, bool b, address c, address d) e"],
     [
       [
-        mockThunderbirdV1AppConfigsForSending.isSelfBroadcasting,
-        mockThunderbirdV1AppConfigsForSending.oracleFeeCollector,
-        mockThunderbirdV1AppConfigsForSending.relayerFeeCollector,
+        mockThunderbirdAppConfigsForSending.isSelfBroadcasting,
+        mockThunderbirdAppConfigsForSending.useGasEfficientBroadcasting,
+        mockThunderbirdAppConfigsForSending.oracleFeeCollector,
+        mockThunderbirdAppConfigsForSending.relayerFeeCollector,
       ],
     ]
   );
 
-  // Creating mock thunderbird V1 app configs for receiving
-  let mockThunderbirdV1AppConfigsForReceiving = {
+  // Creating mock thunderbird  app configs for receiving
+  let mockThunderbirdAppConfigsForReceiving = {
     oracle: earlybirdPeripheryContractsData.oracle,
     relayer: earlybirdPeripheryContractsData.relayer,
-    recsContract: mockThunderbirdV1RecsContract,
+    recsContract: mockThunderbirdRecsContract,
     emitMsgProofs: true,
     directMsgsEnabled: false,
     msgDeliveryPaused: false,
   };
 
-  // Encoding mock thunderbird V1 app configs for receiving
-  let encodedMockThunderbirdV1AppConfigsForReceiving = abiCoder.encode(
+  // Encoding mock thunderbird  app configs for receiving
+  let encodedMockThunderbirdAppConfigsForReceiving = abiCoder.encode(
     ["tuple(address a, address b, address c, bool d, bool e, bool f) g"],
     [
       [
-        mockThunderbirdV1AppConfigsForReceiving.oracle,
-        mockThunderbirdV1AppConfigsForReceiving.relayer,
-        mockThunderbirdV1AppConfigsForReceiving.recsContract,
-        mockThunderbirdV1AppConfigsForReceiving.emitMsgProofs,
-        mockThunderbirdV1AppConfigsForReceiving.directMsgsEnabled,
-        mockThunderbirdV1AppConfigsForReceiving.msgDeliveryPaused,
+        mockThunderbirdAppConfigsForReceiving.oracle,
+        mockThunderbirdAppConfigsForReceiving.relayer,
+        mockThunderbirdAppConfigsForReceiving.recsContract,
+        mockThunderbirdAppConfigsForReceiving.emitMsgProofs,
+        mockThunderbirdAppConfigsForReceiving.directMsgsEnabled,
+        mockThunderbirdAppConfigsForReceiving.msgDeliveryPaused,
       ],
     ]
   );
 
   return {
-    encodedMockThunderbirdV1AppConfigsForSending: encodedMockThunderbirdV1AppConfigsForSending,
-    encodedMockThunderbirdV1AppConfigsForReceiving: encodedMockThunderbirdV1AppConfigsForReceiving,
-    mockThunderbirdV1AppConfigsForSending: mockThunderbirdV1AppConfigsForSending,
-    mockThunderbirdV1AppConfigsForReceiving: mockThunderbirdV1AppConfigsForReceiving,
+    encodedMockThunderbirdAppConfigsForSending: encodedMockThunderbirdAppConfigsForSending,
+    encodedMockThunderbirdAppConfigsForReceiving: encodedMockThunderbirdAppConfigsForReceiving,
+    mockThunderbirdAppConfigsForSending: mockThunderbirdAppConfigsForSending,
+    mockThunderbirdAppConfigsForReceiving: mockThunderbirdAppConfigsForReceiving,
   };
 }
 
 /**
- * Function for getting ad creating configs for mock rukh V1 app
- * @param {string} mockRukhV1RecsContract - 20 byte string representing the mock rukh V1 recs contract
+ * Function for getting ad creating configs for mock rukh  app
+ * @param {string} mockRukhRecsContract - 20 byte string representing the mock rukh  recs contract
  * @param {Map<String, String>} earlybirdPeripheryContractsData - map indicating the earlybird periphery contract data
- * @returns {Map<String, Any>} map containing all the configs for mock rukh V1 app
+ * @returns {Map<String, Any>} map containing all the configs for mock rukh  app
  */
-async function getConfigsForMockRukhV1App(mockRukhV1RecsContract, earlybirdPeripheryContractsData) {
+async function getConfigsForMockRukhApp(mockRukhRecsContract, earlybirdPeripheryContractsData) {
   // Instantiate abi encoder
   let abiCoder = new ethers.AbiCoder();
 
-  // Creating mock rukh V1 app configs for sending
-  let mockRukhV1AppConfigsForSending = {
+  // Creating mock rukh  app configs for sending
+  let mockRukhAppConfigsForSending = {
     isSelfBroadcasting: false,
+    useGasEfficientBroadcasting: false,
     oracleFeeCollector: earlybirdPeripheryContractsData.oracle,
     relayerFeeCollector: earlybirdPeripheryContractsData.relayer,
   };
 
-  // Encoding mock rukh V1 app configs for sending
-  let encodedMockRukhV1AppConfigsForSending = abiCoder.encode(
-    ["tuple(bool a, address b, address c) d"],
+  // Encoding mock rukh  app configs for sending
+  let encodedMockRukhAppConfigsForSending = abiCoder.encode(
+    ["tuple(bool a, bool b, address c, address d) e"],
     [
       [
-        mockRukhV1AppConfigsForSending.isSelfBroadcasting,
-        mockRukhV1AppConfigsForSending.oracleFeeCollector,
-        mockRukhV1AppConfigsForSending.relayerFeeCollector,
+        mockRukhAppConfigsForSending.isSelfBroadcasting,
+        mockRukhAppConfigsForSending.useGasEfficientBroadcasting,
+        mockRukhAppConfigsForSending.oracleFeeCollector,
+        mockRukhAppConfigsForSending.relayerFeeCollector,
       ],
     ]
   );
 
-  // Creating mock thunderbird V1 app configs for receiving
-  let mockRukhV1AppConfigsForReceiving = {
+  // Creating mock thunderbird  app configs for receiving
+  let mockRukhAppConfigsForReceiving = {
     minDisputeTime: 10,
     minDisputeResolutionExtension: 10,
     disputeEpochLength: 100,
@@ -494,40 +498,40 @@ async function getConfigsForMockRukhV1App(mockRukhV1RecsContract, earlybirdPerip
     defaultRelayer: earlybirdPeripheryContractsData.relayer,
     disputersContract: earlybirdPeripheryContractsData.disputerContract,
     disputeResolver: earlybirdPeripheryContractsData.disputeResolver,
-    recsContract: mockRukhV1RecsContract,
+    recsContract: mockRukhRecsContract,
     emitMsgProofs: true,
     directMsgsEnabled: true,
     msgDeliveryPaused: false,
   };
 
-  // Encoding mock thunderbird V1 app configs for receiving
-  let encodedMockRukhV1AppConfigsForReceiving = abiCoder.encode(
+  // Encoding mock thunderbird  app configs for receiving
+  let encodedMockRukhAppConfigsForReceiving = abiCoder.encode(
     [
       "tuple(uint256 a, uint256 b, uint256 c, uint256 d, address e, address f, address g, address h, address i, bool j, bool k, bool l) m",
     ],
     [
       [
-        mockRukhV1AppConfigsForReceiving.minDisputeTime,
-        mockRukhV1AppConfigsForReceiving.minDisputeResolutionExtension,
-        mockRukhV1AppConfigsForReceiving.disputeEpochLength,
-        mockRukhV1AppConfigsForReceiving.maxValidDisputesPerEpoch,
-        mockRukhV1AppConfigsForReceiving.oracle,
-        mockRukhV1AppConfigsForReceiving.defaultRelayer,
-        mockRukhV1AppConfigsForReceiving.disputersContract,
-        mockRukhV1AppConfigsForReceiving.disputeResolver,
-        mockRukhV1AppConfigsForReceiving.recsContract,
-        mockRukhV1AppConfigsForReceiving.emitMsgProofs,
-        mockRukhV1AppConfigsForReceiving.directMsgsEnabled,
-        mockRukhV1AppConfigsForReceiving.msgDeliveryPaused,
+        mockRukhAppConfigsForReceiving.minDisputeTime,
+        mockRukhAppConfigsForReceiving.minDisputeResolutionExtension,
+        mockRukhAppConfigsForReceiving.disputeEpochLength,
+        mockRukhAppConfigsForReceiving.maxValidDisputesPerEpoch,
+        mockRukhAppConfigsForReceiving.oracle,
+        mockRukhAppConfigsForReceiving.defaultRelayer,
+        mockRukhAppConfigsForReceiving.disputersContract,
+        mockRukhAppConfigsForReceiving.disputeResolver,
+        mockRukhAppConfigsForReceiving.recsContract,
+        mockRukhAppConfigsForReceiving.emitMsgProofs,
+        mockRukhAppConfigsForReceiving.directMsgsEnabled,
+        mockRukhAppConfigsForReceiving.msgDeliveryPaused,
       ],
     ]
   );
 
   return {
-    encodedMockRukhV1AppConfigsForSending: encodedMockRukhV1AppConfigsForSending,
-    encodedMockRukhV1AppConfigsForReceiving: encodedMockRukhV1AppConfigsForReceiving,
-    mockRukhV1AppConfigsForSending: mockRukhV1AppConfigsForSending,
-    mockRukhV1AppConfigsForReceiving: mockRukhV1AppConfigsForReceiving,
+    encodedMockRukhAppConfigsForSending: encodedMockRukhAppConfigsForSending,
+    encodedMockRukhAppConfigsForReceiving: encodedMockRukhAppConfigsForReceiving,
+    mockRukhAppConfigsForSending: mockRukhAppConfigsForSending,
+    mockRukhAppConfigsForReceiving: mockRukhAppConfigsForReceiving,
   };
 }
 
@@ -576,10 +580,10 @@ async function readDeploymentAddressesForProtocol(deployment_addresses, protocol
  */
 function emptyEarlybirdMockAppDeploymentData() {
   return {
-    mockThunderbirdV1App: ethers.ZeroAddress,
-    mockThunderbirdV1RecsContract: ethers.ZeroAddress,
-    mockRukhV1App: ethers.ZeroAddress,
-    mockRukhV1RecsContract: ethers.ZeroAddress,
+    mockThunderbirdApp: ethers.ZeroAddress,
+    mockThunderbirdRecsContract: ethers.ZeroAddress,
+    mockRukhApp: ethers.ZeroAddress,
+    mockRukhRecsContract: ethers.ZeroAddress,
   };
 }
 
