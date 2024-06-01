@@ -26,11 +26,11 @@ esac
 
 # export env vars needed by the Solidity scripts
 export ENVIRONMENT KEY_INDEX MNEMONICS SENDING_MNEMONICS SENDING_KEY_INDEX
+export DEPLOYMENT_CONFIGS_DIRECTORY="`pwd`/../../../../deployment-configs/${ENVIRONMENT}"
 
-CHAIN_CONFIGS_DIRECTORY="environmentVariables/${ENVIRONMENT}"
 ############################################## SENDING MESSAGE TO APP ############################################################
 i=0
-for entry in "$CHAIN_CONFIGS_DIRECTORY"/*
+for entry in "$DEPLOYMENT_CONFIGS_DIRECTORY/chains/activeChains"/*
 do
     . "$entry"
     chains[$i]=$CHAIN_NAME
@@ -56,31 +56,16 @@ while true; do
     echo "Enter message you will like to send:"
     read NEWMESSAGE
 
-    destinationChainConfigsPath="$CHAIN_CONFIGS_DIRECTORY/"$destinationChain".sh" 
-    destination_mock_thunderbird_app_address_path="../addresses/"${ENVIRONMENT}"/"$destinationChain"/thunderbird/app.txt"
-    . ${destinationChainConfigsPath}
+    . "$DEPLOYMENT_CONFIGS_DIRECTORY/chains/activeChains/$sourceChain.sh"
+    
+    export SOURCE_CHAIN_FILE_PATH="`pwd`/../../../../deployment-addresses/${ENVIRONMENT}/${sourceChain}.json"
+    export DESTINATION_CHAIN_FILE_PATH="`pwd`/../../../../deployment-addresses/${ENVIRONMENT}/${destinationChain}.json"
+    export SOURCE_CHAIN=$sourceChain
+    export DESTINATION_CHAIN=$destinationChain
+    export MESSAGE_STRING=$NEWMESSAGE
+    export LIBRARY="Thunderbird"
 
-    if [ -f "$destination_mock_thunderbird_app_address_path" ]
-    then
-        destination_mock_thunderbird_app_address=$(<$destination_mock_thunderbird_app_address_path)
-        export RECEIVER_ADDRESS=$destination_mock_thunderbird_app_address
-        export MESSAGE_STRING=$NEWMESSAGE
-        export RECEIVER_CHAIN_ID=$CHAIN_ID
-        export RECEIVER_EARLYBIRD_INSTANCE_ID=$(<../addresses/"$ENVIRONMENT"/"$destinationChain"/earlybird-evm/instanceId.txt)
-        export RECEIVER_RELAYER_FEE_COLLECTOR=$(<"../addresses/"${ENVIRONMENT}"/"$destinationChain"/periphery-contracts/relayer.txt")
-    else
-        echo "$ENVIRONMENT destination mock thunderbird app address not found at $destination_mock_thunderbird_app_address_path" && exit 10
-    fi
-
-    sourceChainConfigsPath="$CHAIN_CONFIGS_DIRECTORY/""$sourceChain"".sh" 
-    source_mock_thunderbird_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/app.txt"
-
-    sourceChainConfigsPath="$CHAIN_CONFIGS_DIRECTORY/""$sourceChain"".sh" 
-    source_mock_thunderbird_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/app.txt"
-    . "$sourceChainConfigsPath"
-
-    export MOCK_THUNDERBIRD_APP_ADDRESS=$(<"../addresses/"${ENVIRONMENT}"/"${CHAIN_NAME}"/thunderbird/app.txt")
-
-    forge script --legacy deploymentScripts/thunderbird/mockThunderbirdApp.s.sol:MockThunderbirdAppSendMessage --rpc-url $RPC_URL --broadcast
+    # send message
+    node sendMessageOnMockAppScript.js
     echo "\n"
 done
