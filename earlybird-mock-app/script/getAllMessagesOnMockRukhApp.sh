@@ -4,12 +4,15 @@
 : ${ENVIRONMENT:="local"}
 export ENVIRONMENT
 
-CHAIN_CONFIGS_DIRECTORY="environmentVariables/${ENVIRONMENT}"
+export DEPLOYMENT_CONFIGS_DIRECTORY="`pwd`/../../../../deployment-configs/${ENVIRONMENT}"
 
-for entry in "$CHAIN_CONFIGS_DIRECTORY"/*
+for entry in "$DEPLOYMENT_CONFIGS_DIRECTORY/chains/activeChains"/*
 do
     . "$entry"
-    address_dir="../addresses/${ENVIRONMENT}/${CHAIN_NAME}"
-    export MOCK_RUKH_APP_ADDRESS=$(<"${address_dir}/rukh/app.txt")
-    forge script deploymentScripts/rukh/mockRukhApp.s.sol:MockRukhAppGetAllMessages --rpc-url $RPC_URL --broadcast
+    export CHAIN_FILE_PATH="`pwd`/../../../../deployment-addresses/${ENVIRONMENT}/${CHAIN_NAME}.json"
+    export LIBRARY="Rukh"
+    export CHAIN_NAME=$CHAIN_NAME
+
+    # read the messages
+    node getAllMessagesOnMockApp.js
 done
