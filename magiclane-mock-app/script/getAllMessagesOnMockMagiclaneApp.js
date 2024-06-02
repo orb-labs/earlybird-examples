@@ -3,7 +3,6 @@ const fs = require("node:fs");
 
 // Fetching environment variables
 const RPC_URL = process.env.RPC_URL;
-const LIBRARY = process.env.LIBRARY;
 const CHAIN_FILE_PATH = process.env.CHAIN_FILE_PATH;
 const CHAIN_NAME = process.env.CHAIN_NAME;
 
@@ -11,27 +10,20 @@ const CHAIN_NAME = process.env.CHAIN_NAME;
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 
 // Fetching abis
-const mockThunderbirdAppFactoryData = require("../out/ThunderbirdVersion/MockApp.sol/MockApp.json");
-const mockRukhAppFactoryData = require("../out/RukhVersion/MockApp.sol/MockApp.json");
+const magiclaneMockAppFactoryData = require("../out/MagiclaneMockApp.sol/MagiclaneMockApp.json");
 
 // Function for reading messages on mock app
 const getAllMessagesOnMockApp = async () => {
   try {
     // Print statement to indicate beginning of script
-    console.log("\n=== Reading Message to and from %s Mock App ===\n", LIBRARY);
+    console.log("\n=== Reading Message to and from %s Mock App ===\n");
 
     // Read the source information
     const protocolData = readData(CHAIN_FILE_PATH, false);
-    const mockData = readDeploymentAddressesForProtocol(protocolData, "earlybirdMockAppDeploymentData", "");
+    const mockData = readDeploymentAddressesForProtocol(protocolData, "magiclaneMockAppDeploymentData", "");
 
     // Read the chain data
-    let appContract;
-    if (LIBRARY == "Thunderbird") {
-      appContract = new ethers.Contract(mockData.mockThunderbirdApp, mockThunderbirdAppFactoryData.abi, provider);
-    } else {
-      appContract = new ethers.Contract(mockData.mockRukhApp, mockRukhAppFactoryData.abi, provider);
-    }
-
+    const appContract = new ethers.Contract(mockData.magiclaneMockApp, magiclaneMockAppFactoryData.abi, provider);
     const receivedMessages = await appContract.getAllReceivedMessages();
     const sentMessages = await appContract.getAllSentMessages();
 
