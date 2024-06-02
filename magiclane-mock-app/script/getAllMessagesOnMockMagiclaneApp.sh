@@ -4,12 +4,14 @@
 : ${ENVIRONMENT:="local"}
 export ENVIRONMENT
 
-CHAIN_CONFIGS_DIRECTORY="environmentVariables/${ENVIRONMENT}"
+export DEPLOYMENT_CONFIGS_DIRECTORY="`pwd`/../../../../deployment-configs/${ENVIRONMENT}"
 
-for entry in "$CHAIN_CONFIGS_DIRECTORY"/*
+for entry in "$DEPLOYMENT_CONFIGS_DIRECTORY/chains/activeChains"/*
 do
     . "$entry"
-    address_dir="../addresses/${ENVIRONMENT}/${CHAIN_NAME}"
-    export MAGICLANE_MOCK_APP_ADDRESS=$(<"${address_dir}/magiclaneMockApp.txt")
-    forge script deploymentScripts/MagiclaneMockApp.s.sol:MagiclaneMockAppGetAllMessages --rpc-url $RPC_URL --broadcast
+    export CHAIN_FILE_PATH="`pwd`/../../../../deployment-addresses/${ENVIRONMENT}/${CHAIN_NAME}.json"
+    export CHAIN_NAME=$CHAIN_NAME
+
+    # read the messages
+    node getAllMessagesOnMockMagiclaneApp.js
 done

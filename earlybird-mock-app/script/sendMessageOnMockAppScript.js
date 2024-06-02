@@ -16,8 +16,6 @@ const DESTINATION_CHAIN_FILE_PATH = process.env.DESTINATION_CHAIN_FILE_PATH;
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const wallet = ethers.Wallet.fromPhrase(MNEMONICS, provider);
 
-console.log(SOURCE_CHAIN, "RPC_URL", RPC_URL);
-
 // Fetching abis
 const mockThunderbirdAppFactoryData = require("../out/ThunderbirdVersion/MockApp.sol/MockApp.json");
 const mockRukhAppFactoryData = require("../out/RukhVersion/MockApp.sol/MockApp.json");

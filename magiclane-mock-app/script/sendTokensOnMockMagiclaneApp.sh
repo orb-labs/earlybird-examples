@@ -5,16 +5,16 @@
 : ${ENVIRONMENT:="local"}
 
 case $ENVIRONMENT in
-    mainnet)
+    prod)
         : ${SENDING_KEY_INDEX:="0"}
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         ;;
-    testnet)
+    dev)
         : ${SENDING_KEY_INDEX:="0"}
         : ${MNEMONICS:=`gcloud secrets versions access latest --secret=activity-runner-mnemonics`}
         ;;
     local)
-        : ${SENDING_KEY_INDEX:="0"}
+        : ${SENDING_KEY_INDEX:="5"}
         : ${MNEMONICS:="test test test test test test test test test test test junk"}
         ;;
     *)
@@ -26,11 +26,11 @@ esac
 
 # export env vars needed by the Solidity scripts
 export ENVIRONMENT KEY_INDEX MNEMONICS SENDING_MNEMONICS SENDING_KEY_INDEX
+export DEPLOYMENT_CONFIGS_DIRECTORY="`pwd`/../../../../deployment-configs/${ENVIRONMENT}"
 
-CHAIN_CONFIGS_DIRECTORY="environmentVariables/${ENVIRONMENT}"
 ############################################## SENDING MESSAGE TO APP ############################################################
 i=0
-for entry in "$CHAIN_CONFIGS_DIRECTORY"/*
+for entry in "$DEPLOYMENT_CONFIGS_DIRECTORY/chains/activeChains"/*
 do
     . "$entry"
     chains[$i]=$CHAIN_NAME
@@ -58,72 +58,37 @@ while true; do
 
     echo "\n"
     echo "Enter the number of fungible tokens you will like to send:"
-    select NEW_NUMBER_OF_FTS in {1..10}; do
+    select NEW_NUMBER_OF_FTS in {1..3}; do
         [[ -n $NEW_NUMBER_OF_FTS ]] || { echo "Invalid chain. Please try again." >&2; continue; }
         break # valid choice was made; exit prompt.
     done
 
     echo "\n"
     echo "Enter the number of nonfungible tokens you will like to send:"
-     select NEW_NUMBER_OF_NFTS in {0..10}; do
+     select NEW_NUMBER_OF_NFTS in {0..3}; do
         [[ $NEW_NUMBER_OF_NFTS -ge 0 && $NEW_NUMBER_OF_NFTS -le 9 ]] || { echo "Invalid chain. Please try again." >&2; continue; }
         break # valid choice was made; exit prompt.
     done
 
     echo "\n"
     echo "Enter the number of semifungible tokens you will like to send:"
-     select NEW_NUMBER_OF_SFTS in {0..10}; do
+     select NEW_NUMBER_OF_SFTS in {0..3}; do
         [[ $NEW_NUMBER_OF_NFTS -ge 0 && $NEW_NUMBER_OF_NFTS -le 9 ]] || { echo "Invalid chain. Please try again." >&2; continue; }
         break # valid choice was made; exit prompt.
     done
 
-    destinationChainConfigsPath="$CHAIN_CONFIGS_DIRECTORY/"$destinationChain".sh" 
-    destination_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$destinationChain"/magiclaneMockApp.txt"
-    . ${destinationChainConfigsPath}
+    . "$DEPLOYMENT_CONFIGS_DIRECTORY/chains/activeChains/$sourceChain.sh"
 
-    if [ -f "$destination_magiclane_mock_app_address_path" ]
-    then
-        destination_magiclane_mock_app_address=$(<$destination_magiclane_mock_app_address_path)
-        export RECEIVER_MAGICLANE_MOCK_APP_ADDRESS=$destination_magiclane_mock_app_address
-        export RECEIVER_MAGICLANE_SPOKE_ID=$(<../addresses/"$ENVIRONMENT"/"$destinationChain"/magiclane-evm/spokeId.txt)
-    else
-        echo "$ENVIRONMENT destination mock thunderbird app address not found at $destination_magiclane_mock_app_address_path" && exit 10
-    fi
-
-    sourceChainConfigsPath="$CHAIN_CONFIGS_DIRECTORY/""$sourceChain"".sh" 
-    source_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/magiclaneMockApp.txt"
-
-    sourceChainConfigsPath="$CHAIN_CONFIGS_DIRECTORY/""$sourceChain"".sh" 
-    source_magiclane_mock_app_address_path="../addresses/"${ENVIRONMENT}"/"$sourceChain"/magiclaneMockApp.txt"
-    . "$sourceChainConfigsPath"
-
-    export MAGICLANE_SPOKE_ENDPOINT_ADDRESS=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/magiclane-evm/spokeEndpoint.txt)
+    export SOURCE_CHAIN_FILE_PATH="`pwd`/../../../../deployment-addresses/${ENVIRONMENT}/${sourceChain}.json"
+    export DESTINATION_CHAIN_FILE_PATH="`pwd`/../../../../deployment-addresses/${ENVIRONMENT}/${destinationChain}.json"
+    export SOURCE_CHAIN=$sourceChain
+    export DESTINATION_CHAIN=$destinationChain
     export MESSAGE_STRING=$NEWMESSAGE
     export NUMBER_OF_FTS=$NEW_NUMBER_OF_FTS
     export NUMBER_OF_NFTS=$NEW_NUMBER_OF_NFTS
     export NUMBER_OF_SFTS=$NEW_NUMBER_OF_SFTS
 
-    if [[ $NEW_NUMBER_OF_FTS -gt 0 ]]; then
-        for i in $(seq 0 $(($NEW_NUMBER_OF_FTS - 1)))
-        do
-            export TEST_FT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestFTs/TestFT-"$i".txt)
-        done
-    fi
-
-    if [[ $NEW_NUMBER_OF_NFTS -gt 0 ]]; then
-        for i in $(seq 0 $(($NEW_NUMBER_OF_NFTS - 1)))
-        do
-            export TEST_NFT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestNFTs/TestNFT-"$i".txt)
-        done
-    fi
-
-    if [[ $NEW_NUMBER_OF_SFTS -gt 0 ]]; then
-        for i in $(seq 0 $(($NEW_NUMBER_OF_SFTS - 1)))
-        do
-            export TEST_SFT_ADDRESSES_$i=$(<../addresses/"$ENVIRONMENT"/"$sourceChain"/TestSFTs/TestSFT-"$i".txt)
-        done
-    fi
-
-    forge script --legacy deploymentScripts/MagiclaneMockApp.s.sol:MagiclaneMockAppSendMessage --rpc-url $RPC_URL --broadcast
+    # send message
+    node magiclaneMockAppSendTokensScript.js
     echo "\n"
 done
