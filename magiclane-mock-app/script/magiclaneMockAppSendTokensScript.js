@@ -58,14 +58,15 @@ const magiclaneMockAppSendTokens = async () => {
 
     // iterate on the number of tokens that are being sent and approve the tokens
     // TODO(felix): run this in parallel
-    const fungibleTokens = [];
+    const fungibleTokens = [{ tokenAddress: ethers.ZeroAddress, unwrap: true, amount: 10000, maxFees: 10000 }];
     for (let i = 0; i < NUMBER_OF_FTS; i++) {
       const ftName = "testFT_".concat(i);
       const tokenAddress = sourceMagiclaneMockAppDeploymentData[ftName];
-      const ftObject = { tokenAddress: tokenAddress, unwrap: true, amount: 10000 * (i + 1), maxFees: 10000 * (i + 1) };
+      const amount = 10000 * (i + 1);
+      const ftObject = { tokenAddress: tokenAddress, unwrap: true, amount, maxFees: amount };
       fungibleTokens.push(ftObject);
       const token = new ethers.Contract(tokenAddress, testFungibleTokenFactoryData.abi, wallet);
-      const approveTx = await token.approve(spokeEndpoint, fungibleTokens[i].amount);
+      const approveTx = await token.approve(spokeEndpoint, amount);
       await approveTx.wait();
     }
 
@@ -120,7 +121,16 @@ const magiclaneMockAppSendTokens = async () => {
       gasOnDest: gasOnDest, // Gas.Data gasOnDest
     };
     const appContract = new ethers.Contract(spokeEndpoint, magiclaneSpokeEndpointFactoryData.abi, wallet);
-    const submitTx = await appContract.sendTokens(sendTokensRequest);
+
+    // TODO(felix): do the proper fee estimation at the destination
+    const feeEstimateForSendTokensRequest = await appContract.getFeeEstimateForSendTokensRequest(sendTokensRequest);
+    const amount = BigInt(10) * BigInt(feeEstimateForSendTokensRequest[1]);
+    sendTokensRequest.fungibleTokens[0].maxFees = amount;
+    sendTokensRequest.fungibleTokens[0].amount = amount;
+    sendTokensRequest.gasOnHub.feeFungibleTokenAmount = feeEstimateForSendTokensRequest[1];
+    sendTokensRequest.gasOnDest.feeFungibleTokenAmount = BigInt(9) * BigInt(feeEstimateForSendTokensRequest[1]);
+
+    const submitTx = await appContract.sendTokens(sendTokensRequest, { value: amount });
     await submitTx.wait();
 
     // Print statement to indicate the end of script
