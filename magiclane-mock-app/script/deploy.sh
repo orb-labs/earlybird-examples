@@ -2,6 +2,9 @@ if [[ -z $DEPLOYMENT_CONFIGS_DIRECTORY || -z $DEPLOYMENT_ADDRESSES_DIRECTORY || 
 
 export NUMBER_OF_TOKENS=3;
 
+# additional addresses for minting tokens for the solver and activity runner
+export ADDITIONAL_MINT_ADDRESSES_RECIPIENTS="0x15d34aaf54267db7d7c367839aaf71a00a2c6a65,0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
+
 # build and compile contracts
 forge build
 
