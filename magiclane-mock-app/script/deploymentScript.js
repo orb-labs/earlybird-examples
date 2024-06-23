@@ -7,6 +7,9 @@ const CHAIN_NAME = process.env.CHAIN_NAME;
 const RPC_URL = process.env.RPC_URL;
 const NUMBER_OF_TOKENS = process.env.NUMBER_OF_TOKENS;
 const DEPLOYMENT_ADDRESSES_FILE_PATH = process.env.DEPLOYMENT_ADDRESSES_FILE_PATH;
+const MINT_ADDRESSES_RECIPIENTS = process.env.ADDITIONAL_MINT_ADDRESSES_RECIPIENTS
+  ? process.env.ADDITIONAL_MINT_ADDRESSES_RECIPIENTS.split(",")
+  : [];
 
 // Instantiating providers and walelts
 const provider = new ethers.JsonRpcProvider(RPC_URL);
@@ -52,18 +55,23 @@ const deployMagiclaneMockApp = async () => {
       magiclaneMockApp: magiclaneMockApp,
     };
 
+    MINT_ADDRESSES_RECIPIENTS.push(wallet.address);
+    const fungibleTokens = [];
+    const nonFungibleTokens = [];
+    const semiFungibleTokens = [];
+
     // Create test tokens
     for (let i = 0; i < NUMBER_OF_TOKENS; i++) {
-      // Set mint amounts and mint receipient
-      let mintAmount = 100_000_000;
-      let mintReceipient = wallet.address;
+      // Set mint amounts and mint recipient
+      let mintAmount = 1_000_000_000_000_000;
 
       // Creating test fungible tokens
       let ftName = "testFT_".concat(i);
       magiclaneMockAppDeploymentData[ftName] = await useOrDeployTestFungibleToken(
         expectedMagiclaneMockAppData[ftName],
-        ftName,
-        mintReceipient,
+        "USDC",
+        "usdc",
+        MINT_ADDRESSES_RECIPIENTS,
         mintAmount
       );
 
@@ -72,7 +80,7 @@ const deployMagiclaneMockApp = async () => {
       magiclaneMockAppDeploymentData[nftName] = await useOrDeployTestNonFungibleToken(
         expectedMagiclaneMockAppData[nftName],
         nftName,
-        mintReceipient,
+        MINT_ADDRESSES_RECIPIENTS,
         i
       );
 
@@ -81,11 +89,19 @@ const deployMagiclaneMockApp = async () => {
       magiclaneMockAppDeploymentData[sftName] = await useOrDeployTestSemiFungibleToken(
         expectedMagiclaneMockAppData[sftName],
         sftName,
-        mintReceipient,
+        MINT_ADDRESSES_RECIPIENTS,
         i,
         mintAmount
       );
+
+      fungibleTokens.push(magiclaneMockAppDeploymentData[ftName]);
+      nonFungibleTokens.push(magiclaneMockAppDeploymentData[nftName]);
+      semiFungibleTokens.push(magiclaneMockAppDeploymentData[sftName]);
     }
+
+    magiclaneMockAppDeploymentData.fungibleTokens = fungibleTokens;
+    magiclaneMockAppDeploymentData.nonFungibleTokens = nonFungibleTokens;
+    magiclaneMockAppDeploymentData.semiFungibleTokens = semiFungibleTokens;
 
     // Save magiclane mock app data
     deploymentAddresses.magiclaneMockAppDeploymentData = magiclaneMockAppDeploymentData;
@@ -147,7 +163,8 @@ async function useOrDeployMagiclaneMockApp(expectedMagiclaneMockApp, magiclaneSp
 async function useOrDeployTestFungibleToken(
   expectedTestFungibleTokenAddress,
   testFungibleTokenName,
-  mintReceipient,
+  testFungibleTokenSymbol,
+  mintReceipients,
   mintAmount
 ) {
   let testFungibleTokenAddress;
@@ -169,13 +186,15 @@ async function useOrDeployTestFungibleToken(
     );
     const testFungibleTokenContract = await testFungibleTokenFactory.deploy(
       testFungibleTokenName,
-      testFungibleTokenName
+      testFungibleTokenSymbol
     );
     await testFungibleTokenContract.waitForDeployment();
 
     // Mint tokens to mint receipient
-    let mintTx = await testFungibleTokenContract.mint(mintReceipient, mintAmount);
-    await mintTx.wait();
+    for (let i = 0; i < mintReceipients.length; i++) {
+      let mintTx = await testFungibleTokenContract.mint(mintReceipients[i], mintAmount);
+      await mintTx.wait();
+    }
 
     testFungibleTokenAddress = await testFungibleTokenContract.getAddress();
     console.log("%s deployed on %s at %s", testFungibleTokenName, CHAIN_NAME, testFungibleTokenAddress);
@@ -199,7 +218,7 @@ async function useOrDeployTestFungibleToken(
 async function useOrDeployTestNonFungibleToken(
   expectedTestNonFungibleTokenAddress,
   testNonFungibleTokenName,
-  mintReceipient,
+  mintReceipients,
   mintIndex
 ) {
   let testNonFungibleTokenAddress;
@@ -226,8 +245,10 @@ async function useOrDeployTestNonFungibleToken(
     await testNonFungibleTokenContract.waitForDeployment();
 
     // Mint tokens to mint receipient
-    let mintTx = await testNonFungibleTokenContract.mint(mintReceipient, mintIndex);
-    await mintTx.wait();
+    for (let i = 0; i < mintReceipients.length; i++) {
+      let mintTx = await testNonFungibleTokenContract.mint(mintReceipients[i], 100 * mintIndex + i);
+      await mintTx.wait();
+    }
 
     testNonFungibleTokenAddress = await testNonFungibleTokenContract.getAddress();
     console.log("%s deployed on %s at %s", testNonFungibleTokenName, CHAIN_NAME, testNonFungibleTokenAddress);
@@ -252,7 +273,7 @@ async function useOrDeployTestNonFungibleToken(
 async function useOrDeployTestSemiFungibleToken(
   expectedTestSemiFungibleTokenAddress,
   testSemiFungibleTokenName,
-  mintReceipient,
+  mintReceipients,
   mintIndex,
   mintAmount
 ) {
@@ -277,8 +298,10 @@ async function useOrDeployTestSemiFungibleToken(
     await testSemiFungibleTokenContract.waitForDeployment();
 
     // Mint tokens to mint receipient
-    let mintTx = await testSemiFungibleTokenContract.mint(mintReceipient, mintIndex, mintAmount);
-    await mintTx.wait();
+    for (let i = 0; i < mintReceipients.length; i++) {
+      let mintTx = await testSemiFungibleTokenContract.mint(mintReceipients[i], 100 * mintIndex + i, mintAmount);
+      await mintTx.wait();
+    }
 
     testSemiFungibleTokenAddress = await testSemiFungibleTokenContract.getAddress();
     console.log("%s deployed on %s at %s", testSemiFungibleTokenName, CHAIN_NAME, testSemiFungibleTokenAddress);
