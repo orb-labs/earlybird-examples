@@ -80,8 +80,7 @@ const deployMagiclaneMockApp = async () => {
       magiclaneMockAppDeploymentData[nftName] = await useOrDeployTestNonFungibleToken(
         expectedMagiclaneMockAppData[nftName],
         nftName,
-        MINT_ADDRESSES_RECIPIENTS,
-        i
+        MINT_ADDRESSES_RECIPIENTS[1]
       );
 
       // Creating test semi fungible tokens
@@ -89,8 +88,7 @@ const deployMagiclaneMockApp = async () => {
       magiclaneMockAppDeploymentData[sftName] = await useOrDeployTestSemiFungibleToken(
         expectedMagiclaneMockAppData[sftName],
         sftName,
-        MINT_ADDRESSES_RECIPIENTS,
-        i,
+        MINT_ADDRESSES_RECIPIENTS[1],
         mintAmount
       );
 
@@ -218,8 +216,7 @@ async function useOrDeployTestFungibleToken(
 async function useOrDeployTestNonFungibleToken(
   expectedTestNonFungibleTokenAddress,
   testNonFungibleTokenName,
-  mintReceipients,
-  mintIndex
+  mintReceipient
 ) {
   let testNonFungibleTokenAddress;
 
@@ -245,9 +242,11 @@ async function useOrDeployTestNonFungibleToken(
     await testNonFungibleTokenContract.waitForDeployment();
 
     // Mint tokens to mint receipient
-    for (let i = 0; i < mintReceipients.length; i++) {
-      let mintTx = await testNonFungibleTokenContract.mint(mintReceipients[i], 100 * mintIndex + i);
-      await mintTx.wait();
+    for (let i = 0; i < 10; i++) {
+      try {
+        let mintTx = await testNonFungibleTokenContract.mint(mintReceipient, i);
+        await mintTx.wait();
+      } catch (err) {}
     }
 
     testNonFungibleTokenAddress = await testNonFungibleTokenContract.getAddress();
@@ -273,8 +272,7 @@ async function useOrDeployTestNonFungibleToken(
 async function useOrDeployTestSemiFungibleToken(
   expectedTestSemiFungibleTokenAddress,
   testSemiFungibleTokenName,
-  mintReceipients,
-  mintIndex,
+  mintReceipient,
   mintAmount
 ) {
   let testSemiFungibleTokenAddress;
@@ -298,9 +296,11 @@ async function useOrDeployTestSemiFungibleToken(
     await testSemiFungibleTokenContract.waitForDeployment();
 
     // Mint tokens to mint receipient
-    for (let i = 0; i < mintReceipients.length; i++) {
-      let mintTx = await testSemiFungibleTokenContract.mint(mintReceipients[i], 100 * mintIndex + i, mintAmount);
-      await mintTx.wait();
+    for (let i = 0; i < 10; i++) {
+      try {
+        let mintTx = await testSemiFungibleTokenContract.mint(mintReceipient, i, mintAmount);
+        await mintTx.wait();
+      } catch (err) {}
     }
 
     testSemiFungibleTokenAddress = await testSemiFungibleTokenContract.getAddress();
