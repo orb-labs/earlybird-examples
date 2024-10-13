@@ -63,7 +63,7 @@ const deployMagiclaneMockApp = async () => {
     // Create test tokens
     for (let i = 0; i < NUMBER_OF_TOKENS; i++) {
       // Set mint amounts and mint recipient
-      let mintAmount = 1_000_000_000_000_000;
+      let mintAmount = BigInt("10000000000000000000000000000000000000000000000000");
 
       // Creating test fungible tokens
       let ftName = "testFT_".concat(i);
