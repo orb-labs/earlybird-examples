@@ -5,11 +5,9 @@ const fs = require("node:fs");
 const MNEMONICS = process.env.MNEMONICS;
 const CHAIN_NAME = process.env.CHAIN_NAME;
 const RPC_URL = process.env.RPC_URL;
+const CHAIN_CONFIG_FILE = process.env.CHAIN_CONFIG_FILE;
 const NUMBER_OF_TOKENS = process.env.NUMBER_OF_TOKENS;
 const DEPLOYMENT_ADDRESSES_FILE_PATH = process.env.DEPLOYMENT_ADDRESSES_FILE_PATH;
-const MINT_ADDRESSES_RECIPIENTS = process.env.ADDITIONAL_MINT_ADDRESSES_RECIPIENTS
-  ? process.env.ADDITIONAL_MINT_ADDRESSES_RECIPIENTS.split(",")
-  : [];
 
 // Instantiating providers and walelts
 const provider = new ethers.JsonRpcProvider(RPC_URL);
@@ -44,6 +42,22 @@ const deployMagiclaneMockApp = async () => {
       emptyMagiclaneMockAppDeploymentData()
     );
 
+    // Read chain config file
+    let chainConfigData = await readData(CHAIN_CONFIG_FILE, true);
+
+    // Get additional addresses for minting tokens for the solver and activity runner
+    let mintAddressesRecipients = chainConfigData.ADDITIONAL_MINT_ADDRESSES_RECIPIENTS ?? [];
+
+    // Read solver data
+    let solverData = await readDeploymentAddressesForProtocol(
+      deploymentAddresses,
+      "solverContractDeploymentData",
+      ""
+    );
+
+    // Add solver address to mint addresses recipients
+    mintAddressesRecipients.push(solverData.solver);
+
     // Get or deploy magiclane mock app
     let magiclaneMockApp = await useOrDeployMagiclaneMockApp(
       expectedMagiclaneMockAppData.magiclaneMockApp,
@@ -55,7 +69,7 @@ const deployMagiclaneMockApp = async () => {
       magiclaneMockApp: magiclaneMockApp,
     };
 
-    MINT_ADDRESSES_RECIPIENTS.push(wallet.address);
+    mintAddressesRecipients.push(wallet.address);
     const fungibleTokens = [];
     const nonFungibleTokens = [];
     const semiFungibleTokens = [];
@@ -71,7 +85,7 @@ const deployMagiclaneMockApp = async () => {
         expectedMagiclaneMockAppData[ftName],
         "USDC",
         "usdc",
-        MINT_ADDRESSES_RECIPIENTS,
+        mintAddressesRecipients,
         mintAmount
       );
 
@@ -80,7 +94,7 @@ const deployMagiclaneMockApp = async () => {
       magiclaneMockAppDeploymentData[nftName] = await useOrDeployTestNonFungibleToken(
         expectedMagiclaneMockAppData[nftName],
         nftName,
-        MINT_ADDRESSES_RECIPIENTS[1]
+        mintAddressesRecipients[1]
       );
 
       // Creating test semi fungible tokens
@@ -88,7 +102,7 @@ const deployMagiclaneMockApp = async () => {
       magiclaneMockAppDeploymentData[sftName] = await useOrDeployTestSemiFungibleToken(
         expectedMagiclaneMockAppData[sftName],
         sftName,
-        MINT_ADDRESSES_RECIPIENTS[1],
+        mintAddressesRecipients[1],
         mintAmount
       );
 
@@ -246,7 +260,7 @@ async function useOrDeployTestNonFungibleToken(
       try {
         let mintTx = await testNonFungibleTokenContract.mint(mintReceipient, i);
         await mintTx.wait();
-      } catch (err) {}
+      } catch (err) { }
     }
 
     testNonFungibleTokenAddress = await testNonFungibleTokenContract.getAddress();
@@ -300,7 +314,7 @@ async function useOrDeployTestSemiFungibleToken(
       try {
         let mintTx = await testSemiFungibleTokenContract.mint(mintReceipient, i, mintAmount);
         await mintTx.wait();
-      } catch (err) {}
+      } catch (err) { }
     }
 
     testSemiFungibleTokenAddress = await testSemiFungibleTokenContract.getAddress();
