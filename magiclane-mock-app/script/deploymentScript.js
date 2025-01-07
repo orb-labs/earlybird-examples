@@ -55,6 +55,10 @@ const deployMagiclaneMockApp = async () => {
       ""
     );
 
+    // send some eth to the solver
+    let ethTx = await wallet.sendTransaction({to: solverData.solver, value: "100000000000000000000"});
+    await ethTx.wait(1);
+
     // Add solver address to mint addresses recipients
     mintAddressesRecipients.push(solverData.solver);
 
