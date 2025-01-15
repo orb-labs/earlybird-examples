@@ -1,5 +1,6 @@
 const { ethers } = require("ethers");
 const fs = require("node:fs");
+const { swap_placeholder_signers } = require("../../../../script/swapPlaceholderSigners.js");
 
 // Fetching environment variables
 const MNEMONICS = process.env.MNEMONICS;
@@ -46,7 +47,7 @@ const deployMagiclaneMockApp = async () => {
     let chainConfigData = await readData(CHAIN_CONFIG_FILE, true);
 
     // Get additional addresses for minting tokens for the solver and activity runner
-    let mintAddressesRecipients = chainConfigData.ADDITIONAL_MINT_ADDRESSES_RECIPIENTS ?? [];
+    let mintAddressesRecipients = swap_placeholder_signers(chainConfigData.ADDITIONAL_MINT_ADDRESSES_RECIPIENTS ?? []);
 
     // Read solver data
     let solverData = await readDeploymentAddressesForProtocol(
