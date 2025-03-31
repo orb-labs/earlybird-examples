@@ -79,6 +79,8 @@ const deployMagiclaneMockApp = async () => {
     const nonFungibleTokens = [];
     const semiFungibleTokens = [];
 
+    const ftNames = [{name: "USDC", symbol: "usdc"}, {name: "WETH", symbol: "WETH"}, {name: "Dai", symbol: "DAI"}];
+
     // Create test tokens
     for (let i = 0; i < NUMBER_OF_TOKENS; i++) {
       // Set mint amounts and mint recipient
@@ -88,8 +90,8 @@ const deployMagiclaneMockApp = async () => {
       let ftName = "testFT_".concat(i);
       magiclaneMockAppDeploymentData[ftName] = await useOrDeployTestFungibleToken(
         expectedMagiclaneMockAppData[ftName],
-        "USDC",
-        "usdc",
+        ftNames[i].name,
+        ftNames[i].symbol,
         mintAddressesRecipients,
         mintAmount
       );
